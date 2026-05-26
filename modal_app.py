@@ -135,14 +135,14 @@ def _get_detector():
 
 
 @app.function(gpu="T4", timeout=600)
-def score_question(question: str, n_samples: int = 10) -> dict:
+def score_question(question: str, n_samples: int = 10, temperature: float = 0.5) -> dict:
     """
     Score one question.  Modal keeps containers warm between .map() calls so
     _get_detector() only pays the model-load cost on the first question per
     container, not on every call.
     """
     detector = _get_detector()
-    result = detector.analyze(question, n_samples=n_samples)
+    result = detector.analyze(question, n_samples=n_samples, temperature=temperature)
     return {
         "question": question,
         "semantic_entropy": result.semantic_entropy,
@@ -174,7 +174,7 @@ def analyze(question: str = "What is the capital of France?", n_samples: int = 1
 
 
 @app.local_entrypoint()
-def benchmark(n_questions: int = 200, n_samples: int = 10):
+def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 0.5):
     """
     Evaluate SE vs PE on TriviaQA (closed-book).
 
@@ -197,11 +197,11 @@ def benchmark(n_questions: int = 200, n_samples: int = 10):
     questions = [item["question"] for item in items]
     aliases_list = [item["answer"]["normalized_aliases"] for item in items]
 
-    print(f"Dispatching {len(questions)} questions to Modal (n_samples={n_samples}) …")
+    print(f"Dispatching {len(questions)} questions to Modal (n_samples={n_samples}, temperature={temperature}) …")
     raw = list(
         score_question.map(
             questions,
-            kwargs={"n_samples": n_samples},
+            kwargs={"n_samples": n_samples, "temperature": temperature},
             order_outputs=True,
         )
     )
@@ -234,22 +234,29 @@ def benchmark(n_questions: int = 200, n_samples: int = 10):
     print(f"   Avg total per question   : {avg_llm + avg_nli:.1f}s")
     print(f"{'='*56}")
 
-    out = Path("benchmark_results.json")
-    out.write_text(
-        json.dumps(
-            {
-                "llm_model": LLM_MODEL,
-                "nli_model": NLI_MODEL,
-                "n_questions": len(rows),
-                "n_samples": n_samples,
-                "accuracy": accuracy,
-                "se_auroc": se_auroc,
-                "pe_auroc": pe_auroc,
-                "avg_llm_s": avg_llm,
-                "avg_nli_s": avg_nli,
-                "rows": rows,
-            },
-            indent=2,
-        )
+    from datetime import datetime
+    model_slug = LLM_MODEL.split("/")[-1].lower()
+    timestamp  = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fname      = f"{model_slug}_q{len(rows)}_s{n_samples}_t{temperature}_{timestamp}.json"
+    Path("outputs").mkdir(exist_ok=True)
+    out = Path("outputs") / fname
+
+    payload = json.dumps(
+        {
+            "llm_model": LLM_MODEL,
+            "nli_model": NLI_MODEL,
+            "n_questions": len(rows),
+            "n_samples": n_samples,
+            "temperature": temperature,
+            "accuracy": accuracy,
+            "se_auroc": se_auroc,
+            "pe_auroc": pe_auroc,
+            "avg_llm_s": avg_llm,
+            "avg_nli_s": avg_nli,
+            "rows": rows,
+        },
+        indent=2,
     )
+    out.write_text(payload)
+    Path("benchmark_results.json").write_text(payload)  # kept for results.py default
     print(f"Full results → {out}")

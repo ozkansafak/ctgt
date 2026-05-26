@@ -72,12 +72,14 @@ def plot_auroc(data: dict) -> None:
 
         # ROC curves
         ax = axes[0]
-        for scores, label, color in [
-            (se_scores, f"Semantic Entropy (AUROC={data['se_auroc']:.3f})", "#2196F3"),
-            (pe_scores, f"Predictive Entropy (AUROC={data['pe_auroc']:.3f})", "#FF5722"),
+        for scores, label, color, marker, fillstyle in [
+            (se_scores, f"Semantic Entropy (AUROC={data['se_auroc']:.3f})", "#2196F3", "o", "full"),
+            (pe_scores, f"Predictive Entropy (AUROC={data['pe_auroc']:.3f})", "#FF5722", "o", "none"),
         ]:
             fpr, tpr, _ = roc_curve(labels_wrong, scores)
-            ax.plot(fpr, tpr, label=label, color=color, lw=2)
+            ax.plot(fpr, tpr, color=color, lw=2)
+            ax.plot(fpr, tpr, marker=marker, fillstyle=fillstyle,
+                    color=color, linestyle="none", ms=8, label=label)
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")
         ax.set_ylabel("True Positive Rate")
@@ -90,8 +92,9 @@ def plot_auroc(data: dict) -> None:
         correct_se = [r["semantic_entropy"] for r in rows if r["is_correct"]]
         wrong_se   = [r["semantic_entropy"] for r in rows if not r["is_correct"]]
         bins = np.linspace(0, max(se_scores) + 0.1, 25)
-        ax.hist(correct_se, bins=bins, alpha=0.6, label="Correct", color="#4CAF50")
-        ax.hist(wrong_se,   bins=bins, alpha=0.6, label="Wrong",   color="#F44336")
+        ax.hist(wrong_se,   bins=bins, alpha=0.6,  label="Wrong",   color="#F44336")
+        ax.hist(correct_se, bins=bins, alpha=0.9,  label="Correct", color="#4CAF50",
+                edgecolor="black", linewidth=0.8)
         ax.set_xlabel("Semantic Entropy")
         ax.set_ylabel("Count")
         ax.set_title("SE Distribution: Correct vs Wrong Answers")
@@ -108,17 +111,27 @@ def plot_auroc(data: dict) -> None:
         print("\nInstall matplotlib to generate plots:  pip install matplotlib")
 
 
+def _latest_output() -> Path:
+    """Return the most recently modified file in outputs/, or fall back to benchmark_results.json."""
+    candidates = sorted(Path("outputs").glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if candidates:
+        return candidates[0]
+    return Path("benchmark_results.json")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="benchmark_results.json")
+    parser.add_argument("--input", default=None,
+                        help="Path to results JSON. Defaults to latest file in outputs/.")
     parser.add_argument("--no-plot", action="store_true")
     args = parser.parse_args()
 
-    path = Path(args.input)
+    path = Path(args.input) if args.input else _latest_output()
     if not path.exists():
         print(f"No results file found at {path}. Run the benchmark first:")
         print("  modal run modal_app.py::app.benchmark --n-questions 200")
         return
+    print(f"Reading {path}")
 
     data = json.loads(path.read_text())
     print_summary(data)
