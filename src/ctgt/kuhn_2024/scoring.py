@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import math
 
-from .sampling import Sample
+from ..sampling import Sample
 
 
 def _logsumexp(values: list[float]) -> float:

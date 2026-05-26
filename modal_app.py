@@ -1,20 +1,19 @@
 """
-Modal deployment for the semantic-entropy hallucination detector.
+Modal deployment for LLM hallucination detection.
 
-Commands
---------
-Single question (interactive):
-    modal run modal_app.py::app.analyze --question "Who painted the Mona Lisa?"
+Implements two methods:
+  Kuhn / Farquhar 2024 (1561 citations) — Semantic Entropy baseline
+    modal run modal_app.py::app.benchmark --n-questions 200
+    modal run modal_app.py::app.analyze  --question "Who painted the Mona Lisa?"
 
-TriviaQA benchmark (parallelised across Modal workers):
-    modal run modal_app.py::app.benchmark --n-questions 200 --n-samples 10
+  Kossen et al. 2024 (161 citations) — Semantic Entropy Probes
+    modal run modal_app.py::app.collect_sep_training_data --n-questions 200
+    python train_probe.py
+    modal run modal_app.py::app.upload_probe
+    modal run modal_app.py::app.analyze_fast --question "Who painted the Mona Lisa?"
 
 Persistent web endpoint:
     modal deploy modal_app.py
-
-Model defaults are intentionally small for cheap prototyping.
-Swap LLM_MODEL to a larger model (e.g. Qwen/Qwen2.5-7B-Instruct) once the
-pipeline is validated.
 """
 from __future__ import annotations
 
@@ -23,7 +22,7 @@ import modal
 # ---------------------------------------------------------------------------
 # Model selection  — small by default for cheap prototyping
 # ---------------------------------------------------------------------------
-LLM_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"   # ~3 GB on disk; fits on T4
+LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"   # ~14 GB; use A10G
 NLI_MODEL = "cross-encoder/nli-deberta-v3-large"
 
 
@@ -70,7 +69,7 @@ app = modal.App("hallucination-detector", image=image)
 # ---------------------------------------------------------------------------
 # Interactive single-question service
 # ---------------------------------------------------------------------------
-@app.cls(gpu="T4", timeout=300, scaledown_window=300)
+@app.cls(gpu="A10G", timeout=300, scaledown_window=300)
 class DetectorService:
     """
     GPU service for interactive single-question analysis.
@@ -81,8 +80,8 @@ class DetectorService:
 
     @modal.enter()
     def load(self) -> None:
-        from ctgt.detection import SemanticEntropyDetector
-        from ctgt.entailment import EntailmentClustering
+        from ctgt.kuhn_2024.detection import SemanticEntropyDetector
+        from ctgt.kuhn_2024.entailment import EntailmentClustering
         from ctgt.sampling import LLMSampler
 
         sampler = LLMSampler(model_name=LLM_MODEL)
@@ -124,8 +123,8 @@ def _get_detector():
     """Lazy singleton: models load once per container and stay warm."""
     global _detector
     if _detector is None:
-        from ctgt.detection import SemanticEntropyDetector
-        from ctgt.entailment import EntailmentClustering
+        from ctgt.kuhn_2024.detection import SemanticEntropyDetector
+        from ctgt.kuhn_2024.entailment import EntailmentClustering
         from ctgt.sampling import LLMSampler
 
         sampler = LLMSampler(model_name=LLM_MODEL)
@@ -134,7 +133,7 @@ def _get_detector():
     return _detector
 
 
-@app.function(gpu="T4", timeout=600)
+@app.function(gpu="A10G", timeout=600)
 def score_question(question: str, n_samples: int = 10, temperature: float = 0.5) -> dict:
     """
     Score one question.  Modal keeps containers warm between .map() calls so
@@ -160,7 +159,7 @@ def score_question(question: str, n_samples: int = 10, temperature: float = 0.5)
 probe_volume = modal.Volume.from_name("sep-probes", create_if_missing=True)
 
 
-@app.function(gpu="T4", timeout=600)
+@app.function(gpu="A10G", timeout=600)
 def score_question_with_states(
     question: str,
     n_samples: int = 10,
@@ -195,7 +194,7 @@ def score_question_with_states(
     }
 
 
-@app.function(gpu="T4", timeout=120, volumes={"/probes": probe_volume})
+@app.function(gpu="A10G", timeout=120, volumes={"/probes": probe_volume})
 def analyze_fast(question: str) -> dict:
     """Hallucination detection via a single forward pass + linear probe.
 

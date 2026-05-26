@@ -22,7 +22,7 @@ from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
 
 from ctgt import SemanticEntropyDetector
-from ctgt.entailment import EntailmentClustering
+from ctgt.kuhn_2024.entailment import EntailmentClustering
 from ctgt.sampling import LLMSampler
 
 

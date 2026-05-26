@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 
 from .entailment import EntailmentClustering
-from .sampling import LLMSampler, Sample
+from ..sampling import LLMSampler, Sample
 from .scoring import predictive_entropy, semantic_entropy
 
 

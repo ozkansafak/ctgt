@@ -18,7 +18,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
-from ctgt.probe import SEProbe
+from ctgt.kossen_2024.probe import SEProbe
 
 
 def _latest_sep_data() -> Path:
