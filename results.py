@@ -68,7 +68,19 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         se_scores    = [r["semantic_entropy"]     for r in rows]
         pe_scores    = [r["predictive_entropy"]   for r in rows]
 
+        model_short = data["llm_model"].split("/")[-1]
+        n_q   = data["n_questions"]
+        n_s   = data["n_samples"]
+        temp  = data["temperature"]
+        acc   = data["accuracy"]
+
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+        fig.suptitle(
+            f"Semantic Entropy — Kuhn et al. (2023) · "
+            f"{model_short} · N={n_q} · M={n_s} · "
+            f"temp={temp} · Accuracy={acc:.0%}",
+            fontsize=10,
+        )
 
         # ROC curves
         ax = axes[0]
@@ -83,7 +95,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")
         ax.set_ylabel("True Positive Rate")
-        ax.set_title("ROC Curve — Score: Semantic Entropy")
+        ax.set_title("ROC Curve")
         ax.legend(loc="lower right")
         ax.grid(alpha=0.3)
 

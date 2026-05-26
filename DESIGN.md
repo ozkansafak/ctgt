@@ -242,6 +242,22 @@ Kuhn et al. use OPT-30B (also base) and report SE AUROC ~0.83 at ~50% accuracy �
 
 ---
 
+### 4.4 Mistral-7B-Instruct-v0.3
+
+![Mistral-7B results](outputs/sep_data_mistral-7b-instruct-v0.3_q200_s10_t0.5_20260526_010837_plots.png)
+
+| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
+|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 0.750 | 0.293 | — | — | — | — |
+
+N=200 questions, M=10 samples, temp=0.5, A10G GPU, wall time ~60s.
+
+The ROC curve is notably smoother than the Qwen/OPT runs because N=200 yields far more unique SE threshold values than N=50.
+
+PE AUROC = 0.293 (below random): with the concise system prompt, Mistral reliably returns the same wrong answer across all M=10 samples, collapsing predictive entropy near zero regardless of correctness. SE is robust because it measures *semantic* diversity, not token-level diversity.
+
+---
+
 ## 5. Production Inference Architecture
 
 ### 5.1 Pipeline components
