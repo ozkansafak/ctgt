@@ -163,12 +163,12 @@ All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Moda
 
 All runs: N=300, M=10 samples, temp=0.5, Modal A10G GPU.
 
-| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kossen SEP AUROC | SEP gap | Best layer |
-|---|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 0.662 | −0.058 | 21 |
-| Meta-Llama-3.1-8B-Instruct | 8B | **73%** | **0.728** | 0.310 | **0.687** | −0.034 | 21 |
-| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | 0.692 | −0.042 | 17 |
-| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — | — |
+| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kuhn wall time | Kossen SEP AUROC | SEP gap | Best layer |
+|---|---|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 75s | 0.662 | −0.058 | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | **73%** | **0.728** | 0.310 | 108s | **0.687** | −0.034 | 21 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | 90s | 0.692 | −0.042 | 17 |
+| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — | — | — |
 
 PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
 
