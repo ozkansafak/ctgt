@@ -203,14 +203,22 @@ python benchmark.py --n-questions 50 --n-samples 5
 
 ## Scaling up
 
-Change two lines in `modal_app.py`:
+Change two lines in `modal_app.py`. No other code changes needed.
+
+| | Current (prototype) | Scaled up |
+|---|---|---|
+| `LLM_MODEL` | `"Qwen/Qwen2.5-1.5B-Instruct"` | `"Qwen/Qwen2.5-7B-Instruct"` |
+| `gpu` | `"T4"` | `"A10G"` |
 
 ```python
-LLM_MODEL = "Qwen/Qwen2.5-7B-Instruct"  # was 1.5B
-gpu = "A10G"                              # was T4 — in @app.cls decorator
-```
+# modal_app.py — prototype
+LLM_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+gpu = "T4"
 
-No other code changes needed.
+# modal_app.py — scaled up
+LLM_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+gpu = "A10G"
+```
 
 ---
 
