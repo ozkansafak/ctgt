@@ -83,7 +83,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")
         ax.set_ylabel("True Positive Rate")
-        ax.set_title("ROC Curve — Score: Semantic Entropy (Kuhn et al., 2023)")
+        ax.set_title("ROC Curve — Score: Semantic Entropy")
         ax.legend(loc="lower right")
         ax.grid(alpha=0.3)
 
