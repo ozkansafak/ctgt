@@ -328,7 +328,18 @@ N=300, M=10, temp=0.5, A10G GPU, wall time 75s.
 |---|---|---|---|
 | Mistral-7B-Instruct-v0.3 (N=300) | 0.720 | 0.330 | 61% |
 
-PE AUROC = 0.330 (below random): with the concise system prompt, Mistral reliably returns the same wrong answer across all M=10 samples, collapsing predictive entropy near zero regardless of correctness. SE is robust because it measures *semantic* diversity, not token-level diversity.
+**Why PE AUROC = 0.330 — below random, and what that means:**
+
+AUROC < 0.5 means the score is *anti-correlated* with errors — you'd get better-than-random detection by flipping the prediction (flag low PE, not high PE). Here's the mechanism:
+
+- **Wrong answer:** Mistral is confidently wrong. All M=10 samples return the same incorrect tokens. PE ≈ 0 — looks maximally certain.
+- **Correct answer:** there is occasionally slight lexical variation across samples ("JFK" vs "John F. Kennedy" vs "Kennedy"). PE is slightly above 0.
+
+The model ends up *more* uncertain (lexically) on questions it gets right and *less* uncertain on questions it gets wrong — the opposite of what PE assumes. AUROC 0.33 instead of 0.67.
+
+The root cause is the concise system prompt. It fixed accuracy (1% → 61%) by preventing verbose rambling, but it also made the model so lexically rigid that all 10 samples are near-identical regardless of whether the answer is right or wrong.
+
+SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one meaning cluster → SE = 0. SE only rises when samples genuinely disagree on the *answer*, not just the *wording*. That's a more robust signal than token-level probability.
 
 ---
 
