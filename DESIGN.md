@@ -174,13 +174,14 @@ SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sam
 
 **Full details**
 
-| Model | Params | PE AUROC | Kuhn wall time | Kossen training collection¹ | SEP best layer |
+| Model | Params | PE AUROC | Kuhn wall time (N=300) | Kossen inference wall time (N=300) | SEP best layer |
 |---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 75s | 21 |
-| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 139s | 21 |
-| Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 51s | 17 |
+| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | — | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | — | 21 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | — | 17 |
 
-¹ Training collection runs the full Kuhn pipeline (M=10 samples + NLI) plus one extra forward pass to extract hidden states — a one-time cost. At inference, the trained probe requires only 1 forward pass per question (~10× faster than Kuhn).
+Kuhn wall time: M=10 LLM samples + NLI clustering per question, N=300 questions in parallel on A10G.
+Kossen inference wall time: 1 forward pass + probe per question — not yet measured; run `modal run modal_app.py::app.benchmark_sep_inference`.
 
 PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
 

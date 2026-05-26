@@ -168,6 +168,23 @@ def score_question(question: str, n_samples: int = 10, temperature: float = 0.5,
 probe_volume = modal.Volume.from_name("sep-probes", create_if_missing=True)
 
 
+@app.function(gpu="A10G", timeout=120)
+def score_question_sep_fast(question: str, probe_bytes: bytes, llm_model: str = LLM_MODEL) -> dict:
+    """Single-question Kossen SEP inference: 1 forward pass + probe, no sampling, no NLI."""
+    import pickle
+    import time as _time
+
+    import numpy as np
+
+    probe = pickle.loads(probe_bytes)
+    sampler = _get_detector(llm_model).sampler
+    t0 = _time.perf_counter()
+    hidden_states = sampler.extract_hidden_states(question, layers=[probe.best_layer])
+    hs = np.array(hidden_states[str(probe.best_layer)], dtype=np.float32)
+    score = probe.predict_proba(hs)
+    return {"probe_score": float(score), "time_s": _time.perf_counter() - t0}
+
+
 @app.function(gpu="A10G", timeout=600)
 def score_question_with_states(
     question: str,
@@ -461,6 +478,53 @@ def collect_sep_training_data(
     print(f"Wall time: {wall_time_s:.0f}s ({wall_time_s / 60:.1f} min)")
     print(f"SEP training data → {out}")
     print("Next: python train_probe.py --input", out)
+
+
+@app.local_entrypoint()
+def benchmark_sep_inference(n_questions: int = 300, llm_model: str = LLM_MODEL, probe_path: str = None):
+    """Benchmark Kossen SEP inference: 1 forward pass per question, no sampling, no NLI.
+
+    Measures the true inference wall time — comparable to Kuhn's benchmark wall time.
+
+    Example:
+        modal run modal_app.py::app.benchmark_sep_inference --n-questions 300
+        modal run modal_app.py::app.benchmark_sep_inference --llm-model NousResearch/Meta-Llama-3.1-8B-Instruct
+    """
+    import time as _time
+    from pathlib import Path
+
+    from datasets import load_dataset
+
+    if probe_path is None:
+        model_slug = llm_model.split("/")[-1].lower()
+        probe_path = f"outputs/sep_probe_{model_slug}.pkl"
+
+    probe_bytes = Path(probe_path).read_bytes()
+    print(f"Loaded probe from {probe_path} ({len(probe_bytes) / 1024:.0f} KB)")
+
+    print(f"Loading TriviaQA validation[:{n_questions}] …")
+    dataset = load_dataset(
+        "mandarjoshi/trivia_qa", "rc.nocontext", split=f"validation[:{n_questions}]"
+    )
+    questions = [item["question"] for item in dataset]
+
+    print(f"Dispatching {len(questions)} questions for SEP inference (model={llm_model}) …")
+    _t0 = _time.perf_counter()
+    results = list(
+        score_question_sep_fast.map(
+            questions,
+            kwargs={"probe_bytes": probe_bytes, "llm_model": llm_model},
+            order_outputs=True,
+        )
+    )
+    wall_time_s = _time.perf_counter() - _t0
+    avg_time_s = sum(r["time_s"] for r in results) / len(results)
+
+    print(f"\n{'='*56}")
+    print(f" SEP inference  n={len(results)}  model={llm_model.split('/')[-1]}")
+    print(f"   Avg per-question time  : {avg_time_s:.3f}s  (1 fwd pass + probe)")
+    print(f"   Total wall time        : {wall_time_s:.0f}s ({wall_time_s/60:.1f} min)")
+    print(f"{'='*56}")
 
 
 @app.local_entrypoint()
