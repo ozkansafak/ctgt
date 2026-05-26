@@ -201,9 +201,9 @@ TriviaQA `rc.nocontext` validation set, M=10 samples, temperature=0.5, Modal GPU
 
 | Model | IT? | Params | N | GPU | Accuracy | SE AUROC | PE AUROC | SE gain | Wall time |
 |---|---|---|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | ✅ | 7B | 200 | A10G | **56%** | **0.750** | 0.293 | +0.457 | 60s |
-| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 50 | T4 | 6% | 0.723 | 0.660 | +0.064 | 103s |
-| OPT-2.7B | ❌ | 2.7B | 50 | T4 | 4% | 0.688 | 0.562 | +0.125 | — |
+| Mistral-7B-Instruct-v0.3 | ✅ | 7B | 300 | A10G | **61%** | **0.720** | 0.330 | +0.390 | 75s |
+| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 300 | A10G | 39% | 0.755 | 0.293 | +0.462 | 90s |
+| OPT-2.7B | ❌ | 2.7B | 300 | A10G | 3% | 0.501 | 0.586 | −0.085 | 252s |
 | Kuhn et al. OPT-30B | ❌ | 30B | — | — | ~50% | ~0.830 | — | — | — |
 
 #### Kossen 2024 — Semantic Entropy Probes (SEP)
@@ -214,9 +214,9 @@ TriviaQA `rc.nocontext` validation set, M=10 samples, temperature=0.5, Modal GPU
 
 The SEP probe achieves **92% of SE's AUROC** using a single forward pass and a matrix multiply — no NLI clustering, no multiple samples.
 
-**Key finding on PE:** Mistral-7B-Instruct with a concise system prompt produces AUROC = 0.293 for PE — *below random*. The model is overconfident: it often generates the same wrong answer across all M=10 samples (PE → 0), making PE anticorrelated with error. SE is robust to this because it measures semantic diversity, not lexical diversity. This is the canonical failure mode of PE that motivated the SE paper.
+**Key finding on PE:** Both instruction-tuned models (Mistral, Qwen) show PE AUROC below 0.5 — the model is overconfident and produces the same wrong answer across all M=10 samples, making PE anticorrelated with error. SE is robust because it measures semantic diversity, not lexical. OPT-2.7B (base model) actually has PE > SE (0.586 vs 0.501) — the opposite pattern — because its noisy completions make PE sensitive to output format rather than factual uncertainty.
 
-**Why OPT-2.7B scores lower than Qwen-1.5B despite being larger:** OPT is a base model (pretrain only, no instruction tuning). Its completions are noisier and some noise reflects *how to format the answer* rather than *which fact to state*, diluting the SE signal. This is not a fair size comparison — a proper comparison requires instruction-tuned models at both sizes.
+**Why OPT-2.7B SE AUROC ≈ 0.5 (random):** With only 3% accuracy and no instruction tuning, OPT rarely produces semantically consistent answers even when correct. SE can't distinguish uncertainty from noise. The N=50 result (0.688) was a statistical fluke — N=300 gives the true picture.
 
 Kuhn et al. use OPT-30B (also base) and report SE AUROC ~0.83 at ~50% accuracy — model scale, not instruction tuning, drives the accuracy.
 
@@ -224,37 +224,41 @@ Kuhn et al. use OPT-30B (also base) and report SE AUROC ~0.83 at ~50% accuracy �
 
 ### 4.2 Qwen2.5-1.5B-Instruct
 
-![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q50_s10_t0.5_20260525_231929_plots.png)
+![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png)
 
-| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
-|---|---|---|---|---|---|---|
-| Qwen2.5-1.5B | 0.723 | 0.660 | 1.236 | 1.733 | 5.00 | 7.23 |
+N=300, M=10, temp=0.5, A10G GPU, wall time 90s.
+
+| | SE AUROC | PE AUROC | Accuracy |
+|---|---|---|---|
+| Qwen2.5-1.5B (N=300) | 0.755 | 0.293 | 39% |
 
 ---
 
 ### 4.3 OPT-2.7B (base model)
 
-![OPT-2.7B results](outputs/opt-2.7b_q50_s10_t0.5_20260525_223843_plots.png)
+![OPT-2.7B results](outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png)
 
-| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
-|---|---|---|---|---|---|---|
-| OPT-2.7B | 0.688 | 0.562 | 1.243 | 1.565 | 5.00 | 6.67 |
+N=300, M=10, temp=0.5, A10G GPU, wall time 252s.
+
+| | SE AUROC | PE AUROC | Accuracy |
+|---|---|---|---|
+| OPT-2.7B (N=300) | 0.501 | 0.586 | 3% |
+
+SE AUROC ≈ 0.5 (random): OPT-2.7B is a base model with 3% accuracy. It rarely produces consistent answers even when correct, so SE cannot separate uncertainty from noise. The earlier N=50 result (0.688) was a statistical artifact of the tiny sample.
 
 ---
 
 ### 4.4 Mistral-7B-Instruct-v0.3
 
-![Mistral-7B results](outputs/sep_data_mistral-7b-instruct-v0.3_q200_s10_t0.5_20260526_010837_plots.png)
+![Mistral-7B results](outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png)
 
-| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
-|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 0.750 | 0.293 | — | — | — | — |
+N=300, M=10, temp=0.5, A10G GPU, wall time 75s.
 
-N=200 questions, M=10 samples, temp=0.5, A10G GPU, wall time ~60s.
+| | SE AUROC | PE AUROC | Accuracy |
+|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 (N=300) | 0.720 | 0.330 | 61% |
 
-The ROC curve is notably smoother than the Qwen/OPT runs because N=200 yields far more unique SE threshold values than N=50.
-
-PE AUROC = 0.293 (below random): with the concise system prompt, Mistral reliably returns the same wrong answer across all M=10 samples, collapsing predictive entropy near zero regardless of correctness. SE is robust because it measures *semantic* diversity, not token-level diversity.
+PE AUROC = 0.330 (below random): with the concise system prompt, Mistral reliably returns the same wrong answer across all M=10 samples, collapsing predictive entropy near zero regardless of correctness. SE is robust because it measures *semantic* diversity, not token-level diversity.
 
 ---
 

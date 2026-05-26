@@ -1,0 +1,3015 @@
+{
+  "llm_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "nli_model": "cross-encoder/nli-deberta-v3-large",
+  "n_questions": 300,
+  "n_samples": 10,
+  "temperature": 0.5,
+  "accuracy": 0.3933333333333333,
+  "se_auroc": 0.7549823058297634,
+  "pe_auroc": 0.2931644626559881,
+  "avg_llm_s": 0.16478570143999985,
+  "avg_nli_s": 0.6073595297433333,
+  "wall_time_s": 90.35536320810206,
+  "rows": [
+    {
+      "question": "Who was the man behind The Chipmunks?",
+      "semantic_entropy": 0.8281078699485833,
+      "predictive_entropy": 2.278636252778181,
+      "n_clusters": 3,
+      "most_common_answer": "Bob Wheeler",
+      "time_llm_s": 0.907387674999999,
+      "time_nli_s": 0.991335265,
+      "is_correct": false
+    },
+    {
+      "question": "Which Lloyd Webber musical premiered in the US on 10th December 1993?",
+      "semantic_entropy": 0.6899341457084888,
+      "predictive_entropy": 2.2913843243325744,
+      "n_clusters": 3,
+      "most_common_answer": "Les Mis\u00e9rables",
+      "time_llm_s": 1.0687037499999992,
+      "time_nli_s": 1.0926393900000004,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the next British Prime Minister after Arthur Balfour?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "David Lloyd George",
+      "time_llm_s": 1.032057774,
+      "time_nli_s": 0.7400572900000011,
+      "is_correct": false
+    },
+    {
+      "question": "Who had a 70s No 1 hit with Kiss You All Over?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The Pointer Sisters",
+      "time_llm_s": 0.8750184549999993,
+      "time_nli_s": 0.7115052320000004,
+      "is_correct": false
+    },
+    {
+      "question": "What claimed the life of singer Kathleen Ferrier?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Heart attack",
+      "time_llm_s": 0.8554619740000007,
+      "time_nli_s": 0.7132704839999988,
+      "is_correct": false
+    },
+    {
+      "question": "Rita Coolidge sang the title song for which Bond film?",
+      "semantic_entropy": 0.9768634898394405,
+      "predictive_entropy": 2.255676041854689,
+      "n_clusters": 4,
+      "most_common_answer": "\"You Only Live Twice\"",
+      "time_llm_s": 0.1564766879999997,
+      "time_nli_s": 1.078908748,
+      "is_correct": false
+    },
+    {
+      "question": "What was the last US state to reintroduce alcohol after prohibition?",
+      "semantic_entropy": 0.16561814704080785,
+      "predictive_entropy": 2.276557056701973,
+      "n_clusters": 2,
+      "most_common_answer": "Maine",
+      "time_llm_s": 0.0860405189999991,
+      "time_nli_s": 0.5751048249999986,
+      "is_correct": false
+    },
+    {
+      "question": "Which actress was voted Miss Greenwich Village in 1942?",
+      "semantic_entropy": 1.6991937115444258,
+      "predictive_entropy": 2.265461022086301,
+      "n_clusters": 6,
+      "most_common_answer": "Barbara Stanwyck",
+      "time_llm_s": 0.15782722600000199,
+      "time_nli_s": 1.2655312479999985,
+      "is_correct": false
+    },
+    {
+      "question": "What is the Japanese share index called?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Nikkei 225",
+      "time_llm_s": 0.23228578899999874,
+      "time_nli_s": 0.5212135720000006,
+      "is_correct": true
+    },
+    {
+      "question": "What was the name of Michael Jackson's autobiography written in 1988?",
+      "semantic_entropy": 0.2836443070415684,
+      "predictive_entropy": 2.229035284052904,
+      "n_clusters": 3,
+      "most_common_answer": "Man in the Mirror",
+      "time_llm_s": 0.13300113100000033,
+      "time_nli_s": 0.47943256400000145,
+      "is_correct": false
+    },
+    {
+      "question": "In which decade did stereo records first go on sale?",
+      "semantic_entropy": 1.127670861260219,
+      "predictive_entropy": 2.298122553199094,
+      "n_clusters": 4,
+      "most_common_answer": "1930s",
+      "time_llm_s": 0.15354570799999934,
+      "time_nli_s": 1.0569798430000006,
+      "is_correct": true
+    },
+    {
+      "question": "In what year's Olympics were electric timing devices and a public-address system used for the first time?",
+      "semantic_entropy": 0.8908228866095295,
+      "predictive_entropy": 2.2971932549209266,
+      "n_clusters": 3,
+      "most_common_answer": "1908",
+      "time_llm_s": 0.14324445500000138,
+      "time_nli_s": 0.5671926399999982,
+      "is_correct": false
+    },
+    {
+      "question": "Which volcano in Tanzania is the highest mountain in Africa?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Kilimanjaro",
+      "time_llm_s": 0.15614352300000078,
+      "time_nli_s": 0.5220962679999985,
+      "is_correct": true
+    },
+    {
+      "question": "The flag of Libya is a plain rectangle of which color?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "green",
+      "time_llm_s": 0.057626631999999844,
+      "time_nli_s": 0.6001178850000013,
+      "is_correct": true
+    },
+    {
+      "question": "Of which African country is Niamey the capital?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Chad",
+      "time_llm_s": 0.08190004100000081,
+      "time_nli_s": 0.4994490169999999,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the director of the CIA from 1976-81?",
+      "semantic_entropy": 1.217483004930605,
+      "predictive_entropy": 2.2907929102821916,
+      "n_clusters": 4,
+      "most_common_answer": "William Colby",
+      "time_llm_s": 0.18487706999999887,
+      "time_nli_s": 0.6914264579999987,
+      "is_correct": false
+    },
+    {
+      "question": "Which musical featured the song The Street Where You Live?",
+      "semantic_entropy": 0.26915430860185574,
+      "predictive_entropy": 2.299156901781835,
+      "n_clusters": 2,
+      "most_common_answer": "West Side Story",
+      "time_llm_s": 0.12778175200000064,
+      "time_nli_s": 0.4748553270000002,
+      "is_correct": false
+    },
+    {
+      "question": "\"Who was the target of the failed \"\"Bomb Plot\"\" of 1944?\"",
+      "semantic_entropy": 1.9848236998362663,
+      "predictive_entropy": 2.249062067795202,
+      "n_clusters": 8,
+      "most_common_answer": "German military leaders",
+      "time_llm_s": 0.5048926639999998,
+      "time_nli_s": 1.1569182210000015,
+      "is_correct": false
+    },
+    {
+      "question": "Who had an 80s No 1 hit with Hold On To The Nights?",
+      "semantic_entropy": 0.9630746679943865,
+      "predictive_entropy": 2.2864613246164907,
+      "n_clusters": 3,
+      "most_common_answer": "Wham!",
+      "time_llm_s": 0.11151785299999872,
+      "time_nli_s": 0.6545569919999998,
+      "is_correct": false
+    },
+    {
+      "question": "Who directed the classic 30s western Stagecoach?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "John Ford",
+      "time_llm_s": 0.08186400599999999,
+      "time_nli_s": 0.4925885199999982,
+      "is_correct": true
+    },
+    {
+      "question": "Dave Gilmore and Roger Waters were in which rock group?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Pink Floyd",
+      "time_llm_s": 0.08353885000000005,
+      "time_nli_s": 0.517864319000001,
+      "is_correct": true
+    },
+    {
+      "question": "Which highway was Revisited in a classic 60s album by Bob Dylan?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The Freeway",
+      "time_llm_s": 0.1125109110000011,
+      "time_nli_s": 0.5192715260000007,
+      "is_correct": false
+    },
+    {
+      "question": "Which was the only eastern bloc country to participate in the 1984 LA Olympics?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Czechoslovakia",
+      "time_llm_s": 0.16352125599999923,
+      "time_nli_s": 0.5133324140000006,
+      "is_correct": false
+    },
+    {
+      "question": "Which 90s sci fi series with James Belushi was based on Bruce Wagner's comic strip of the same name?",
+      "semantic_entropy": 0.16182729998523826,
+      "predictive_entropy": 2.2753585869051793,
+      "n_clusters": 2,
+      "most_common_answer": "Futurama",
+      "time_llm_s": 0.13606036399999866,
+      "time_nli_s": 0.4689174939999994,
+      "is_correct": false
+    },
+    {
+      "question": "If I Were A Rich Man Was a big hit from which stage show?",
+      "semantic_entropy": 1.3654727240373876,
+      "predictive_entropy": 2.290233691258881,
+      "n_clusters": 4,
+      "most_common_answer": "The Moulin Rouge!",
+      "time_llm_s": 0.30097886299999743,
+      "time_nli_s": 0.718437662000003,
+      "is_correct": false
+    },
+    {
+      "question": "Men Against the Sea and Pitcairn's Island were two sequels to what famous novel?",
+      "semantic_entropy": 0.6572233622025687,
+      "predictive_entropy": 2.3002636014751796,
+      "n_clusters": 2,
+      "most_common_answer": "War of the Worlds",
+      "time_llm_s": 0.1889875219999979,
+      "time_nli_s": 0.5805657470000014,
+      "is_correct": false
+    },
+    {
+      "question": "What was Truman Capote's last name before he was adopted by his stepfather?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Capote",
+      "time_llm_s": 0.0862334649999994,
+      "time_nli_s": 0.5047169820000015,
+      "is_correct": false
+    },
+    {
+      "question": "In Lewis Carroll's poem The Hunting of the Snark, what did the elusive, troublesome snark turn into to fool hunters?",
+      "semantic_entropy": 0.87034110931864,
+      "predictive_entropy": 2.292081212807284,
+      "n_clusters": 3,
+      "most_common_answer": "a boot",
+      "time_llm_s": 0.1114257130000027,
+      "time_nli_s": 0.6845011159999999,
+      "is_correct": false
+    },
+    {
+      "question": "In the Bible, who did the sun and moon stand still before?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3016849312935928,
+      "n_clusters": 1,
+      "most_common_answer": "Joshua.",
+      "time_llm_s": 0.1062130830000001,
+      "time_nli_s": 0.5091120869999983,
+      "is_correct": true
+    },
+    {
+      "question": "What Michelle Pfeiffer movie got a boost from the Coolio song Gangsta's Paradise?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Dangerous Beauty",
+      "time_llm_s": 0.11497303099999812,
+      "time_nli_s": 0.5240882710000001,
+      "is_correct": true
+    },
+    {
+      "question": "What was President Gerald Ford's middle name?",
+      "semantic_entropy": 0.6761803322946267,
+      "predictive_entropy": 2.17627109203175,
+      "n_clusters": 3,
+      "most_common_answer": "Lesley",
+      "time_llm_s": 0.08237363499999972,
+      "time_nli_s": 0.5809438470000003,
+      "is_correct": false
+    },
+    {
+      "question": "Art Garfunkel trained for which profession although he didn't qualify?",
+      "semantic_entropy": 1.1425898150717502,
+      "predictive_entropy": 2.111975976547508,
+      "n_clusters": 4,
+      "most_common_answer": "tennis",
+      "time_llm_s": 0.08141613300000117,
+      "time_nli_s": 0.8580830329999998,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the last inmate of Spandau jail in Berlin?",
+      "semantic_entropy": 1.142444217969649,
+      "predictive_entropy": 2.26269260092299,
+      "n_clusters": 4,
+      "most_common_answer": "Ernst Z\u00fcndel",
+      "time_llm_s": 0.22420666800000078,
+      "time_nli_s": 0.7099524039999991,
+      "is_correct": false
+    },
+    {
+      "question": "What was Eddie Murphy's first movie?",
+      "semantic_entropy": 0.2646655214282093,
+      "predictive_entropy": 2.2985986685304924,
+      "n_clusters": 2,
+      "most_common_answer": "Coming to America",
+      "time_llm_s": 0.12757633400000046,
+      "time_nli_s": 0.468077061999999,
+      "is_correct": false
+    },
+    {
+      "question": "In the 80s who wrote the novel Empire of The Sun?",
+      "semantic_entropy": 0.24223140666253146,
+      "predictive_entropy": 2.2952141753409605,
+      "n_clusters": 2,
+      "most_common_answer": "John Marsden",
+      "time_llm_s": 0.1108379510000006,
+      "time_nli_s": 0.7401459379999977,
+      "is_correct": false
+    },
+    {
+      "question": "Kagoshima international airport is in which country?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Japan",
+      "time_llm_s": 0.058011398000001435,
+      "time_nli_s": 0.518414890999999,
+      "is_correct": true
+    },
+    {
+      "question": "In which sport could the Pacers take on the Pistons?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Basketball",
+      "time_llm_s": 0.08168428600000155,
+      "time_nli_s": 0.507650384999998,
+      "is_correct": true
+    },
+    {
+      "question": "Kim Carnes' nine weeks at No 1 with Bette Davis Eyes was interrupted for one week by which song?",
+      "semantic_entropy": 1.365579835812958,
+      "predictive_entropy": 2.288747136456127,
+      "n_clusters": 6,
+      "most_common_answer": "\"Love Me or Leave Me\"",
+      "time_llm_s": 0.23067504599999822,
+      "time_nli_s": 0.6649885710000021,
+      "is_correct": false
+    },
+    {
+      "question": "Where in Canada is the Lion's Gate bridge?",
+      "semantic_entropy": 0.6509173086163731,
+      "predictive_entropy": 2.260355221050473,
+      "n_clusters": 2,
+      "most_common_answer": "Vancouver, British Columbia",
+      "time_llm_s": 0.15293403300000108,
+      "time_nli_s": 0.7358468539999983,
+      "is_correct": true
+    },
+    {
+      "question": "What was Walter Matthau's first movie?",
+      "semantic_entropy": 0.9432408647783441,
+      "predictive_entropy": 2.301436547464883,
+      "n_clusters": 3,
+      "most_common_answer": "The Wizard of Oz",
+      "time_llm_s": 0.13283663900000064,
+      "time_nli_s": 0.6175842940000003,
+      "is_correct": false
+    },
+    {
+      "question": "Otis Barton was a pioneer in exploring where?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.299471742042542,
+      "n_clusters": 1,
+      "most_common_answer": "the Arctic",
+      "time_llm_s": 0.10954412599999941,
+      "time_nli_s": 0.5292521490000013,
+      "is_correct": false
+    },
+    {
+      "question": "Where in England was actor Nigel Hawthorne born?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2948385567209475,
+      "n_clusters": 1,
+      "most_common_answer": "London",
+      "time_llm_s": 0.10500611100000157,
+      "time_nli_s": 0.5097770609999976,
+      "is_correct": false
+    },
+    {
+      "question": "What mythological beast has the head of a man, the body of a lion, and the tail and feet of a dragon?",
+      "semantic_entropy": 0.9061798684188215,
+      "predictive_entropy": 2.2978288822795956,
+      "n_clusters": 3,
+      "most_common_answer": "Lion-man-dragon.",
+      "time_llm_s": 0.3653245510000005,
+      "time_nli_s": 0.590784553999999,
+      "is_correct": false
+    },
+    {
+      "question": "In Greek mythology, who were Arges, Brontes and Steropes?",
+      "semantic_entropy": 1.752882261730016,
+      "predictive_entropy": 2.283907953462932,
+      "n_clusters": 7,
+      "most_common_answer": "Three goddesses of the winds",
+      "time_llm_s": 0.23065996000000055,
+      "time_nli_s": 1.070197941,
+      "is_correct": false
+    },
+    {
+      "question": "Which musician founded the Red Hot Peppers?",
+      "semantic_entropy": 0.34869125807386475,
+      "predictive_entropy": 2.200514577299127,
+      "n_clusters": 2,
+      "most_common_answer": "Anthony Kiedis",
+      "time_llm_s": 0.13165960599999948,
+      "time_nli_s": 0.5570104690000015,
+      "is_correct": false
+    },
+    {
+      "question": "Where did the Shinning Path terrorists operate?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Peru",
+      "time_llm_s": 0.08413854199999804,
+      "time_nli_s": 0.5400216340000021,
+      "is_correct": true
+    },
+    {
+      "question": "How old was Jimi Hendrix when he died?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "27",
+      "time_llm_s": 0.08237683600000167,
+      "time_nli_s": 0.5148345379999988,
+      "is_correct": true
+    },
+    {
+      "question": "Which Brit broke the land speed record in 1990 in Thrust 2?",
+      "semantic_entropy": 0.5638275747135421,
+      "predictive_entropy": 2.296758415280051,
+      "n_clusters": 2,
+      "most_common_answer": "Brian Woolfrey",
+      "time_llm_s": 0.1382041600000008,
+      "time_nli_s": 0.559660019999999,
+      "is_correct": false
+    },
+    {
+      "question": "In which state was Gene Vincent born?",
+      "semantic_entropy": 0.3629657073827919,
+      "predictive_entropy": 2.278793770153835,
+      "n_clusters": 2,
+      "most_common_answer": "Tennessee",
+      "time_llm_s": 0.08179579000000103,
+      "time_nli_s": 0.5185394870000017,
+      "is_correct": false
+    },
+    {
+      "question": "How was the European Recovery Program in the 1940s more commonly known?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2940496021821457,
+      "n_clusters": 1,
+      "most_common_answer": "The Marshall Plan",
+      "time_llm_s": 0.14035188500000118,
+      "time_nli_s": 0.5261589239999971,
+      "is_correct": true
+    },
+    {
+      "question": "Brandon Lee died during the making of which movie?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The Crow",
+      "time_llm_s": 0.08178269000000071,
+      "time_nli_s": 0.5138818090000008,
+      "is_correct": true
+    },
+    {
+      "question": "Who had a 70s No 1 hit with Let's Do It Again?",
+      "semantic_entropy": 1.1131895868353676,
+      "predictive_entropy": 2.2453756081373077,
+      "n_clusters": 5,
+      "most_common_answer": "The Jackson 5",
+      "time_llm_s": 0.13452550999999957,
+      "time_nli_s": 0.7243234300000019,
+      "is_correct": false
+    },
+    {
+      "question": "Who had a Too Legit To Quit Tour?",
+      "semantic_entropy": 1.1850256096337208,
+      "predictive_entropy": 2.2764158704628663,
+      "n_clusters": 5,
+      "most_common_answer": "Kanye West",
+      "time_llm_s": 0.1308423389999973,
+      "time_nli_s": 0.6126149720000029,
+      "is_correct": false
+    },
+    {
+      "question": "\"According to Rudyard Kipling what were the \"\"two imposters\"\" to meet and treat the same day?\"",
+      "semantic_entropy": 1.1572293216301488,
+      "predictive_entropy": 2.2990197408419664,
+      "n_clusters": 5,
+      "most_common_answer": "The Jungle Book",
+      "time_llm_s": 1.0235964279999976,
+      "time_nli_s": 0.5782066470000018,
+      "is_correct": false
+    },
+    {
+      "question": "Who is the most successful UK solo artist in the USA?",
+      "semantic_entropy": 1.1061695469869843,
+      "predictive_entropy": 2.2458747602617457,
+      "n_clusters": 5,
+      "most_common_answer": "Ed Sheeran",
+      "time_llm_s": 0.17894764800000118,
+      "time_nli_s": 0.6072708049999989,
+      "is_correct": false
+    },
+    {
+      "question": "Which country does the airline TAAG come from?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Angola",
+      "time_llm_s": 0.08379681099999914,
+      "time_nli_s": 0.5283303570000015,
+      "is_correct": true
+    },
+    {
+      "question": "Which US No 1 single came from Diana Ross's platinum album Diana?",
+      "semantic_entropy": 0.7340202898539553,
+      "predictive_entropy": 2.2531069616258255,
+      "n_clusters": 4,
+      "most_common_answer": "I Feel Pretty",
+      "time_llm_s": 0.1838740510000001,
+      "time_nli_s": 0.534634195999999,
+      "is_correct": false
+    },
+    {
+      "question": "River Phoenix died during the making of which movie?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Pulp Fiction",
+      "time_llm_s": 0.10458693999999724,
+      "time_nli_s": 0.5036413750000008,
+      "is_correct": false
+    },
+    {
+      "question": "Which artist David was born in Bradford UK?",
+      "semantic_entropy": 0.8601706710438307,
+      "predictive_entropy": 2.286475860595955,
+      "n_clusters": 3,
+      "most_common_answer": "William Blake",
+      "time_llm_s": 0.13370062999999988,
+      "time_nli_s": 0.5840199330000004,
+      "is_correct": false
+    },
+    {
+      "question": "What is Mel Gibson's middle name?",
+      "semantic_entropy": 0.961747495471154,
+      "predictive_entropy": 2.225915083669589,
+      "n_clusters": 4,
+      "most_common_answer": "James",
+      "time_llm_s": 0.05783533099999971,
+      "time_nli_s": 0.7436863349999996,
+      "is_correct": false
+    },
+    {
+      "question": "Richard Daley was mayor of which city for 21 years?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Chicago",
+      "time_llm_s": 0.05764209999999892,
+      "time_nli_s": 0.506646215,
+      "is_correct": true
+    },
+    {
+      "question": "\"In which movie did Garbo say, \"\"I want to be alone\"\".\"",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Anna Karenina",
+      "time_llm_s": 0.10975739899999937,
+      "time_nli_s": 0.5207482710000022,
+      "is_correct": false
+    },
+    {
+      "question": "What is Osbert Lancaster best known for producing?",
+      "semantic_entropy": 0.8754951891528964,
+      "predictive_entropy": 2.298090471554606,
+      "n_clusters": 3,
+      "most_common_answer": "Poetry and plays",
+      "time_llm_s": 0.15823336400000088,
+      "time_nli_s": 0.6320977469999995,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the defending champion when Martina Navratilova first won Wimbledon singles?",
+      "semantic_entropy": 1.3748891721388934,
+      "predictive_entropy": 2.2996371854797077,
+      "n_clusters": 5,
+      "most_common_answer": "Vera Zvonareva",
+      "time_llm_s": 0.1809986109999997,
+      "time_nli_s": 0.7820491270000005,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the first US-born winner of golf's British Open?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Jack Nicklaus",
+      "time_llm_s": 0.10710996599999945,
+      "time_nli_s": 0.5101165730000012,
+      "is_correct": false
+    },
+    {
+      "question": "In which country is the Sky Train Rail bridge?",
+      "semantic_entropy": 0.6730116670092563,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 2,
+      "most_common_answer": "Canada",
+      "time_llm_s": 0.05716582899999878,
+      "time_nli_s": 0.6320190210000014,
+      "is_correct": true
+    },
+    {
+      "question": "What was the Paramount Film Company originally called?",
+      "semantic_entropy": 1.687912152408825,
+      "predictive_entropy": 2.2955668240315736,
+      "n_clusters": 6,
+      "most_common_answer": "First National Pictures",
+      "time_llm_s": 0.17925351299999903,
+      "time_nli_s": 0.9080367060000007,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the first person after Scott to reach the South Pole overland?",
+      "semantic_entropy": 0.5992143278401917,
+      "predictive_entropy": 2.2699911723627726,
+      "n_clusters": 3,
+      "most_common_answer": "Amundsen",
+      "time_llm_s": 0.11051163799999841,
+      "time_nli_s": 0.5281837140000007,
+      "is_correct": false
+    },
+    {
+      "question": "Which journalist first told the world about the My Lai massacre?",
+      "semantic_entropy": 1.7940317729992648,
+      "predictive_entropy": 2.2966279200508346,
+      "n_clusters": 7,
+      "most_common_answer": "Betty MacMillan Salter",
+      "time_llm_s": 0.2284037930000018,
+      "time_nli_s": 0.8928743170000004,
+      "is_correct": false
+    },
+    {
+      "question": "What is the name of Terence and Shirley Conran's dress designer son?",
+      "semantic_entropy": 0.8943117816506891,
+      "predictive_entropy": 2.2716005709021303,
+      "n_clusters": 4,
+      "most_common_answer": "Tom\u00e1s Conran",
+      "time_llm_s": 0.13422214800000276,
+      "time_nli_s": 0.5684564499999993,
+      "is_correct": false
+    },
+    {
+      "question": "Which drink did The Spice Girls promote?",
+      "semantic_entropy": 0.845789610800584,
+      "predictive_entropy": 2.249723434154489,
+      "n_clusters": 4,
+      "most_common_answer": "Cola",
+      "time_llm_s": 0.129436345000002,
+      "time_nli_s": 0.5706058449999993,
+      "is_correct": true
+    },
+    {
+      "question": "Who was the youngest brother in the Beach Boys?",
+      "semantic_entropy": 0.5723370510271646,
+      "predictive_entropy": 2.249296943016581,
+      "n_clusters": 2,
+      "most_common_answer": "Mike",
+      "time_llm_s": 0.08362078600000089,
+      "time_nli_s": 0.5864872649999988,
+      "is_correct": false
+    },
+    {
+      "question": "Who first hosted Family Feud?",
+      "semantic_entropy": 1.06556800152156,
+      "predictive_entropy": 2.226697255058343,
+      "n_clusters": 3,
+      "most_common_answer": "Bill Cullen",
+      "time_llm_s": 0.12788586699999982,
+      "time_nli_s": 0.6399189860000014,
+      "is_correct": false
+    },
+    {
+      "question": "What did the Lone Ranger's title Kemo Sabe mean in Apache?",
+      "semantic_entropy": 1.00357944775679,
+      "predictive_entropy": 2.2800706517866143,
+      "n_clusters": 4,
+      "most_common_answer": "He who knows many things.",
+      "time_llm_s": 0.27971806299999713,
+      "time_nli_s": 0.937375000000003,
+      "is_correct": false
+    },
+    {
+      "question": "Who or what was Gentle Ben in the 60s TV series?",
+      "semantic_entropy": 1.9467772307566757,
+      "predictive_entropy": 2.1953832836515232,
+      "n_clusters": 8,
+      "most_common_answer": "The Flintstones character.",
+      "time_llm_s": 0.2042723879999997,
+      "time_nli_s": 1.3028369830000024,
+      "is_correct": false
+    },
+    {
+      "question": "Which 70s show was based on the British show Till Death Us Do Part?",
+      "semantic_entropy": 1.8713351090660746,
+      "predictive_entropy": 2.287192410137255,
+      "n_clusters": 7,
+      "most_common_answer": "Dynasty",
+      "time_llm_s": 0.25578966100000144,
+      "time_nli_s": 0.8312644469999988,
+      "is_correct": false
+    },
+    {
+      "question": "On what date in 1969 did Neil Armstrong first set foot on the Moon?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "July 20, 1969",
+      "time_llm_s": 0.295058001000001,
+      "time_nli_s": 0.5374470219999985,
+      "is_correct": true
+    },
+    {
+      "question": "Bandar Seri Begawan International airport is in which country?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Brunei",
+      "time_llm_s": 0.08209438799999802,
+      "time_nli_s": 0.5107573970000026,
+      "is_correct": true
+    },
+    {
+      "question": "What was the profession of Paul Strand (1890 - 1976)?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Photographer",
+      "time_llm_s": 0.08797260700000109,
+      "time_nli_s": 0.512459218,
+      "is_correct": true
+    },
+    {
+      "question": "Who had a 60s No 1 with Downtown?",
+      "semantic_entropy": 1.1199163124945821,
+      "predictive_entropy": 2.2894192481148643,
+      "n_clusters": 4,
+      "most_common_answer": "The Rolling Stones",
+      "time_llm_s": 0.13065866499999856,
+      "time_nli_s": 0.677696804,
+      "is_correct": false
+    },
+    {
+      "question": "Who was born first, Kiefer Sutherland or Christian Slater?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Christian Slater",
+      "time_llm_s": 0.08653345999999829,
+      "time_nli_s": 0.5397037590000018,
+      "is_correct": false
+    },
+    {
+      "question": "To the nearest two, how many tennis Grand Slam titles did Jimmy Connors win?",
+      "semantic_entropy": 0.6911978636454496,
+      "predictive_entropy": 2.3006357760795506,
+      "n_clusters": 2,
+      "most_common_answer": "20",
+      "time_llm_s": 0.08825673200000139,
+      "time_nli_s": 0.6058600279999986,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the Georgia Peach?",
+      "semantic_entropy": 1.8843127367238632,
+      "predictive_entropy": 2.2075669916199634,
+      "n_clusters": 8,
+      "most_common_answer": "Willie Mays",
+      "time_llm_s": 0.2718229910000005,
+      "time_nli_s": 0.9881096439999979,
+      "is_correct": false
+    },
+    {
+      "question": "Who set fire to his guitar at the Monterey Pop festival in 19676?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.297419967199092,
+      "n_clusters": 1,
+      "most_common_answer": "Jimi Hendrix",
+      "time_llm_s": 0.13867436399999988,
+      "time_nli_s": 0.5294979019999992,
+      "is_correct": true
+    },
+    {
+      "question": "Della Street was whose secretary?",
+      "semantic_entropy": 2.1560425624525856,
+      "predictive_entropy": 2.27973177217121,
+      "n_clusters": 9,
+      "most_common_answer": "John F. Kennedy's",
+      "time_llm_s": 0.206775253,
+      "time_nli_s": 1.2042170230000018,
+      "is_correct": false
+    },
+    {
+      "question": "In music, who was Sweet and Innocent and Too Young?",
+      "semantic_entropy": 1.595874942474674,
+      "predictive_entropy": 2.2822125727010145,
+      "n_clusters": 6,
+      "most_common_answer": "The Pointer Sisters",
+      "time_llm_s": 1.5586199829999998,
+      "time_nli_s": 0.7442875180000001,
+      "is_correct": false
+    },
+    {
+      "question": "Who is featured on Puff Daddy's Can't Hold Me Down?",
+      "semantic_entropy": 1.0879886984146792,
+      "predictive_entropy": 2.294573938861417,
+      "n_clusters": 4,
+      "most_common_answer": "Nicki Minaj",
+      "time_llm_s": 0.1295958319999997,
+      "time_nli_s": 0.6111593239999991,
+      "is_correct": false
+    },
+    {
+      "question": "What had Edmond Hillary worked at before taking up mountain climbing?",
+      "semantic_entropy": 0.9262781772403111,
+      "predictive_entropy": 2.3013807860665834,
+      "n_clusters": 3,
+      "most_common_answer": "television presenter",
+      "time_llm_s": 0.13185052400000075,
+      "time_nli_s": 0.7735310719999973,
+      "is_correct": false
+    },
+    {
+      "question": "In which American state is the Isabella Stewart Gardner Museum?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Massachusetts",
+      "time_llm_s": 0.08123398900000112,
+      "time_nli_s": 0.5108090259999969,
+      "is_correct": true
+    },
+    {
+      "question": "Benina international airport is in which country?",
+      "semantic_entropy": 0.19812594707659004,
+      "predictive_entropy": 2.2857796622606674,
+      "n_clusters": 2,
+      "most_common_answer": "Burundi",
+      "time_llm_s": 0.08130751899999922,
+      "time_nli_s": 0.4790936650000006,
+      "is_correct": false
+    },
+    {
+      "question": "Beloved in 1999 was whose first movie since The Color Purple in 1985?",
+      "semantic_entropy": 1.1994682921746749,
+      "predictive_entropy": 2.2675059525967014,
+      "n_clusters": 4,
+      "most_common_answer": "Halle Berry",
+      "time_llm_s": 0.13757201499999994,
+      "time_nli_s": 0.7719914950000017,
+      "is_correct": false
+    },
+    {
+      "question": "Which Star Trek star directed Three Men and a Baby?",
+      "semantic_entropy": 1.2673844991494914,
+      "predictive_entropy": 2.296367459575368,
+      "n_clusters": 4,
+      "most_common_answer": "Roddenberry",
+      "time_llm_s": 0.15790805600000013,
+      "time_nli_s": 0.6351858949999958,
+      "is_correct": false
+    },
+    {
+      "question": "Which sitcom star appeared on the big screening The Object of My Affection?",
+      "semantic_entropy": 1.4774018238957132,
+      "predictive_entropy": 2.2811789957391073,
+      "n_clusters": 6,
+      "most_common_answer": "Steve Carell",
+      "time_llm_s": 0.12983663099999987,
+      "time_nli_s": 0.7322799799999977,
+      "is_correct": false
+    },
+    {
+      "question": "\"Which character did Julia \"\"Roberts play in Steven Spielberg's Hook?\"",
+      "semantic_entropy": 0.3163656500932065,
+      "predictive_entropy": 2.2626230515737062,
+      "n_clusters": 2,
+      "most_common_answer": "Hook",
+      "time_llm_s": 0.08135987200000017,
+      "time_nli_s": 0.5065990069999984,
+      "is_correct": false
+    },
+    {
+      "question": "Which US president did Anthony Hopkins play in a film whose title was simply his name?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Barack Obama",
+      "time_llm_s": 0.11054422499999816,
+      "time_nli_s": 0.5184810180000028,
+      "is_correct": false
+    },
+    {
+      "question": "Which movie was a biopic about the life of David Helfgott?",
+      "semantic_entropy": 1.0957405794266815,
+      "predictive_entropy": 2.293737559602941,
+      "n_clusters": 3,
+      "most_common_answer": "The King's Speech",
+      "time_llm_s": 0.13307162199999922,
+      "time_nli_s": 0.6653007360000025,
+      "is_correct": false
+    },
+    {
+      "question": "Which film director guested as the FBI Director in The Silence of the Lambs?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Jonathan Demme",
+      "time_llm_s": 0.11385405400000081,
+      "time_nli_s": 0.5180252169999946,
+      "is_correct": false
+    },
+    {
+      "question": "In which sci fi classic did the space ship Nostromo first appear?",
+      "semantic_entropy": 1.0754566563631234,
+      "predictive_entropy": 2.2613912882124314,
+      "n_clusters": 4,
+      "most_common_answer": "Starship Troopers",
+      "time_llm_s": 0.22872446899999943,
+      "time_nli_s": 0.7940762040000067,
+      "is_correct": false
+    },
+    {
+      "question": "Nigel Hawthorne was Oscar nominated for The Madness of which King?",
+      "semantic_entropy": 1.3920176591664863,
+      "predictive_entropy": 2.2013646858946654,
+      "n_clusters": 5,
+      "most_common_answer": "Richard II",
+      "time_llm_s": 0.08221285200000139,
+      "time_nli_s": 0.7882254449999984,
+      "is_correct": false
+    },
+    {
+      "question": "Which Swedish actress won the Best Supporting Actress Oscar for Murder on the Orient Express?",
+      "semantic_entropy": 1.398621751518003,
+      "predictive_entropy": 2.2392006956488166,
+      "n_clusters": 6,
+      "most_common_answer": "Ren\u00e9e Zellweger",
+      "time_llm_s": 0.18403325500000278,
+      "time_nli_s": 0.7943090539999957,
+      "is_correct": false
+    },
+    {
+      "question": "Which Oscar-nominated film had You Sexy Thing as its theme song?",
+      "semantic_entropy": 1.8654418806219644,
+      "predictive_entropy": 2.251932126108924,
+      "n_clusters": 7,
+      "most_common_answer": "BlacKkKlansman",
+      "time_llm_s": 0.23628610699999797,
+      "time_nli_s": 1.0661748099999997,
+      "is_correct": false
+    },
+    {
+      "question": "Which Joan's career revived in Whatever Happened to Baby Jane?",
+      "semantic_entropy": 0.6606673446049662,
+      "predictive_entropy": 2.2587911831555245,
+      "n_clusters": 4,
+      "most_common_answer": "Joan Crawford",
+      "time_llm_s": 0.15431405300000023,
+      "time_nli_s": 0.5147341330000046,
+      "is_correct": true
+    },
+    {
+      "question": "Which much-loved actor won the Best Actor Oscar for The Philadelphia Story?",
+      "semantic_entropy": 0.3738789467982139,
+      "predictive_entropy": 2.253604519500859,
+      "n_clusters": 3,
+      "most_common_answer": "James Stewart",
+      "time_llm_s": 0.1060636929999994,
+      "time_nli_s": 0.6778273990000017,
+      "is_correct": true
+    },
+    {
+      "question": "Which legendary dancer was Oscar-nominated for The Towering Inferno?",
+      "semantic_entropy": 0.24538402608535353,
+      "predictive_entropy": 2.2321673333307595,
+      "n_clusters": 2,
+      "most_common_answer": "Michael Jackson",
+      "time_llm_s": 0.08256929800000279,
+      "time_nli_s": 0.4941605140000007,
+      "is_correct": false
+    },
+    {
+      "question": "What was the name of the brothel in The Best Little Whorehouse in Texas?",
+      "semantic_entropy": 1.569002025079758,
+      "predictive_entropy": 2.2989034084088087,
+      "n_clusters": 6,
+      "most_common_answer": "The Best Little Whorehouse in Texas is named after the brothel it operates.",
+      "time_llm_s": 1.0037526200000002,
+      "time_nli_s": 0.8215482160000036,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the male star of the movie The Man of La Mancha?",
+      "semantic_entropy": 1.2609577518380612,
+      "predictive_entropy": 2.2124271531671007,
+      "n_clusters": 5,
+      "most_common_answer": "Bob Hope",
+      "time_llm_s": 0.13085189400000274,
+      "time_nli_s": 0.7161448879999952,
+      "is_correct": false
+    },
+    {
+      "question": "What relation is Joey Richardson to Vanessa Redgrave?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "son",
+      "time_llm_s": 0.05721116499999823,
+      "time_nli_s": 0.4912113540000007,
+      "is_correct": false
+    },
+    {
+      "question": "Melanie Molitor is the mom of which tennis world NO 1?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Serena Williams",
+      "time_llm_s": 0.10638199399999593,
+      "time_nli_s": 0.5060056989999993,
+      "is_correct": false
+    },
+    {
+      "question": "Marc Dutroux hit the headlines over a 'house of horrors' in which country?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Belgium",
+      "time_llm_s": 0.09023834399999942,
+      "time_nli_s": 0.5298107429999988,
+      "is_correct": true
+    },
+    {
+      "question": "On which date in 1945 did Hitler take cyanide then shoot himself?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "April 30, 1945",
+      "time_llm_s": 0.2811361859999977,
+      "time_nli_s": 0.5094987439999983,
+      "is_correct": true
+    },
+    {
+      "question": "In which river is the Boulder Dam?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.302067266202234,
+      "n_clusters": 1,
+      "most_common_answer": "The Colorado River.",
+      "time_llm_s": 0.1290564250000017,
+      "time_nli_s": 0.5030548260000032,
+      "is_correct": true
+    },
+    {
+      "question": "Which sports event was first held at Worcester, Massachusetts in 1927?",
+      "semantic_entropy": 1.3456804697193372,
+      "predictive_entropy": 2.2465791941836692,
+      "n_clusters": 5,
+      "most_common_answer": "Worcester State College football game",
+      "time_llm_s": 0.28474607799999774,
+      "time_nli_s": 0.7307000300000013,
+      "is_correct": false
+    },
+    {
+      "question": "In which European city is the Belvederen Gallery?",
+      "semantic_entropy": 0.8554979778075212,
+      "predictive_entropy": 2.2999777960553667,
+      "n_clusters": 3,
+      "most_common_answer": "Bern, Switzerland",
+      "time_llm_s": 0.10823934999999807,
+      "time_nli_s": 0.664389614000001,
+      "is_correct": false
+    },
+    {
+      "question": "How old was Woody Herman when he founded his own orchestra?",
+      "semantic_entropy": 1.3862549967360043,
+      "predictive_entropy": 2.247118367706247,
+      "n_clusters": 6,
+      "most_common_answer": "32",
+      "time_llm_s": 0.08415371400000282,
+      "time_nli_s": 0.7248776229999976,
+      "is_correct": false
+    },
+    {
+      "question": "For which movie did Katharine Hepburn win her second Oscar?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Guess Who?",
+      "time_llm_s": 0.10532256600000522,
+      "time_nli_s": 0.48904953999999634,
+      "is_correct": true
+    },
+    {
+      "question": "Who had a 60s No 1 hit with This Diamond Ring?",
+      "semantic_entropy": 0.9092612344760826,
+      "predictive_entropy": 2.262814387910446,
+      "n_clusters": 3,
+      "most_common_answer": "The Rolling Stones",
+      "time_llm_s": 0.13325649999999456,
+      "time_nli_s": 0.7210256749999999,
+      "is_correct": false
+    },
+    {
+      "question": "The world was first aware of the Chernobyl disaster after detectors were triggered at a nuclear plant in which country?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Ukraine",
+      "time_llm_s": 0.09083702600000265,
+      "time_nli_s": 0.5265879499999997,
+      "is_correct": false
+    },
+    {
+      "question": "In which country was the first permanent bungee jumping site situated?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "New Zealand",
+      "time_llm_s": 0.08186972699999728,
+      "time_nli_s": 0.5085769070000055,
+      "is_correct": true
+    },
+    {
+      "question": "Who succeeded Brezhnev as Soviet premier?",
+      "semantic_entropy": 0.6169461165624526,
+      "predictive_entropy": 2.302457818550265,
+      "n_clusters": 2,
+      "most_common_answer": "Gorbachev",
+      "time_llm_s": 0.15174242100000157,
+      "time_nli_s": 0.5200333549999954,
+      "is_correct": false
+    },
+    {
+      "question": "In the late 60s Owen Finlay MacLaren pioneered what useful item for parents of small chldren?",
+      "semantic_entropy": 1.4350451385152019,
+      "predictive_entropy": 2.2899810330104904,
+      "n_clusters": 5,
+      "most_common_answer": "potty chair",
+      "time_llm_s": 0.18779403599999966,
+      "time_nli_s": 0.6679967130000009,
+      "is_correct": false
+    },
+    {
+      "question": "In which city's shipyard was Solidarity set up?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Gdansk",
+      "time_llm_s": 0.10408436699999868,
+      "time_nli_s": 0.5043069279999983,
+      "is_correct": true
+    },
+    {
+      "question": "Which female singer was born on exactly the same day as impressionist Rich Little?",
+      "semantic_entropy": 0.2299006585456471,
+      "predictive_entropy": 2.2929414649545197,
+      "n_clusters": 2,
+      "most_common_answer": "Celine Dion",
+      "time_llm_s": 0.13479461299999684,
+      "time_nli_s": 0.48639664200000254,
+      "is_correct": false
+    },
+    {
+      "question": "What is Harrison Ford's real name?",
+      "semantic_entropy": 0.8719984433199379,
+      "predictive_entropy": 2.2978340127725145,
+      "n_clusters": 4,
+      "most_common_answer": "Carl Allen Ford",
+      "time_llm_s": 0.1788614279999976,
+      "time_nli_s": 0.5099320670000012,
+      "is_correct": true
+    },
+    {
+      "question": "Who's home runs record did Mark McGwire break in the 1998 season?",
+      "semantic_entropy": 1.0626059963597738,
+      "predictive_entropy": 2.300634024317712,
+      "n_clusters": 3,
+      "most_common_answer": "Mark McGwire's home runs record was broken by Sammy Sosa.",
+      "time_llm_s": 0.5579999439999952,
+      "time_nli_s": 0.6070069120000028,
+      "is_correct": false
+    },
+    {
+      "question": "Who won baseball's first World Series of the 80s?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The New York Yankees",
+      "time_llm_s": 0.13389706699999948,
+      "time_nli_s": 0.5236821649999968,
+      "is_correct": false
+    },
+    {
+      "question": "What was Pete Sampras seeded when he won his first US Open?",
+      "semantic_entropy": 0.8204391660575571,
+      "predictive_entropy": 2.279160463099056,
+      "n_clusters": 3,
+      "most_common_answer": "#16",
+      "time_llm_s": 0.10865024099999943,
+      "time_nli_s": 0.6921214979999988,
+      "is_correct": false
+    },
+    {
+      "question": "\"Which boxer famously said,\"\" If I can't beat this bum take my name off the record books?\"\"\"",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Muhammad Ali",
+      "time_llm_s": 0.11192212899999987,
+      "time_nli_s": 0.5257439040000023,
+      "is_correct": false
+    },
+    {
+      "question": "Where did Jonathan Edwards set his 1995 triple jump world record?",
+      "semantic_entropy": 1.2277487009885224,
+      "predictive_entropy": 2.2607157895555874,
+      "n_clusters": 5,
+      "most_common_answer": "New Haven, Connecticut",
+      "time_llm_s": 0.15745730200000452,
+      "time_nli_s": 0.7325795490000004,
+      "is_correct": false
+    },
+    {
+      "question": "In baseball, where do the Orioles come from?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Baltimore",
+      "time_llm_s": 0.08226572800000298,
+      "time_nli_s": 0.5183069229999973,
+      "is_correct": true
+    },
+    {
+      "question": "The Naismith Award is presented in which sport?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.289399883737836,
+      "n_clusters": 1,
+      "most_common_answer": "basketball",
+      "time_llm_s": 0.08432161699999341,
+      "time_nli_s": 0.5234845510000028,
+      "is_correct": true
+    },
+    {
+      "question": "Which cartoon and film character is the nickname of super athlete Michael Johnson?",
+      "semantic_entropy": 0.45573696345970705,
+      "predictive_entropy": 2.299638923364309,
+      "n_clusters": 2,
+      "most_common_answer": "Scooby-Doo",
+      "time_llm_s": 0.15729083500000485,
+      "time_nli_s": 0.6802234459999994,
+      "is_correct": false
+    },
+    {
+      "question": "For which team did Babe Ruth blast his last Major League home run?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.301781683721322,
+      "n_clusters": 1,
+      "most_common_answer": "The New York Yankees",
+      "time_llm_s": 0.1519048810000001,
+      "time_nli_s": 0.4927316010000027,
+      "is_correct": false
+    },
+    {
+      "question": "What was Warren Beatty's first movie?",
+      "semantic_entropy": 0.9948359122803367,
+      "predictive_entropy": 2.2719918322952624,
+      "n_clusters": 4,
+      "most_common_answer": "Bonnie and Clyde",
+      "time_llm_s": 0.15579403699999972,
+      "time_nli_s": 0.8064434069999962,
+      "is_correct": false
+    },
+    {
+      "question": "Which future Hollywood star got her break as Wonder Girl, Wonder Woman's sister Drusilla?",
+      "semantic_entropy": 0.8497394075443323,
+      "predictive_entropy": 2.282316975368889,
+      "n_clusters": 3,
+      "most_common_answer": "Lana Wachowski",
+      "time_llm_s": 0.15865957900000183,
+      "time_nli_s": 0.6455409490000008,
+      "is_correct": false
+    },
+    {
+      "question": "Mickey Braddock in the 50s series Circus Boy found fame with which surname in which pop band?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The Beatles",
+      "time_llm_s": 0.09204810300000332,
+      "time_nli_s": 0.5244604489999958,
+      "is_correct": false
+    },
+    {
+      "question": "Which war veteran was Director of News & Special Events for ABC before find fame as a TV cop?",
+      "semantic_entropy": 1.3801140157630263,
+      "predictive_entropy": 2.2671314405506418,
+      "n_clusters": 5,
+      "most_common_answer": "Ed Fritsch",
+      "time_llm_s": 0.13408574000000328,
+      "time_nli_s": 0.8272231369999972,
+      "is_correct": false
+    },
+    {
+      "question": "What US sitcom was the first exported to Britain?",
+      "semantic_entropy": 0.9632640474599875,
+      "predictive_entropy": 2.299788344876448,
+      "n_clusters": 3,
+      "most_common_answer": "Friends",
+      "time_llm_s": 0.12770949499999773,
+      "time_nli_s": 0.583706283000005,
+      "is_correct": false
+    },
+    {
+      "question": "In Hanna and Barbera's TV cartoons base on The Addams Family who was the voice of Gomez?",
+      "semantic_entropy": 1.1045677904862963,
+      "predictive_entropy": 2.250770035563948,
+      "n_clusters": 4,
+      "most_common_answer": "Mel Brooks",
+      "time_llm_s": 0.11320412399999924,
+      "time_nli_s": 0.8374030460000057,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the only female victim to be killed off in the opening credit sequence in Police Squad?",
+      "semantic_entropy": 2.0449647011467036,
+      "predictive_entropy": 2.2181069101555586,
+      "n_clusters": 9,
+      "most_common_answer": "Linda Hamilton",
+      "time_llm_s": 0.15834820899999613,
+      "time_nli_s": 1.0744117230000043,
+      "is_correct": false
+    },
+    {
+      "question": "Which US president won the Nobel Peace Prize in 1920?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Woodrow Wilson",
+      "time_llm_s": 0.11097713599999537,
+      "time_nli_s": 0.5284155390000009,
+      "is_correct": true
+    },
+    {
+      "question": "Who beat Tim Henman in his first Wimbledon singles semifinal?",
+      "semantic_entropy": 0.8963187647289867,
+      "predictive_entropy": 2.298057791482741,
+      "n_clusters": 3,
+      "most_common_answer": "Novak Djokovic",
+      "time_llm_s": 0.15495185099999986,
+      "time_nli_s": 0.5592101610000029,
+      "is_correct": false
+    },
+    {
+      "question": "What relation was Flo Jo to Jackie Joyner Kersee?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.292987231806067,
+      "n_clusters": 1,
+      "most_common_answer": "Sister",
+      "time_llm_s": 0.08199152699999956,
+      "time_nli_s": 0.5035658390000037,
+      "is_correct": true
+    },
+    {
+      "question": "How long was swimmer Michelle Smith-de Bruin banned for attempting to manipulate a drugs test?",
+      "semantic_entropy": 0.44456203343485545,
+      "predictive_entropy": 2.298079293476456,
+      "n_clusters": 2,
+      "most_common_answer": "1 year",
+      "time_llm_s": 0.08884495100000578,
+      "time_nli_s": 0.6961719009999996,
+      "is_correct": false
+    },
+    {
+      "question": "Yuan Yuan was caught carrying drugs for which Chinese team?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.291042838676862,
+      "n_clusters": 1,
+      "most_common_answer": "Beijing Olympic Games delegation",
+      "time_llm_s": 0.20041441899999768,
+      "time_nli_s": 0.5040456159999991,
+      "is_correct": false
+    },
+    {
+      "question": "Which grand slam did Pete Sampras not win in the 20th century?",
+      "semantic_entropy": 0.587608332402705,
+      "predictive_entropy": 2.301000692114941,
+      "n_clusters": 2,
+      "most_common_answer": "French Open",
+      "time_llm_s": 0.08679592000000014,
+      "time_nli_s": 0.6375538750000018,
+      "is_correct": true
+    },
+    {
+      "question": "In which events did Gert Fredriksson win six Olympic gold medals?",
+      "semantic_entropy": 1.5420369041461193,
+      "predictive_entropy": 2.2788756261105267,
+      "n_clusters": 5,
+      "most_common_answer": "Figure skating",
+      "time_llm_s": 0.1557815379999994,
+      "time_nli_s": 0.9009117240000037,
+      "is_correct": false
+    },
+    {
+      "question": "How many of his 45 races did Mike Hawthorn, a former Formula One motor racing world champion, win?",
+      "semantic_entropy": 0.9823824372016747,
+      "predictive_entropy": 2.24278247424456,
+      "n_clusters": 3,
+      "most_common_answer": "10",
+      "time_llm_s": 0.08737257699999645,
+      "time_nli_s": 0.6498484610000048,
+      "is_correct": false
+    },
+    {
+      "question": "On the Internet what is Spam?",
+      "semantic_entropy": 0.5400435199316316,
+      "predictive_entropy": 2.2902612814475445,
+      "n_clusters": 2,
+      "most_common_answer": "Unwanted bulk electronic mail.",
+      "time_llm_s": 0.18067524599999985,
+      "time_nli_s": 0.6368106040000043,
+      "is_correct": true
+    },
+    {
+      "question": "In which country did the Internet start?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.297228632314351,
+      "n_clusters": 1,
+      "most_common_answer": "United States",
+      "time_llm_s": 0.12651067499999868,
+      "time_nli_s": 0.5051643030000008,
+      "is_correct": true
+    },
+    {
+      "question": "In which year was the Juilliard School founded in New York?",
+      "semantic_entropy": 0.47252438286624654,
+      "predictive_entropy": 2.3013973109518426,
+      "n_clusters": 2,
+      "most_common_answer": "1905",
+      "time_llm_s": 0.12974266399999834,
+      "time_nli_s": 0.4973593819999991,
+      "is_correct": true
+    },
+    {
+      "question": "Who wrote My Life and Loves in 1926, originally banned in the US?",
+      "semantic_entropy": 0.9858111875708113,
+      "predictive_entropy": 2.296978987578828,
+      "n_clusters": 3,
+      "most_common_answer": "D.H. Lawrence",
+      "time_llm_s": 0.15969560499999602,
+      "time_nli_s": 0.6454752369999994,
+      "is_correct": false
+    },
+    {
+      "question": "What was Blondie's last UK No 1 of the 80s?",
+      "semantic_entropy": 1.6154751640525697,
+      "predictive_entropy": 2.279479338899413,
+      "n_clusters": 6,
+      "most_common_answer": "Parallel Lines",
+      "time_llm_s": 0.15571916999999758,
+      "time_nli_s": 0.7820885470000007,
+      "is_correct": false
+    },
+    {
+      "question": "In baseball, where do the Royals come from?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Kansas City",
+      "time_llm_s": 0.08161238499999968,
+      "time_nli_s": 0.5150690039999972,
+      "is_correct": true
+    },
+    {
+      "question": "What is the largest city in Ohio?",
+      "semantic_entropy": 0.43762263434239423,
+      "predictive_entropy": 2.2969638701908393,
+      "n_clusters": 2,
+      "most_common_answer": "Cleveland",
+      "time_llm_s": 0.10522881699999687,
+      "time_nli_s": 0.5184143970000008,
+      "is_correct": true
+    },
+    {
+      "question": "In which decade of the 20th century was Anne Bancroft born?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "1934",
+      "time_llm_s": 0.134206963000004,
+      "time_nli_s": 0.4967237669999989,
+      "is_correct": false
+    },
+    {
+      "question": "The Suez Canal connects the Mediterranean Sea to which other Sea?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Red Sea",
+      "time_llm_s": 0.08220960100000241,
+      "time_nli_s": 0.508591882999994,
+      "is_correct": true
+    },
+    {
+      "question": "Which rock star did Cindy Crawford name her first son after?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Michael Jackson",
+      "time_llm_s": 0.08064306800000054,
+      "time_nli_s": 0.4922927320000028,
+      "is_correct": false
+    },
+    {
+      "question": "Sun Yat Sen overthrew the emperor in which country establishing a republic after 2000 years of imperial rule?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "China",
+      "time_llm_s": 0.06474400899999466,
+      "time_nli_s": 0.5173719120000015,
+      "is_correct": true
+    },
+    {
+      "question": "Who designed the dress which made the most at Diana's dress auction?",
+      "semantic_entropy": 0.87919453155836,
+      "predictive_entropy": 2.2737455446176886,
+      "n_clusters": 3,
+      "most_common_answer": "Yves Saint Laurent",
+      "time_llm_s": 0.12707358900000543,
+      "time_nli_s": 0.643625109999995,
+      "is_correct": false
+    },
+    {
+      "question": "Which Palestinian co-founded al Fatah in 1957?",
+      "semantic_entropy": 0.3287276210065569,
+      "predictive_entropy": 2.3025697536454475,
+      "n_clusters": 2,
+      "most_common_answer": "Abu Jihad",
+      "time_llm_s": 0.17756929400000132,
+      "time_nli_s": 0.4759066629999964,
+      "is_correct": true
+    },
+    {
+      "question": "In which country was Earl Spencer's acrimonious divorce settlement heard?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "United Kingdom",
+      "time_llm_s": 0.0825044979999987,
+      "time_nli_s": 0.5157460799999996,
+      "is_correct": false
+    },
+    {
+      "question": "In which North African country was Mohammed Al-Fayed, owner of Harrods department store in London, born?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Egypt",
+      "time_llm_s": 0.06394685499999753,
+      "time_nli_s": 0.5130210840000018,
+      "is_correct": true
+    },
+    {
+      "question": "Aung San Suu Kyi is a controversial leader in which country?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Burma",
+      "time_llm_s": 0.08432256400000426,
+      "time_nli_s": 0.5247584419999995,
+      "is_correct": true
+    },
+    {
+      "question": "Which of the founders of United Artists had the last name nearest the beginning of the alphabet?",
+      "semantic_entropy": 0.8608676493214273,
+      "predictive_entropy": 2.2533533717334633,
+      "n_clusters": 4,
+      "most_common_answer": "Dalecki",
+      "time_llm_s": 0.1859627890000013,
+      "time_nli_s": 0.6087374009999991,
+      "is_correct": false
+    },
+    {
+      "question": "In La Cage Aux Folles, what was La Cage Aux Folles?",
+      "semantic_entropy": 0.9022225206265664,
+      "predictive_entropy": 2.2943635767417994,
+      "n_clusters": 3,
+      "most_common_answer": "a drag performance troupe",
+      "time_llm_s": 0.1547661050000002,
+      "time_nli_s": 0.5599854429999951,
+      "is_correct": false
+    },
+    {
+      "question": "Where was the Fiddler in the musical's title?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "New York City",
+      "time_llm_s": 0.11052839399999925,
+      "time_nli_s": 0.5150713690000046,
+      "is_correct": false
+    },
+    {
+      "question": "South Pacific was set during which war?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "World War II",
+      "time_llm_s": 0.10498484200000036,
+      "time_nli_s": 0.5019406500000017,
+      "is_correct": true
+    },
+    {
+      "question": "What percentage of the earth's surface is covered by Europe?",
+      "semantic_entropy": 1.2561143250795113,
+      "predictive_entropy": 2.294188641332727,
+      "n_clusters": 4,
+      "most_common_answer": "10%",
+      "time_llm_s": 0.15632977199999942,
+      "time_nli_s": 0.6674076800000037,
+      "is_correct": false
+    },
+    {
+      "question": "Which European town gave its name to a Treaty which symbolizes closer economic links between European countries?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Luxembourg",
+      "time_llm_s": 0.08860578299999844,
+      "time_nli_s": 0.5208407850000043,
+      "is_correct": false
+    },
+    {
+      "question": "Which home of champagne in France was also where the German High Command surrendered in WWII?",
+      "semantic_entropy": 0.5451753374368087,
+      "predictive_entropy": 2.292022407557627,
+      "n_clusters": 2,
+      "most_common_answer": "Versailles Palace",
+      "time_llm_s": 0.10999333100000541,
+      "time_nli_s": 0.5366326589999986,
+      "is_correct": false
+    },
+    {
+      "question": "Which was the first European city this century to open an underground railway system?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "London",
+      "time_llm_s": 0.058088898999997696,
+      "time_nli_s": 0.5035756110000023,
+      "is_correct": false
+    },
+    {
+      "question": "Who first drew Mickey Mouse when ?Disney first supplied the voice?",
+      "semantic_entropy": 1.9726776961413617,
+      "predictive_entropy": 2.2842571951791966,
+      "n_clusters": 8,
+      "most_common_answer": "1928",
+      "time_llm_s": 0.23836799300000422,
+      "time_nli_s": 1.008284855999996,
+      "is_correct": false
+    },
+    {
+      "question": "Which actress wrote the novel The Last of the Really Great Whangdoodles?",
+      "semantic_entropy": 2.066981431292724,
+      "predictive_entropy": 2.2554315243813448,
+      "n_clusters": 9,
+      "most_common_answer": "Jodi Picoult",
+      "time_llm_s": 0.18224505099999533,
+      "time_nli_s": 1.180069636000006,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the star of the film based on the record Harper Valley PTA by Jeannie C Riley?",
+      "semantic_entropy": 2.1893700787986394,
+      "predictive_entropy": 2.25803934252001,
+      "n_clusters": 9,
+      "most_common_answer": "Jeannie C Riley",
+      "time_llm_s": 0.16243685999999968,
+      "time_nli_s": 1.1193111410000043,
+      "is_correct": false
+    },
+    {
+      "question": "What color golf balls are used on the golf course in Antarctica?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.228503607993865,
+      "n_clusters": 1,
+      "most_common_answer": "White",
+      "time_llm_s": 0.05681593200000634,
+      "time_nli_s": 0.48259100999999305,
+      "is_correct": false
+    },
+    {
+      "question": "Throughout the 80s and 90s Phil Collins recorded on which record label?",
+      "semantic_entropy": 0.5952329936691414,
+      "predictive_entropy": 2.272477276871558,
+      "n_clusters": 2,
+      "most_common_answer": "EMI",
+      "time_llm_s": 0.13371394499999667,
+      "time_nli_s": 0.564815325000005,
+      "is_correct": false
+    },
+    {
+      "question": "On which label did Chuck Berry record in the 1950s and 1960s?",
+      "semantic_entropy": 1.3718318149650657,
+      "predictive_entropy": 2.2889616231424843,
+      "n_clusters": 4,
+      "most_common_answer": "Parlors",
+      "time_llm_s": 0.18737713200000172,
+      "time_nli_s": 0.8948348849999945,
+      "is_correct": false
+    },
+    {
+      "question": "What was the name of Michael Jackson's second wife?",
+      "semantic_entropy": 1.0540792607212446,
+      "predictive_entropy": 2.2011426538655723,
+      "n_clusters": 6,
+      "most_common_answer": "Lauren Conrad",
+      "time_llm_s": 0.1532521580000008,
+      "time_nli_s": 0.6376640149999986,
+      "is_correct": false
+    },
+    {
+      "question": "Which US city was named after a British Prime Minister?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "London",
+      "time_llm_s": 0.057117245000000594,
+      "time_nli_s": 0.5183522210000007,
+      "is_correct": false
+    },
+    {
+      "question": "\"Who said, To err is human but it feels divine?\"\"\"",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Edgar Allan Poe",
+      "time_llm_s": 0.1323362160000059,
+      "time_nli_s": 0.5299843889999991,
+      "is_correct": false
+    },
+    {
+      "question": "Which singer had a big 60s No 1 with Roses Are Red?",
+      "semantic_entropy": 0.7622542736853302,
+      "predictive_entropy": 2.2788549866039416,
+      "n_clusters": 3,
+      "most_common_answer": "Elvis Presley",
+      "time_llm_s": 0.13586508899999927,
+      "time_nli_s": 0.5479807030000003,
+      "is_correct": false
+    },
+    {
+      "question": "What are the international registration letters of a vehicle from Iceland?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "IZ",
+      "time_llm_s": 0.05735033799999911,
+      "time_nli_s": 0.506815428000003,
+      "is_correct": false
+    },
+    {
+      "question": "Where was the American venue of the Live Aid concert?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "London, England",
+      "time_llm_s": 0.10534647600000113,
+      "time_nli_s": 0.5064001769999962,
+      "is_correct": false
+    },
+    {
+      "question": "Which was the longest moon landing?",
+      "semantic_entropy": 1.0847362698296004,
+      "predictive_entropy": 2.3010819463347576,
+      "n_clusters": 3,
+      "most_common_answer": "Apollo 15",
+      "time_llm_s": 0.15769380100000063,
+      "time_nli_s": 0.6594648469999953,
+      "is_correct": true
+    },
+    {
+      "question": "Who had the most expensive presidential inauguration ceremony of the 20th century?",
+      "semantic_entropy": 0.6343018403108193,
+      "predictive_entropy": 2.29218724492935,
+      "n_clusters": 2,
+      "most_common_answer": "Bill Clinton",
+      "time_llm_s": 0.1569476979999962,
+      "time_nli_s": 0.6179063370000009,
+      "is_correct": false
+    },
+    {
+      "question": "Who became Israel's head of state in 1993?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Rabin",
+      "time_llm_s": 0.08237023000000221,
+      "time_nli_s": 0.5188171769999954,
+      "is_correct": false
+    },
+    {
+      "question": "In WWII, who was the head of the Nazi party's security service?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Reinhard Heydrich",
+      "time_llm_s": 0.1804726139999957,
+      "time_nli_s": 0.522466455,
+      "is_correct": true
+    },
+    {
+      "question": "Which President of the Philippines was deposed in 1986?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.30175580865742,
+      "n_clusters": 1,
+      "most_common_answer": "Ferdinand Marcos",
+      "time_llm_s": 0.12722881999999913,
+      "time_nli_s": 0.4925726130000001,
+      "is_correct": true
+    },
+    {
+      "question": "What kind of disaster claimed some 100,000 lives in Armenia in 1988?",
+      "semantic_entropy": 0.5007514180092821,
+      "predictive_entropy": 2.280542423729097,
+      "n_clusters": 3,
+      "most_common_answer": "The Armenian genocide",
+      "time_llm_s": 0.2108412800000039,
+      "time_nli_s": 0.7057625320000014,
+      "is_correct": false
+    },
+    {
+      "question": "Which state on the Gulf of Mexico is nearest the end of the alphabet?",
+      "semantic_entropy": 0.6466038878602347,
+      "predictive_entropy": 2.256041800294335,
+      "n_clusters": 2,
+      "most_common_answer": "Alaska",
+      "time_llm_s": 0.08287896699999919,
+      "time_nli_s": 0.5981699539999994,
+      "is_correct": false
+    },
+    {
+      "question": "Truax Field international airport is in which US state?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Maine",
+      "time_llm_s": 0.08127391600000067,
+      "time_nli_s": 0.5016092639999954,
+      "is_correct": false
+    },
+    {
+      "question": "In what month was the attack on Pearl Harbor?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "December",
+      "time_llm_s": 0.056938634000005095,
+      "time_nli_s": 0.5112279169999994,
+      "is_correct": true
+    },
+    {
+      "question": "Who did Dr. Crippen murder?",
+      "semantic_entropy": 1.1623797990573954,
+      "predictive_entropy": 2.258844534590297,
+      "n_clusters": 5,
+      "most_common_answer": "Mary Seacole",
+      "time_llm_s": 0.21687777999999724,
+      "time_nli_s": 0.6611349100000012,
+      "is_correct": false
+    },
+    {
+      "question": "In the 1904 Olympics, how many of the 23 track and field titles were won by Americans?",
+      "semantic_entropy": 1.203036164709345,
+      "predictive_entropy": 2.2718180069744625,
+      "n_clusters": 4,
+      "most_common_answer": "16",
+      "time_llm_s": 0.08787889700000306,
+      "time_nli_s": 0.5849295649999959,
+      "is_correct": false
+    },
+    {
+      "question": "The Black Hills lie between which two rivers?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3005420678922106,
+      "n_clusters": 1,
+      "most_common_answer": "the Cheyenne and the Rosebud Rivers",
+      "time_llm_s": 0.25295195900000067,
+      "time_nli_s": 0.5127847380000006,
+      "is_correct": false
+    },
+    {
+      "question": "In what year was the first in-flight movie shown on an internal flight in the USA.",
+      "semantic_entropy": 1.1934885598600076,
+      "predictive_entropy": 2.2745814877392343,
+      "n_clusters": 5,
+      "most_common_answer": "1935",
+      "time_llm_s": 0.1387868760000046,
+      "time_nli_s": 0.6144594760000004,
+      "is_correct": false
+    },
+    {
+      "question": "In which city was John Lennon murdered?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "New York City",
+      "time_llm_s": 0.10298384900000457,
+      "time_nli_s": 0.49493491199999795,
+      "is_correct": true
+    },
+    {
+      "question": "How was President Kennedy assassinated?",
+      "semantic_entropy": 1.8403244655556055,
+      "predictive_entropy": 2.2942342512539025,
+      "n_clusters": 7,
+      "most_common_answer": "Assassinated by Lee Harvey Oswald.",
+      "time_llm_s": 0.6192624480000006,
+      "time_nli_s": 0.7969501950000009,
+      "is_correct": false
+    },
+    {
+      "question": "Which caped crusader operated in Gotham City?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Batman",
+      "time_llm_s": 0.057031203000001085,
+      "time_nli_s": 0.49576760899999783,
+      "is_correct": true
+    },
+    {
+      "question": "Who did Jack Ruby shoot in November 1963?",
+      "semantic_entropy": 0.4503932706743224,
+      "predictive_entropy": 2.298930372500142,
+      "n_clusters": 2,
+      "most_common_answer": "Lee Harvey Oswald",
+      "time_llm_s": 0.13026345000000106,
+      "time_nli_s": 0.6754228009999963,
+      "is_correct": true
+    },
+    {
+      "question": "Who was the first American to travel faster than the speed of sound?",
+      "semantic_entropy": 0.4308954867696727,
+      "predictive_entropy": 2.2957795865356228,
+      "n_clusters": 2,
+      "most_common_answer": "Chuck Yeager",
+      "time_llm_s": 0.1558532859999957,
+      "time_nli_s": 0.5173582560000014,
+      "is_correct": true
+    },
+    {
+      "question": "Who was the first US president Barbara Walters interviewed?",
+      "semantic_entropy": 0.6931471805599453,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 2,
+      "most_common_answer": "Lyndon B. Johnson",
+      "time_llm_s": 0.15402502100000248,
+      "time_nli_s": 0.6064070309999963,
+      "is_correct": false
+    },
+    {
+      "question": "Which orchestral conductor was married to one of the subjects of the film Hillary and Jackie?",
+      "semantic_entropy": 1.2407527322445624,
+      "predictive_entropy": 2.298841733187835,
+      "n_clusters": 4,
+      "most_common_answer": "James Levine",
+      "time_llm_s": 0.2077907890000006,
+      "time_nli_s": 0.6553015229999986,
+      "is_correct": false
+    },
+    {
+      "question": "Which writer and politician became Lord Tweedsmuir?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Ramsay MacDonald",
+      "time_llm_s": 0.13103920900000077,
+      "time_nli_s": 0.5128322150000031,
+      "is_correct": false
+    },
+    {
+      "question": "In what year was the first Tarzan novel published?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "1912",
+      "time_llm_s": 0.13007197099999956,
+      "time_nli_s": 0.5130937489999994,
+      "is_correct": false
+    },
+    {
+      "question": "In which country were motorized ambulances first used?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "United States",
+      "time_llm_s": 0.08163798900000074,
+      "time_nli_s": 0.514246908000004,
+      "is_correct": false
+    },
+    {
+      "question": "What is the Pacific terminus of the Trans Siberian Railway?",
+      "semantic_entropy": 0.6350349448418164,
+      "predictive_entropy": 2.2977810184138576,
+      "n_clusters": 2,
+      "most_common_answer": "Ulaanbaatar",
+      "time_llm_s": 0.18013233500000325,
+      "time_nli_s": 0.5392131939999985,
+      "is_correct": false
+    },
+    {
+      "question": "What is the name of the mountain pass which lies between Pakistan and Afghanistan?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Khyber Pass",
+      "time_llm_s": 0.13220449800000011,
+      "time_nli_s": 0.5144423140000001,
+      "is_correct": true
+    },
+    {
+      "question": "What is the name of the group of 1,196 islands in the North Indian Ocean, none bigger than five square miles?",
+      "semantic_entropy": 0.6112828173260129,
+      "predictive_entropy": 2.2812021995540324,
+      "n_clusters": 2,
+      "most_common_answer": "Andaman Islands",
+      "time_llm_s": 0.11177056399999685,
+      "time_nli_s": 0.5407114120000003,
+      "is_correct": true
+    },
+    {
+      "question": "Which Syrian city is said to be the oldest continually inhabited city in the world?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Damascus",
+      "time_llm_s": 0.08702122100000054,
+      "time_nli_s": 0.5057999280000018,
+      "is_correct": true
+    },
+    {
+      "question": "Who was king of France at the time of the French Revolution?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Louis XVI",
+      "time_llm_s": 0.08165634999999583,
+      "time_nli_s": 0.5084521719999984,
+      "is_correct": true
+    },
+    {
+      "question": "What is the principal language of Bulgaria?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2915113984788524,
+      "n_clusters": 1,
+      "most_common_answer": "Bulgarian.",
+      "time_llm_s": 0.13254503600000334,
+      "time_nli_s": 0.5257008359999986,
+      "is_correct": true
+    },
+    {
+      "question": "What is the name of the cathedral in Red Square, Moscow?",
+      "semantic_entropy": 0.5938552853316491,
+      "predictive_entropy": 2.301710819588096,
+      "n_clusters": 2,
+      "most_common_answer": "St. Basil's Cathedral",
+      "time_llm_s": 0.15488837000000188,
+      "time_nli_s": 0.5364398290000025,
+      "is_correct": true
+    },
+    {
+      "question": "Which country is known to its people as Suomen Tasavalta?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Finland",
+      "time_llm_s": 0.08235606499999903,
+      "time_nli_s": 0.5019887460000021,
+      "is_correct": true
+    },
+    {
+      "question": "Which crusade was led by Philip II Augustus of France and Richard I of England?",
+      "semantic_entropy": 0.44456203343485545,
+      "predictive_entropy": 2.298079293476456,
+      "n_clusters": 2,
+      "most_common_answer": "The Third Crusade",
+      "time_llm_s": 0.13959853000000066,
+      "time_nli_s": 0.5135890310000022,
+      "is_correct": true
+    },
+    {
+      "question": "In which Netherlands city does the United Nations International Court of Justice sit?",
+      "semantic_entropy": 0.6628473185791794,
+      "predictive_entropy": 2.2722852310132797,
+      "n_clusters": 2,
+      "most_common_answer": "The Hague",
+      "time_llm_s": 0.08163787899999875,
+      "time_nli_s": 0.5947480760000019,
+      "is_correct": true
+    },
+    {
+      "question": "In which battle did Harold II, the last Saxon king, lose his life?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Battle of Hastings",
+      "time_llm_s": 0.11181319599999995,
+      "time_nli_s": 0.5243077109999987,
+      "is_correct": true
+    },
+    {
+      "question": "Who proclaimed the People's Republic of China in 1949?",
+      "semantic_entropy": 0.6459833208358727,
+      "predictive_entropy": 2.2967805427847563,
+      "n_clusters": 2,
+      "most_common_answer": "Chen Yi",
+      "time_llm_s": 0.13022047399999792,
+      "time_nli_s": 0.6074655590000049,
+      "is_correct": false
+    },
+    {
+      "question": "Which wife of Henry VIII had already married twice before she became queen, and married for a fourth time after Henry's death?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Anne Boleyn",
+      "time_llm_s": 0.1360715309999989,
+      "time_nli_s": 0.5045494989999995,
+      "is_correct": false
+    },
+    {
+      "question": "In which country is the castle that gives the Habsburg dynasty its name?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Austria.",
+      "time_llm_s": 0.10896265499999913,
+      "time_nli_s": 0.5106004109999986,
+      "is_correct": false
+    },
+    {
+      "question": "In which parliament has the UK 87 seats for members who are elected for a five0-year term?",
+      "semantic_entropy": 0.39339922133749755,
+      "predictive_entropy": 2.2260079581652867,
+      "n_clusters": 2,
+      "most_common_answer": "House of Lords",
+      "time_llm_s": 0.11175538999999901,
+      "time_nli_s": 0.5407258830000004,
+      "is_correct": true
+    },
+    {
+      "question": "What was the former name of the British Green Party?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The Greens",
+      "time_llm_s": 0.08163842999999815,
+      "time_nli_s": 0.5119089270000003,
+      "is_correct": false
+    },
+    {
+      "question": "\"What is the more common name of the \"\"simple plurality\"\" system of voting?\"",
+      "semantic_entropy": 0.39013225201907054,
+      "predictive_entropy": 2.2844943147953547,
+      "n_clusters": 2,
+      "most_common_answer": "First-past-the-post system",
+      "time_llm_s": 0.20436428499999693,
+      "time_nli_s": 0.4962175250000058,
+      "is_correct": true
+    },
+    {
+      "question": "What word for unthinking patriotism is derived from the name of one of Napoleon's admirers?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Bonapartist",
+      "time_llm_s": 0.11343821199999837,
+      "time_nli_s": 0.524910134999999,
+      "is_correct": false
+    },
+    {
+      "question": "Which builder of steam engines formed a successful partnership with Matthew Boulton?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "James Watt",
+      "time_llm_s": 0.08121887700000485,
+      "time_nli_s": 0.5047767179999951,
+      "is_correct": true
+    },
+    {
+      "question": "What was the nickname of the French singer Edith Piaf?",
+      "semantic_entropy": 0.5363883586142338,
+      "predictive_entropy": 2.294184550325846,
+      "n_clusters": 3,
+      "most_common_answer": "La M\u00f4me",
+      "time_llm_s": 0.17854567299999502,
+      "time_nli_s": 0.4831741070000035,
+      "is_correct": false
+    },
+    {
+      "question": "Whose birthday is celebrated by a public holiday on the third Monday in January in the USA?",
+      "semantic_entropy": 0.6905584809160924,
+      "predictive_entropy": 2.2998911367097996,
+      "n_clusters": 2,
+      "most_common_answer": "Martin Luther King Jr.",
+      "time_llm_s": 0.18351426699999962,
+      "time_nli_s": 0.6021425619999974,
+      "is_correct": true
+    },
+    {
+      "question": "What type of coal is brown and fibrous?",
+      "semantic_entropy": 0.5853779824932437,
+      "predictive_entropy": 2.2667932505863395,
+      "n_clusters": 2,
+      "most_common_answer": "Bituminous coal",
+      "time_llm_s": 0.13117716699999704,
+      "time_nli_s": 0.5781011830000011,
+      "is_correct": true
+    },
+    {
+      "question": "What raw material is used for making glass?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "sand",
+      "time_llm_s": 0.05638430399999805,
+      "time_nli_s": 0.49263378900000276,
+      "is_correct": true
+    },
+    {
+      "question": "What kind of an organism is a truffle?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2546674870705647,
+      "n_clusters": 1,
+      "most_common_answer": "fungi",
+      "time_llm_s": 0.10245717399999421,
+      "time_nli_s": 0.506947279000002,
+      "is_correct": true
+    },
+    {
+      "question": "What is the name of the strong material found in plant cell walls?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2988863307541347,
+      "n_clusters": 1,
+      "most_common_answer": "Cellulose",
+      "time_llm_s": 0.13086272500000007,
+      "time_nli_s": 0.5160965919999967,
+      "is_correct": true
+    },
+    {
+      "question": "What name is given to the change of state from liquid to gas?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Evaporation",
+      "time_llm_s": 0.0840025529999977,
+      "time_nli_s": 0.5263624720000024,
+      "is_correct": true
+    },
+    {
+      "question": "Which branch of science has four fundamental principles: addition, subtraction, multiplication, and division.",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2909943112947935,
+      "n_clusters": 1,
+      "most_common_answer": "Mathematics",
+      "time_llm_s": 0.10933528700000039,
+      "time_nli_s": 0.4929228939999959,
+      "is_correct": false
+    },
+    {
+      "question": "What is the force that opposes the relative motion of two bodies that are in contact?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.302178066913093,
+      "n_clusters": 1,
+      "most_common_answer": "Friction.",
+      "time_llm_s": 0.11017087100000111,
+      "time_nli_s": 0.5065814960000026,
+      "is_correct": true
+    },
+    {
+      "question": "What is the fastest animal on two legs?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "The fastest animal on two legs is the cheetah.",
+      "time_llm_s": 0.3090926000000067,
+      "time_nli_s": 0.48718659099999684,
+      "is_correct": false
+    },
+    {
+      "question": "What is the green pigment used by plants to trap sunlight?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "chlorophyll",
+      "time_llm_s": 0.108065615000001,
+      "time_nli_s": 0.5250095090000002,
+      "is_correct": true
+    },
+    {
+      "question": "What id the name given to the study of birds?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.281455670126867,
+      "n_clusters": 1,
+      "most_common_answer": "ornithology",
+      "time_llm_s": 0.10532083800000436,
+      "time_nli_s": 0.5102094139999949,
+      "is_correct": true
+    },
+    {
+      "question": "Of which reptile are there only two species, one living in the Mississippi and the other in China?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3017118167520483,
+      "n_clusters": 1,
+      "most_common_answer": "Alligator.",
+      "time_llm_s": 0.1107423060000059,
+      "time_nli_s": 0.492926704999995,
+      "is_correct": true
+    },
+    {
+      "question": "What type of seaweed grows up to 100 meters in length, and is farmed for its alginates?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Kelp",
+      "time_llm_s": 0.08808811499999791,
+      "time_nli_s": 0.5073211820000054,
+      "is_correct": true
+    },
+    {
+      "question": "Where in a vertebrate would you find the protein myoglobin?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "heart",
+      "time_llm_s": 0.058117079000005845,
+      "time_nli_s": 0.5208477810000005,
+      "is_correct": false
+    },
+    {
+      "question": "What is the most abundant substance in the plant kingdom, which no mammal produces the enzyme to digest?",
+      "semantic_entropy": 0.4589768274603376,
+      "predictive_entropy": 2.300034404112223,
+      "n_clusters": 2,
+      "most_common_answer": "Starch",
+      "time_llm_s": 0.11294511999999912,
+      "time_nli_s": 0.5205974810000029,
+      "is_correct": false
+    },
+    {
+      "question": "Which family of insects has species named 'drivers', 'weavers', 'and even individuals called 'soldiers'?",
+      "semantic_entropy": 0.7451966889413433,
+      "predictive_entropy": 2.2721947294878198,
+      "n_clusters": 3,
+      "most_common_answer": "Hymenoptera",
+      "time_llm_s": 0.16055524599999416,
+      "time_nli_s": 0.5372920590000021,
+      "is_correct": false
+    },
+    {
+      "question": "What name is given to the study of animal behavior?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.278793770153835,
+      "n_clusters": 1,
+      "most_common_answer": "Ethology",
+      "time_llm_s": 0.08111746499999839,
+      "time_nli_s": 0.4946190779999995,
+      "is_correct": true
+    },
+    {
+      "question": "Mosses are classified as belonging to which part of the plant kingdom?",
+      "semantic_entropy": 0.6367793674319007,
+      "predictive_entropy": 2.1198465733029717,
+      "n_clusters": 2,
+      "most_common_answer": "plants",
+      "time_llm_s": 0.15636174899999844,
+      "time_nli_s": 0.5235630609999973,
+      "is_correct": false
+    },
+    {
+      "question": "Which rodent rears its young, called kittens, in a nest called a drey?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2702790717465255,
+      "n_clusters": 1,
+      "most_common_answer": "Squirrel",
+      "time_llm_s": 0.09096154199999518,
+      "time_nli_s": 0.5194696290000067,
+      "is_correct": true
+    },
+    {
+      "question": "What has a central vein called a midrib?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.228503607993865,
+      "n_clusters": 1,
+      "most_common_answer": "leaf",
+      "time_llm_s": 0.05719375799999682,
+      "time_nli_s": 0.5209069060000004,
+      "is_correct": true
+    },
+    {
+      "question": "Which mammal constructs a lodge in which to store food, rear young, and pass the winter?",
+      "semantic_entropy": 0.6799227638609341,
+      "predictive_entropy": 2.2709301253228116,
+      "n_clusters": 2,
+      "most_common_answer": "Bear",
+      "time_llm_s": 0.1343947209999996,
+      "time_nli_s": 0.5388236719999995,
+      "is_correct": false
+    },
+    {
+      "question": "What is the generic word for plants that grow in water or water-logged conditions?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Aquatic plants",
+      "time_llm_s": 0.10978447300000482,
+      "time_nli_s": 0.4939909089999972,
+      "is_correct": true
+    },
+    {
+      "question": "Which teeth are the third molars, and are always the last to0 erupt?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "wisdom teeth",
+      "time_llm_s": 0.11204503199999749,
+      "time_nli_s": 0.5144323660000012,
+      "is_correct": true
+    },
+    {
+      "question": "What is secreted by the pancreas to regulate blood sugar levels?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Insulin",
+      "time_llm_s": 0.08121954599999981,
+      "time_nli_s": 0.5027627209999963,
+      "is_correct": true
+    },
+    {
+      "question": "How many chambers has the heart?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "four",
+      "time_llm_s": 0.056268864999999835,
+      "time_nli_s": 0.5083124020000014,
+      "is_correct": true
+    },
+    {
+      "question": "What is the name of the large buttock and thigh muscle?",
+      "semantic_entropy": 0.6820820181886593,
+      "predictive_entropy": 2.2819142310272977,
+      "n_clusters": 3,
+      "most_common_answer": "Gluteus Maximus",
+      "time_llm_s": 0.3659887519999998,
+      "time_nli_s": 0.5396314869999941,
+      "is_correct": true
+    },
+    {
+      "question": "When the egg is released from the ovary, what is left behind?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3006778251656295,
+      "n_clusters": 1,
+      "most_common_answer": "the corpus luteum",
+      "time_llm_s": 0.18402945100000068,
+      "time_nli_s": 0.5318055469999976,
+      "is_correct": true
+    },
+    {
+      "question": "What is the scientific name for the heart's pacemaker?",
+      "semantic_entropy": 0.6585415238195389,
+      "predictive_entropy": 2.2995488375410313,
+      "n_clusters": 2,
+      "most_common_answer": "Sinoatrial node",
+      "time_llm_s": 0.26741454700000133,
+      "time_nli_s": 0.7363338139999982,
+      "is_correct": true
+    },
+    {
+      "question": "Which hormone helps control ovulation?",
+      "semantic_entropy": 0.6531235538045446,
+      "predictive_entropy": 2.298983913541491,
+      "n_clusters": 2,
+      "most_common_answer": "Follicle-stimulating hormone (FSH)",
+      "time_llm_s": 0.43575606499999964,
+      "time_nli_s": 0.5921535709999972,
+      "is_correct": true
+    },
+    {
+      "question": "What is the second most common gas in the atmosphere?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2880508516153784,
+      "n_clusters": 1,
+      "most_common_answer": "Nitrogen",
+      "time_llm_s": 0.10569995799999532,
+      "time_nli_s": 0.5138728430000015,
+      "is_correct": false
+    },
+    {
+      "question": "What is the term for nutrient enrichment of lakes?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "eutrophication",
+      "time_llm_s": 0.10826778299999518,
+      "time_nli_s": 0.5297979540000028,
+      "is_correct": true
+    },
+    {
+      "question": "Five-legged creatures have damaged which 1250 mile long wonder of the world?",
+      "semantic_entropy": 1.372333275839298,
+      "predictive_entropy": 2.278824155658923,
+      "n_clusters": 5,
+      "most_common_answer": "The Great Wall of China",
+      "time_llm_s": 0.18498038899999614,
+      "time_nli_s": 0.9700272840000039,
+      "is_correct": false
+    },
+    {
+      "question": "Which radioactive substance sometimes occurs naturally in spring water?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Radon",
+      "time_llm_s": 0.08228383499999836,
+      "time_nli_s": 0.522791600000005,
+      "is_correct": true
+    },
+    {
+      "question": "What is the approximate circumference of the earth?",
+      "semantic_entropy": 1.3059515129672439,
+      "predictive_entropy": 2.2985579750421783,
+      "n_clusters": 4,
+      "most_common_answer": "24,901 miles",
+      "time_llm_s": 0.42023309100000006,
+      "time_nli_s": 0.7250136960000049,
+      "is_correct": true
+    },
+    {
+      "question": "Which common mineral is used to make casts, moulds, blackboard chalk and plaster of Paris?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Calcium carbonate",
+      "time_llm_s": 0.11152805599999738,
+      "time_nli_s": 0.5134513440000035,
+      "is_correct": true
+    },
+    {
+      "question": "What name was given to the invisible material once thought to occupy all space?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Aether",
+      "time_llm_s": 0.08381165099999777,
+      "time_nli_s": 0.528207026000004,
+      "is_correct": false
+    },
+    {
+      "question": "From which areas of space can there be no escape?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3010006921149415,
+      "n_clusters": 1,
+      "most_common_answer": "Black holes",
+      "time_llm_s": 0.08234401700000404,
+      "time_nli_s": 0.5268348679999946,
+      "is_correct": true
+    },
+    {
+      "question": "Who was the first man to walk on the Moon?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Neil Armstrong",
+      "time_llm_s": 0.08315551000000454,
+      "time_nli_s": 0.5228446129999966,
+      "is_correct": true
+    },
+    {
+      "question": "Proteus and Nereid are moons of which planet?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Jupiter",
+      "time_llm_s": 0.08170922800000113,
+      "time_nli_s": 0.49949261700000136,
+      "is_correct": false
+    },
+    {
+      "question": "What is the Milky Way?",
+      "semantic_entropy": 0.4810456973784913,
+      "predictive_entropy": 2.300721511938304,
+      "n_clusters": 2,
+      "most_common_answer": "An enormous spiral galaxy containing our solar system.",
+      "time_llm_s": 0.27950252499999806,
+      "time_nli_s": 0.5799619189999987,
+      "is_correct": false
+    },
+    {
+      "question": "Which force is nothing more than the bending of space and time?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "gravity",
+      "time_llm_s": 0.05739649099999866,
+      "time_nli_s": 0.4973521080000012,
+      "is_correct": true
+    },
+    {
+      "question": "Which star is as bright as 23 Suns, and is orbited by the Pup?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Sirius",
+      "time_llm_s": 0.08872891499999724,
+      "time_nli_s": 0.516618777000005,
+      "is_correct": true
+    },
+    {
+      "question": "What are the three primary colours of light?",
+      "semantic_entropy": 0.28736899100242747,
+      "predictive_entropy": 2.299807586316981,
+      "n_clusters": 2,
+      "most_common_answer": "Red, green, blue.",
+      "time_llm_s": 0.2056501879999999,
+      "time_nli_s": 0.48138726400000564,
+      "is_correct": true
+    },
+    {
+      "question": "In what film did Oprah Winfrey make her big screen acting debut?",
+      "semantic_entropy": 0.40267438952277335,
+      "predictive_entropy": 2.289777822545219,
+      "n_clusters": 2,
+      "most_common_answer": "The Color Purple",
+      "time_llm_s": 0.10390938700000163,
+      "time_nli_s": 0.5029180120000021,
+      "is_correct": true
+    },
+    {
+      "question": "What is the second lightest chemical element?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Helium",
+      "time_llm_s": 0.0789741890000002,
+      "time_nli_s": 0.48139632200000193,
+      "is_correct": true
+    },
+    {
+      "question": "Used in mathematics, what is the value of Pi to three decimal places?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "3.142",
+      "time_llm_s": 0.15689943599999623,
+      "time_nli_s": 0.518673224000004,
+      "is_correct": true
+    },
+    {
+      "question": "What colour is the number 10 on the door of 10 Downing Street? White, Yellow or Brown?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "White",
+      "time_llm_s": 0.06396264099999627,
+      "time_nli_s": 0.5210442770000014,
+      "is_correct": true
+    },
+    {
+      "question": "What was advertised with Eva Herzagovia using the slogan hello boys?",
+      "semantic_entropy": 1.8628333292892179,
+      "predictive_entropy": 2.225039191713945,
+      "n_clusters": 7,
+      "most_common_answer": "T-shirts",
+      "time_llm_s": 0.7392999059999994,
+      "time_nli_s": 1.059898815000004,
+      "is_correct": false
+    },
+    {
+      "question": "What number in Bingo is sometimes referred to as Heinz varieties?",
+      "semantic_entropy": 0.6390353306134562,
+      "predictive_entropy": 2.2731643584320356,
+      "n_clusters": 3,
+      "most_common_answer": "52",
+      "time_llm_s": 0.08533038299999873,
+      "time_nli_s": 0.7516238899999976,
+      "is_correct": false
+    },
+    {
+      "question": "As at March 2001, who holds the record for scoring the most league goals for the soccer team Arsenal?",
+      "semantic_entropy": 1.055385592042001,
+      "predictive_entropy": 2.276456247358531,
+      "n_clusters": 4,
+      "most_common_answer": "Gary Lineker",
+      "time_llm_s": 0.16011181100000016,
+      "time_nli_s": 0.8949292200000016,
+      "is_correct": false
+    },
+    {
+      "question": "How many verses make up the national anthem God Save The Queen?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "31",
+      "time_llm_s": 0.08159308300000134,
+      "time_nli_s": 0.5074768969999965,
+      "is_correct": false
+    },
+    {
+      "question": "What colour is the cross on the national flag of Switzerland?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "White",
+      "time_llm_s": 0.05769422699999893,
+      "time_nli_s": 0.5143091759999976,
+      "is_correct": true
+    },
+    {
+      "question": "Who was the American President when the Berlin Wall was constructed?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Richard Nixon",
+      "time_llm_s": 0.08113918000000098,
+      "time_nli_s": 0.5047399230000025,
+      "is_correct": false
+    },
+    {
+      "question": "What is the minimum number of darts a person needs to throw to complete a leg from 501?",
+      "semantic_entropy": 0.32943844645339476,
+      "predictive_entropy": 2.188930790486263,
+      "n_clusters": 2,
+      "most_common_answer": "24",
+      "time_llm_s": 0.08731860099999977,
+      "time_nli_s": 0.6517930870000015,
+      "is_correct": false
+    },
+    {
+      "question": "What was the first British football team to win the European Cup?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Manchester United",
+      "time_llm_s": 0.0829445359999994,
+      "time_nli_s": 0.5122812230000022,
+      "is_correct": false
+    },
+    {
+      "question": "What is the most popular natural attraction in Alaska?",
+      "semantic_entropy": 0.9074711016348688,
+      "predictive_entropy": 2.3015517685949143,
+      "n_clusters": 4,
+      "most_common_answer": "Alaska's most popular natural attraction is Denali National Park and Preserve.",
+      "time_llm_s": 0.9284772439999998,
+      "time_nli_s": 0.5588267700000031,
+      "is_correct": false
+    },
+    {
+      "question": "What type of acid is extracted from the juice of lemons, oranges, limes, and grapefruit?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Citric acid",
+      "time_llm_s": 0.11687869299999676,
+      "time_nli_s": 0.5294791510000039,
+      "is_correct": true
+    },
+    {
+      "question": "How many pieces are there in a standard set of dominoes?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "28",
+      "time_llm_s": 0.08286444099999812,
+      "time_nli_s": 0.5206228810000013,
+      "is_correct": true
+    },
+    {
+      "question": "What is the acronym for the agency which provides co-operation between police forces worldwide?",
+      "semantic_entropy": 0.4812457800494089,
+      "predictive_entropy": 2.2690555695966097,
+      "n_clusters": 2,
+      "most_common_answer": "Europol",
+      "time_llm_s": 0.08715703699999722,
+      "time_nli_s": 0.5498279199999985,
+      "is_correct": false
+    },
+    {
+      "question": "What were Benjy and Laska, which were sent into space in 1958?",
+      "semantic_entropy": 1.474466916514262,
+      "predictive_entropy": 2.280328951449637,
+      "n_clusters": 6,
+      "most_common_answer": "Ranger 4",
+      "time_llm_s": 0.18305563799999902,
+      "time_nli_s": 0.8214640109999962,
+      "is_correct": false
+    },
+    {
+      "question": "In what year in the 20th century was the Miss World contest held for the first time?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "1952",
+      "time_llm_s": 0.13861422200000106,
+      "time_nli_s": 0.5230361340000016,
+      "is_correct": false
+    },
+    {
+      "question": "In which year was the Encyclopedia Britannica first published?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "1768",
+      "time_llm_s": 0.13604808200000207,
+      "time_nli_s": 0.527294052000002,
+      "is_correct": true
+    },
+    {
+      "question": "On the London Underground, which is the only line to connect at some point with every other line on the system?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3015336206218664,
+      "n_clusters": 1,
+      "most_common_answer": "Circle Line",
+      "time_llm_s": 0.1127621350000041,
+      "time_nli_s": 0.5107637839999981,
+      "is_correct": true
+    },
+    {
+      "question": "Who wrote The Importance Of Being Earnest?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Oscar Wilde",
+      "time_llm_s": 0.10803728899999498,
+      "time_nli_s": 0.5273359030000009,
+      "is_correct": true
+    },
+    {
+      "question": "Thomas Edison, who invented the lightbulb, was afraid of the dark?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.282057577325828,
+      "n_clusters": 1,
+      "most_common_answer": "Yes.",
+      "time_llm_s": 0.08470995100000778,
+      "time_nli_s": 0.4912082269999871,
+      "is_correct": false
+    },
+    {
+      "question": "Taphephobia is the fear of losing your teeth?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "false",
+      "time_llm_s": 0.05689900800000203,
+      "time_nli_s": 0.5078113109999975,
+      "is_correct": true
+    },
+    {
+      "question": "The letter t is the second most common letter used in the English language?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.2387956855715414,
+      "n_clusters": 1,
+      "most_common_answer": "True",
+      "time_llm_s": 0.08447239800000261,
+      "time_nli_s": 0.5321927130000006,
+      "is_correct": true
+    },
+    {
+      "question": "The invention of what in 1867, made Alfred Nobel famous?",
+      "semantic_entropy": 1.2177657798933654,
+      "predictive_entropy": 2.2928417093392293,
+      "n_clusters": 4,
+      "most_common_answer": "dynamite",
+      "time_llm_s": 0.13438050399999923,
+      "time_nli_s": 0.6546028379999953,
+      "is_correct": true
+    },
+    {
+      "question": "What is the most populated city in America?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "New York City",
+      "time_llm_s": 0.112397878000003,
+      "time_nli_s": 0.536922723999993,
+      "is_correct": true
+    },
+    {
+      "question": "What is the only letter of the alphabet which does not appear in any of the names of the 50 American states?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Z",
+      "time_llm_s": 0.06313116100000116,
+      "time_nli_s": 0.4893456650000019,
+      "is_correct": false
+    },
+    {
+      "question": "What was the Spice Girls' debut single called?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Wannabe",
+      "time_llm_s": 0.10533549299999834,
+      "time_nli_s": 0.5088025650000034,
+      "is_correct": true
+    },
+    {
+      "question": "What are the only two musical notes which have no flats?",
+      "semantic_entropy": 1.0959654032495354,
+      "predictive_entropy": 2.2927436486942128,
+      "n_clusters": 4,
+      "most_common_answer": "C and G",
+      "time_llm_s": 0.2903406249999989,
+      "time_nli_s": 0.7876549519999969,
+      "is_correct": true
+    },
+    {
+      "question": "From which country do French fries originate? France, Belgium or Switzerland?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Belgium",
+      "time_llm_s": 0.08262989799999332,
+      "time_nli_s": 0.5131504459999974,
+      "is_correct": false
+    },
+    {
+      "question": "For what novel did J. K. Rowling win the 1999 Whitbread Children's book of the year award?",
+      "semantic_entropy": -0.0,
+      "predictive_entropy": 2.3025850929940455,
+      "n_clusters": 1,
+      "most_common_answer": "Harry Potter and the Philosopher's Stone",
+      "time_llm_s": 0.23980767799999114,
+      "time_nli_s": 0.5235587460000062,
+      "is_correct": true
+    }
+  ]
+}
