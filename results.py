@@ -80,19 +80,17 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
             f"Semantic Entropy (Kuhn 2023) · "
             f"{model_short} · N={n_q} · M={n_s} · "
             f"temp={temp} · Acc={acc:.0%}",
-            fontsize=10,
+            fontsize=12,
         )
 
         # ROC curves
         ax = axes[0]
-        for scores, label, color, marker, fillstyle in [
-            (se_scores, f"Semantic Entropy (AUROC={data['se_auroc']:.3f})", "#2196F3", "o", "full"),
-            (pe_scores, f"Predictive Entropy (AUROC={data['pe_auroc']:.3f})", "#FF5722", "o", "none"),
+        for scores, label, color in [
+            (se_scores, f"Semantic Entropy (AUROC={data['se_auroc']:.3f})", "#2196F3"),
+            (pe_scores, f"Predictive Entropy (AUROC={data['pe_auroc']:.3f})", "#FF5722"),
         ]:
             fpr, tpr, _ = roc_curve(labels_wrong, scores)
-            ax.plot(fpr, tpr, color=color, lw=2)
-            ax.plot(fpr, tpr, marker=marker, fillstyle=fillstyle,
-                    color=color, linestyle="none", ms=8, label=label)
+            ax.plot(fpr, tpr, color=color, lw=2, label=label)
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")
         ax.set_ylabel("True Positive Rate")
@@ -105,9 +103,9 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         correct_se = [r["semantic_entropy"] for r in rows if r["is_correct"]]
         wrong_se   = [r["semantic_entropy"] for r in rows if not r["is_correct"]]
         bins = np.linspace(0, max(se_scores) + 0.1, 25)
-        ax.hist(wrong_se,   bins=bins, alpha=0.6,  label="Wrong",   color="#F44336")
-        ax.hist(correct_se, bins=bins, alpha=0.9,  label="Correct", color="#4CAF50",
+        ax.hist(wrong_se,   bins=bins, alpha=0.6,  label="Wrong",   color="#F44336",
                 edgecolor="black", linewidth=0.8)
+        ax.hist(correct_se, bins=bins, alpha=0.9,  label="Correct", color="#4CAF50")
         ax.set_xlabel("Semantic Entropy")
         ax.set_ylabel("Count")
         ax.set_title("SE Distribution: Correct vs Wrong Answers")

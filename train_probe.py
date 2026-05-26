@@ -49,7 +49,7 @@ def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_ha
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         fig.suptitle(
             f"Semantic Entropy Probes (Kossen 2024) · {model_short} · N={n_q} · layer {probe.best_layer}",
-            fontsize=10,
+            fontsize=12,
         )
 
         ax = axes[0]
@@ -71,13 +71,13 @@ def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_ha
         correct_sep = [sep_scores_cv[i] for i, r in enumerate(rows) if r["is_correct"]]
         wrong_sep   = [sep_scores_cv[i] for i, r in enumerate(rows) if not r["is_correct"]]
         bins = np.linspace(0, 1, 25)
-        ax.hist(wrong_sep,   bins=bins, alpha=0.6, label="Wrong",   color="#F44336")
-        ax.hist(correct_sep, bins=bins, alpha=0.9, label="Correct", color="#4CAF50",
+        ax.hist(wrong_sep,   bins=bins, alpha=0.6, label="Wrong",   color="#F44336",
                 edgecolor="black", linewidth=0.8)
+        ax.hist(correct_sep, bins=bins, alpha=0.9, label="Correct", color="#4CAF50")
         ax.axvline(0.5, color="k", linestyle="--", lw=1)
         ax.set_xlabel("P(uncertain) — SEP probe score")
         ax.set_ylabel("Count")
-        ax.set_title("SEP Score: Correct vs Wrong Answers")
+        ax.set_title("SEP Distribution: Correct vs Wrong Answers")
         ax.legend()
         ax.grid(alpha=0.3)
 
