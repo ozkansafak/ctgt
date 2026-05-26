@@ -58,7 +58,7 @@ Step 3 — Score    p(cluster) = sum of exp(log_prob) for all answers in that cl
 
 ## Evaluation dataset: TriviaQA (closed-book)
 
-We evaluate on **[TriviaQA](https://huggingface.co/datasets/trivia_qa)** `rc.nocontext` split (validation set).
+We evaluate on **[TriviaQA](https://huggingface.co/datasets/mandarjoshi/trivia_qa)** `rc.nocontext` split (validation set).
 
 Closed-book = no supporting document. The model must answer from memory. This makes uncertainty genuine: either the model knows the answer or it doesn't — there is nothing to look up.
 
@@ -77,7 +77,7 @@ Closed-book = no supporting document. The model must answer from memory. This ma
 }
 ```
 
-The model generates 10 answers. We check the best answer (highest-probability cluster) against every alias using RougeL > 0.3. If any alias matches → correct. The ground truth comes entirely from the dataset — no manual labelling required.
+We make M=10 inferences with the model. We check the best answer (highest-probability cluster) against every alias using RougeL > 0.3. If any alias matches → correct. The ground truth comes entirely from the dataset — no manual labelling required.
 
 ---
 
@@ -217,3 +217,25 @@ No other code changes needed.
 ## Related work
 
 **Park & Cho (NeurIPS 2025)** extend this method with *diversity-steered sampling* — penalising semantically redundant outputs during generation so you get better entropy estimates with fewer samples. This directly addresses the main scalability bottleneck of our approach: fewer LLM calls = cheaper per query. A natural next step for a production system.
+
+---
+
+## Action Items
+
+Priority-ordered work remaining. Addresses gaps in motivation, system design, and statistical validity.
+
+**1. Motivation & judgment** — `DESIGN.md`
+- [ ] Add "Why Kuhn et al." section: easy to implement, well-cited (1244 Google Scholar citations), strong empirical results, not outdated
+- [ ] Add "Alternatives rejected" section: why NLI entailment over cosine similarity, why SE over p(True), why TriviaQA over CoQA
+
+**2. Serving system design** — `DESIGN.md`
+- [ ] Add REST API schema: `POST /detect` → `{is_hallucinated, se_score, n_clusters, best_answer}`
+- [ ] Add serving architecture: Modal web endpoint, latency budget, request flow diagram
+
+**3. Statistical validity** — run benchmark
+- [ ] Re-run with 200+ questions (n=50 gives ±0.07 AUROC variance; need more for a credible claim)
+- [ ] Add confidence intervals or bootstrap error bars to results
+
+**4. p(True) baseline** — `modal_app.py`, `src/ctgt/`
+- [ ] Implement Kadavath et al. (2022): ask model "Is your answer correct?" as a third AUROC baseline
+- [ ] Add to results table alongside SE and PE

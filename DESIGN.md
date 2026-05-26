@@ -260,7 +260,7 @@ This scales horizontally: 1,000 questions takes roughly the same wall-clock time
 
 ## 6. Trade-offs & Limitations
 
-**Unsupervised, no labels required.** SE requires no task-specific training data — it runs on any LLM out of the box. This is the main practical advantage over supervised methods (Lin et al., 2022; Kadavath et al., 2022), which need labelled confidence datasets and degrade under distribution shift.
+**Unsupervised, no labels required.** SE requires no task-specific training data — it runs on any LLM out of the box. This is the main practical advantage over supervised methods (e.g. Kadavath et al., 2022), which need labelled confidence datasets and degrade under distribution shift.
 
 **Requires access to log-probabilities.** SE needs token-level log-probs from the generating model. This rules out black-box APIs that only return text. Any open-source model works; GPT-4 via the OpenAI API does not.
 
