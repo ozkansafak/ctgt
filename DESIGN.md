@@ -2,493 +2,223 @@
 
 ---
 
-## 1. Introduction & Problem Definition
+## 1. Introduction
 
-Large Language Models (LLMs) hallucinate — they produce confident-sounding outputs that are factually wrong. This is a fundamental reliability problem: a model can generate fluent, authoritative text about things it does not know.
+LLMs hallucinate — they produce confident-sounding outputs that are factually wrong. The model doesn't say "I'm not sure." It just generates tokens.
 
-The core challenge in detecting hallucinations is that **confidence is hard to measure from the outside**. The model does not say "I'm not sure about this." It just generates tokens.
+One natural signal is token-level probability. But this fails because natural language has many ways to express the same meaning. A model confident about a fact may still generate varied phrasings across samples, inflating apparent uncertainty.
 
-One natural signal is the model's own token probabilities. If the model assigns low probability to its output, it may be uncertain. But this fails in practice for a subtle reason: **natural language has many ways to say the same thing**. The model may be highly confident about a *meaning* while appearing uncertain at the token level simply because there are multiple valid phrasings.
+> "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing but count as two different outcomes under token entropy.
 
-> "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing, hence should be tied to the same semantic cluster.
-
-A naive entropy measure over token sequences treats these as two different outcomes and inflates the uncertainty estimate — incorrectly flagging a confident answer as uncertain.
+This project implements and benchmarks three papers that measure hallucination risk by testing whether the model's answers agree with themselves — at increasing depths of model access.
 
 ---
 
-## 2. Method: Semantic Entropy
+## 2. Methods
 
-We implement **Semantic Entropy** (Kuhn et al, 2023), which computes entropy over *meanings* rather than token sequences.
+### 2.1 Semantic Entropy — Kuhn / Farquhar (2024)  *(implemented)*
 
-### 2.1 Why not token-level entropy?
-
-Standard **Predictive Entropy (PE)** measures the spread of the model's output distribution at the token level:
+Standard **Predictive Entropy (PE)** measures spread at the token level:
 
 ```
 PE = -∑_s  p(s|x) · log p(s|x)
 ```
 
-This is inflated by paraphrases — semantically identical answers that differ in wording. **Semantic Entropy (SE)** collapses paraphrases into a single cluster before computing entropy:
+This is inflated by paraphrases. **Semantic Entropy (SE)** collapses paraphrases into meaning clusters first, then computes entropy over those clusters:
 
 ```
-SE = -∑_c  p(c|x) · log p(c|x)
-     where p(c|x) = ∑_{s ∈ c} p(s|x)
+SE = -∑_c  p(c|x) · log p(c|x),   p(c|x) = ∑_{s ∈ c} p(s|x)
 ```
 
-High SE means the model generates answers with genuinely different *meanings* — a strong hallucination signal.
-
-### 2.2 The three steps
+High SE means the model's answers genuinely disagree on *meaning* — a strong hallucination signal.
 
 **Step 1 — Sample**
 
-Draw M=10 completions from the LLM at temperature T=0.5. Temperature 0.5 balances diversity and accuracy — too low and all samples are identical (no signal), too high and accuracy degrades (noisy signal). Kuhn et al. validate this empirically.
-
-For each completion, we compute its **length-normalised log-probability**:
+Draw M=10 completions at temperature 0.5. Record each completion's length-normalised log-probability:
 
 ```
-log_prob_normalised = (1/N) · ∑_i log p(token_i | context, tokens_{<i})
+log_prob = (1/n) · ∑_i log p(token_i | context, tokens_{<i})
 ```
 
-Length normalisation ensures short and long answers are comparable — without it, longer sequences are penalised simply for having more tokens.
+Length normalisation makes short and long answers comparable.
 
 **Step 2 — Cluster by meaning**
 
-We use **DeBERTa-large** (He et al., 2020), a 400M parameter model fine-tuned on the Multi-NLI dataset, to check whether two answers mean the same thing. For each pair (A, B), we run the NLI model in both directions:
+Use **DeBERTa-large** (400M parameters, fine-tuned on Multi-NLI) to check semantic equivalence. Both directions must hold:
 
 ```
-A entails B  AND  B entails A  →  semantically equivalent  →  same cluster
+A entails B  AND  B entails A  →  same cluster
 ```
 
-Both directions must hold. A one-way implication is not enough: "Paris is in France" entails "Paris exists" but they do not mean the same thing.
+A one-way implication is not enough: "Paris is in France" entails "Paris exists" but they are not equivalent. Greedy transitivity keeps comparisons at O(M·C) rather than O(M²).
 
-We use a greedy clustering algorithm that exploits **transitivity**: each new answer is compared against only one representative per existing cluster, not every member. This reduces worst-case comparisons from O(M²) to O(M·C), where C is the number of clusters — typically much smaller than M.
+**Step 3 — Entropy over clusters**
 
-**Step 3 — Compute Semantic Entropy**
-
-Sum probabilities within each cluster, then compute entropy over the cluster distribution:
+Sum probabilities within each cluster, then compute entropy:
 
 ```
-p(cluster_c) = ∑_{s ∈ c} exp(log_prob_s)   (normalised across all clusters)
 SE = -∑_c  p(c) · log p(c)
 ```
 
-SE = 0 means all samples share one meaning — the model is certain.  
-SE = log(M) ≈ 2.3 (natural log, and M=10) means every sample has a distinct meaning — maximally uncertain.
+SE = 0: all samples share one meaning (certain). SE ≈ log(10) = 2.3: every sample has a distinct meaning (maximally uncertain).
 
 ---
 
-## 3. System Design
+### 2.2 Semantic Entropy Probes — Kossen (2024)  *(implemented)*
 
-### 3.1 Models
+Kuhn needs M=10 samples plus NLI per question. Kossen's insight: **the model already encodes its uncertainty in the hidden states before generating a single output token**. A cheap linear probe can read it out.
 
-| Role | Model | Parameters | VRAM |
+**Training (one-time, offline):**
+
+1. Run Kuhn's pipeline on N questions → one SE score per question. This is the *teacher*.
+2. Binarize SE scores → 0/1 labels using an Otsu threshold γ* (minimises within-class variance).
+3. For the same N questions, run one additional forward pass → extract the hidden state at the **last input token position** at every layer. At that position the transformer has attended to the entire question; its hidden state is the model's compressed state of knowledge just before it commits to an answer.
+4. Grid-search layers: train a logistic regression per layer, pick the layer with the highest validation AUROC (layer 21 for Mistral-7B, d=4096).
+5. Refit the final logistic regression on all training data at the best layer.
+
+**Inference (per question):**
+
+1. One forward pass through the frozen LLM.
+2. Slice `hidden_state[best_layer][-1]` — shape `(d,)`.
+3. `P(uncertain) = sigmoid(W · h + b)` — one matrix multiply.
+
+No sampling. No NLI. No clustering. ~10× fewer forward passes than Kuhn.
+
+---
+
+### 2.3 INSIDE — Chen et al. (ICLR 2024)  *(not yet implemented)*
+
+Two mechanisms operating on K=10 response embeddings at the **middle transformer layer** (≈ L/2):
+
+**EigenScore:** build a covariance matrix Σ = Z^T · J · Z over the K hidden-state vectors Z. Score = (1/K) Σᵢ log(λᵢ). When responses are semantically similar, eigenvalue mass concentrates on one component (low score). When they diverge, eigenvalues spread (high score). No NLI needed — semantic divergence is captured in embedding geometry. Reported AUROC on TriviaQA/LLaMA-7B: ~83% vs ~65% for SE.
+
+**Feature Clipping:** a forward hook that clips extreme activations in the penultimate layer using percentile thresholds from a calibration set. Unlike Kossen (read-only), this *modifies* the computation graph at inference time. Reduces overconfident generations without retraining. Full implementation spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
+
+---
+
+### 2.4 Method comparison
+
+| Method | Model access | Per-query cost | Key idea |
 |---|---|---|---|
-| LLM (generation) | `mistralai/Mistral-7B-Instruct-v0.3` | 7B | ~14 GB |
-| NLI (clustering) | `cross-encoder/nli-deberta-v3-large` | 400M | ~1.5 GB |
+| Kuhn / Farquhar SE | Logprobs | M=10 samples + NLI | Entropy over semantic clusters |
+| Kossen SEP | Hidden states (read) | 1 forward pass | Linear probe on last-input-token activation |
+| Chen INSIDE | Hidden states (read + write) | K=10 samples, no NLI | EigenScore on mid-layer covariance + activation clipping |
 
-Both models run on a single **NVIDIA A10G GPU (24 GB VRAM)** via Modal. The LLM dominates cost; DeBERTa is ~18× smaller and much cheaper per call.
-
-### 3.2 Hyperparameters
-
-| Parameter | Value | Rationale |
-|---|---|---|
-| Samples M | 10 | Kuhn et al. show diminishing returns beyond 10 |
-| Temperature | 0.5 | Optimal balance of diversity vs accuracy (Kuhn et al., Fig. 3b) |
-| Max new tokens | 128 | Sufficient for factual QA answers |
-| SE threshold | ln(2) ≈ 0.69 | Entropy of a 50/50 split between two meanings |
-
-### 3.3 From SE Score to AUROC
-
-The goal is not to predict the answer to a question — it is to build a **meta-detector** that predicts whether the model's generated answer is correct or a hallucination. SE is the score that drives this detector. Here is how it materialises the ROC curve:
-
-**Step 1 — Generate the primary answer**
-
-For each question $x$, generate a single primary answer $y'$. Kuhn et al. use beam search (`num_beams=5`) for a stable, deterministic output. In our implementation we use `most_common_answer` — the representative of the highest-probability semantic cluster from the M=10 samples — which serves the same role without an extra inference call.
-
-**Step 2 — Compute the uncertainty score (SE)**
-
-Separately sample $M=10$ answers at temperature 0.5. Cluster them with DeBERTa NLI. Compute SE. This single scalar is the score for the ROC curve — every question gets exactly one SE value.
-
-*Numerical example — "Who invented the telephone?"*
-
-```
-s1:  "Alexander Graham Bell invented it in 1876."  log_prob = -0.12  ┐
-s2:  "The telephone was invented by Bell in 1876."  log_prob = -0.15  ├─ Cluster 1  p = 0.95
-s3:  "Bell is credited with the telephone."         log_prob = -0.18  ┘
-...
-s10: "Nikola Tesla invented the telephone."         log_prob = -2.10  ── Cluster 2  p = 0.05
-
-SE = -(0.95·log 0.95 + 0.05·log 0.05) = 0.20
-```
-
-The highest-probability cluster (Cluster 1) wins — its representative `s1` becomes `most_common_answer`.
-
-**Step 3 — Define ground truth labels**
-
-Compare `most_common_answer` against the gold aliases from TriviaQA using RougeL:
-
-$$\text{label} = \begin{cases} 0 \ (\text{correct}), & \text{RougeL}(y', y) > 0.3 \\ 1 \ (\text{hallucination}), & \text{RougeL}(y', y) \le 0.3 \end{cases}$$
-
-For this example: RougeL("Alexander Graham Bell invented it in 1876.", "alexander graham bell") = 0.9 > 0.3 → **label = 0 (correct)**.
-
-After running all N questions, each has exactly one (SE score, label) pair:
-
-```
-question  1:  SE = 0.20,  label = 0  (correct)
-question  2:  SE = 1.85,  label = 1  (hallucination)
-question  3:  SE = 0.95,  label = 1  (hallucination)
-...
-question  N:  SE = 1.42,  label = 0  (correct)
-```
-
-**Step 4 — Sweep threshold $\tau$ to build the ROC curve**
-
-For each value of $\tau$ from 0 to $\max(SE)$:
-
-$$\text{Predict hallucination} = \begin{cases} \text{True (Positive)}, & SE \ge \tau \\ \text{False (Negative)}, & SE < \tau \end{cases}$$
-
-At $\tau = 1.0$ using the four questions above:
-
-| Question | SE | Label | Prediction | Outcome |
-|---|---|---|---|---|
-| 1 | 0.20 | 0 (correct) | negative | **TN** |
-| 2 | 1.85 | 1 (hallucination) | positive | **TP** |
-| 3 | 0.95 | 1 (hallucination) | negative | **FN** |
-| 50 | 1.42 | 0 (correct) | positive | **FP** |
-
-Sweeping $\tau$ across all values traces the full ROC curve.
-
-**Step 5 — AUROC**
-
-The area under the ROC curve equals the probability that a randomly chosen hallucinated answer has higher SE than a randomly chosen correct answer:
-
-- AUROC = 0.5 → SE is no better than random  
-- AUROC = 1.0 → SE perfectly separates hallucinations from correct answers
-
-AUROC is appropriate here because we care about *ranking* — which answers to trust — not classification at a fixed threshold.
-
-### 3.4 Method: Semantic Entropy Probes (Kossen et al., 2024)
-
-Kuhn's SE is accurate but slow: every question needs M=10 LLM samples plus NLI clustering. Kossen's key insight is that **the model already "knows" whether it's uncertain before it generates a single token** — that knowledge is encoded in the hidden states at the last input position. A cheap linear probe can read it out.
-
-The method has two phases: a one-time offline training phase, and a fast per-question inference phase.
+The progression represents increasing depth of access: output probabilities → reading internals → modifying internals.
 
 ---
 
-#### Phase 1 — Training (done once, offline)
+## 3. Dataset: TriviaQA
 
-**Step 1 — Generate training labels using Kuhn's pipeline**
-
-Run the full Kuhn SE pipeline on N=300 questions. This gives one SE score per question — a continuous number measuring how semantically diverse the model's 10 answers were. This is the *teacher signal*.
-
-**Step 2 — Binarize SE scores into labels**
-
-Convert continuous SE scores to binary labels using an Otsu threshold γ* (automatically chosen to minimise within-class variance):
-
-```
-label = 1  (uncertain)   if SE > γ*
-label = 0  (confident)   if SE ≤ γ*
-```
-
-**Step 3 — Extract hidden states**
-
-For the same N=300 questions, run one *additional* forward pass through the frozen LLM with `output_hidden_states=True`. From each forward pass, extract the activation at the **last input token** — the token immediately before the model begins generating — at every layer. This gives one vector of shape `(d,)` per layer per question (d=4096 for Mistral-7B).
-
-Why the last input token? At that position, the transformer has attended to the entire question. Its hidden state is the model's compressed "state of knowledge" just before it commits to an answer.
-
-**Step 4 — Find the best layer**
-
-Train a logistic regression on each layer's hidden states independently and compute AUROC on a held-out split. Pick the layer with the highest AUROC (layer 21 for Mistral-7B). Refit the final logistic regression on all training data using that layer.
-
----
-
-#### Phase 2 — Inference (per question, fast)
-
-**Step 1 — One forward pass**
-
-Tokenize the question and run a single forward pass through the frozen LLM. No sampling. No temperature. Just one deterministic pass.
-
-**Step 2 — Slice the hidden state**
-
-Extract the hidden state at position `[-1]` (last input token) from `best_layer`. This is a single vector of shape `(d,)`.
-
-**Step 3 — Score with the probe**
-
-```
-P(uncertain) = sigmoid(W · h + b)
-```
-
-One matrix multiply. Returns a number in [0, 1]. Above 0.5 → flag as uncertain.
-
----
-
-#### Summary
-
-| | Kuhn SE | Kossen SEP |
-|---|---|---|
-| LLM forward passes | M=10 per question | 1 per question |
-| NLI calls | up to M² per question | 0 |
-| What it uses | token probabilities | hidden state activations |
-| Probe training | none | one-time offline run |
-| AUROC (Mistral-7B, N=300) | 0.720 | 0.689 (5-fold CV) |
-| Speedup | 1× | ~10× |
-
-The probe achieves 96% of SE's AUROC at 1/10th the inference cost.
-
----
-
-### 3.5 Dataset: TriviaQA (closed-book)
-
-We evaluate on **TriviaQA** `rc.nocontext` (validation set) — 17,944 trivia questions answered from memory, with no supporting document. Closed-book is the right setting because it forces genuine uncertainty: the model either knows the answer or it doesn't.
+We evaluate on **TriviaQA** `rc.nocontext` (validation set, 17,944 questions) — trivia answered from memory, no supporting document. Closed-book forces genuine uncertainty: the model either knows the answer or it doesn't.
 
 **Correctness criterion:** RougeL(model answer, any gold alias) > 0.3, following Kuhn et al.
 
-RougeL is the F-score of the Longest Common Subsequence (LCS) between reference $X$ (length $m$) and generated answer $Y$ (length $n$):
+RougeL is the F-score of the Longest Common Subsequence between reference X (length m) and prediction Y (length n):
 
-$$R_{lcs} = \frac{LCS(X,Y)}{m}, \quad P_{lcs} = \frac{LCS(X,Y)}{n}$$
+$$R_{lcs} = \frac{LCS(X,Y)}{m}, \quad P_{lcs} = \frac{LCS(X,Y)}{n}, \quad \text{RougeL} = \frac{2\,R_{lcs}\,P_{lcs}}{R_{lcs} + P_{lcs}}$$
 
-$$\text{RougeL} = \frac{(1+\beta^2)\,R_{lcs}\,P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}}, \quad \beta=1$$
-
-We check the model's best answer against every gold alias; a match ($\text{RougeL} > 0.3$) on any alias counts as correct.
-
-Example item:
-```python
-{
-    "question": "Which American-born Sinclair won the Nobel Prize for Literature in 1930?",
-    "answer": {"normalized_aliases": ["sinclair lewis", "harry sinclair lewis", ...]}
-}
-```
+We check the model's primary answer against every gold alias; a match on any alias counts as correct.
 
 ---
 
-## 4. Results
+## 4. Hallucination Detection: End-to-End
 
-TriviaQA `rc.nocontext` validation set, M=10 samples, temperature=0.5, Modal GPU.
+For each question the system produces a **primary answer** (representative of the highest-probability semantic cluster) and an **SE score** (a scalar in [0, log M] measuring semantic diversity across M samples). The SE score drives a threshold detector:
 
-### 4.1 Summary table
+```
+SE ≥ τ  →  flag as hallucination
+SE < τ  →  return answer to user
+```
 
-#### Kuhn / Farquhar baseline — Semantic Entropy (SE)
+Rather than fixing τ and measuring accuracy, we sweep τ and compute **AUROC** — the probability that a randomly chosen hallucinated answer has higher SE than a randomly chosen correct answer. AUROC = 0.5 is random; AUROC = 1.0 is perfect separation.
 
-| Model | IT? | Params | N | GPU | Accuracy | SE AUROC | PE AUROC | SE gain | Wall time |
-|---|---|---|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | ✅ | 7B | 300 | A10G | **61%** | **0.720** | 0.330 | +0.390 | 75s |
-| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 300 | A10G | 39% | 0.755 | 0.293 | +0.462 | 90s |
-| OPT-2.7B | ❌ | 2.7B | 300 | A10G | 3% | 0.501 | 0.586 | −0.085 | 252s |
-| Kuhn et al. OPT-30B | ❌ | 30B | — | — | ~50% | ~0.830 | — | — | — |
+*Example — "Who invented the telephone?"*
 
-#### Kossen 2024 — Semantic Entropy Probes (SEP)
+```
+s1:  "Alexander Graham Bell"      log_prob = -0.12 ┐
+s2:  "Bell invented it in 1876"   log_prob = -0.15 ├─ Cluster 1  p = 0.95
+s3:  "The telephone is Bell's"    log_prob = -0.18 ┘
+s10: "Nikola Tesla"               log_prob = -2.10  ── Cluster 2  p = 0.05
+
+SE = -(0.95·log 0.95 + 0.05·log 0.05) = 0.20  →  low uncertainty
+```
+
+**Hyperparameters**
+
+| Parameter | Value | Rationale |
+|---|---|---|
+| Samples M | 10 | Diminishing returns beyond 10 (Kuhn et al., Fig. 3b) |
+| Temperature | 0.5 | Balances diversity vs accuracy |
+| Max new tokens | 128 | Sufficient for factual QA |
+| Default threshold τ | ln(2) ≈ 0.69 | Entropy of a 50/50 split between two meanings |
+
+---
+
+## 5. Results
+
+All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Modal A10G GPU.
+
+### 5.1 Summary
+
+#### Kuhn / Farquhar baseline — Semantic Entropy
+
+| Model | IT? | Params | Accuracy | SE AUROC | PE AUROC | SE gain | Wall time |
+|---|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | ✅ | 7B | **61%** | **0.720** | 0.330 | +0.390 | 75s |
+| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 39% | 0.755 | 0.293 | +0.462 | 90s |
+| OPT-2.7B | ❌ | 2.7B | 3% | 0.501 | 0.586 | −0.085 | 252s |
+| Kuhn et al. OPT-30B | ❌ | 30B | ~50% | ~0.830 | — | — | — |
+
+#### Kossen — Semantic Entropy Probes
 
 | Model | N | Layer | SE AUROC (oracle) | SEP AUROC (probe) | Gap | Speedup |
 |---|---|---|---|---|---|---|
 | Mistral-7B-Instruct-v0.3 | 200 (5-fold CV) | 21 | 0.746 | **0.689** | −0.057 | ~10× |
 
-The SEP probe achieves **96% of SE's AUROC** using a single forward pass and a matrix multiply — no NLI clustering, no multiple samples.
+The SEP probe achieves 96% of SE's AUROC at 1/10th the inference cost.
 
-**Key finding on PE:** Both instruction-tuned models (Mistral, Qwen) show PE AUROC below 0.5 — the model is overconfident and produces the same wrong answer across all M=10 samples, making PE anticorrelated with error. SE is robust because it measures semantic diversity, not lexical. OPT-2.7B (base model) actually has PE > SE (0.586 vs 0.501) — the opposite pattern — because its noisy completions make PE sensitive to output format rather than factual uncertainty.
-
-**Why OPT-2.7B SE AUROC ≈ 0.5 (random):** With only 3% accuracy and no instruction tuning, OPT rarely produces semantically consistent answers even when correct. SE can't distinguish uncertainty from noise. The N=50 result (0.688) was a statistical fluke — N=300 gives the true picture.
-
-Kuhn et al. use OPT-30B (also base) and report SE AUROC ~0.83 at ~50% accuracy — model scale, not instruction tuning, drives the accuracy.
-
----
-
-### 4.2 Qwen2.5-1.5B-Instruct
-
-![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png)
-
-N=300, M=10, temp=0.5, A10G GPU, wall time 90s.
-
-| | SE AUROC | PE AUROC | Accuracy |
-|---|---|---|---|
-| Qwen2.5-1.5B (N=300) | 0.755 | 0.293 | 39% |
-
----
-
-### 4.3 OPT-2.7B (base model)
-
-![OPT-2.7B results](outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png)
-
-N=300, M=10, temp=0.5, A10G GPU, wall time 252s.
-
-| | SE AUROC | PE AUROC | Accuracy |
-|---|---|---|---|
-| OPT-2.7B (N=300) | 0.501 | 0.586 | 3% |
-
-SE AUROC ≈ 0.5 (random): OPT-2.7B is a base model with 3% accuracy. It rarely produces consistent answers even when correct, so SE cannot separate uncertainty from noise. The earlier N=50 result (0.688) was a statistical artifact of the tiny sample.
-
----
-
-### 4.4 Mistral-7B-Instruct-v0.3
+### 5.2 Per-model results
 
 ![Mistral-7B results](outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png)
 
-N=300, M=10, temp=0.5, A10G GPU, wall time 75s.
-
-| | SE AUROC | PE AUROC | Accuracy |
-|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 (N=300) | 0.720 | 0.330 | 61% |
-
-**Why PE AUROC = 0.330 — below random, and what that means:**
-
-AUROC < 0.5 means the score is *anti-correlated* with errors — you'd get better-than-random detection by flipping the prediction (flag low PE, not high PE). Here's the mechanism:
-
-- **Wrong answer:** Mistral is confidently wrong. All M=10 samples return the same incorrect tokens. PE ≈ 0 — looks maximally certain.
-- **Correct answer:** there is occasionally slight lexical variation across samples ("JFK" vs "John F. Kennedy" vs "Kennedy"). PE is slightly above 0.
-
-The model ends up *more* uncertain (lexically) on questions it gets right and *less* uncertain on questions it gets wrong — the opposite of what PE assumes. AUROC 0.33 instead of 0.67.
-
-The root cause is the concise system prompt. It fixed accuracy (1% → 61%) by preventing verbose rambling, but it also made the model so lexically rigid that all 10 samples are near-identical regardless of whether the answer is right or wrong.
-
-SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one meaning cluster → SE = 0. SE only rises when samples genuinely disagree on the *answer*, not just the *wording*. That's a more robust signal than token-level probability.
+*Mistral-7B-Instruct-v0.3 · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Accuracy=61% · 75s wall time. The PE ROC curve falls **below** the diagonal — PE is anti-correlated with errors. The concise system prompt makes the model lexically rigid: all M=10 samples return the same wrong tokens on incorrect questions (PE≈0), while correct answers show slight lexical variation ("JFK" / "John Kennedy" / "John F. Kennedy"). SE is unaffected because it measures semantic diversity, not token identity — those three phrasings land in one cluster.*
 
 ---
 
-## 5. Production Inference Architecture
+![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png)
 
-### 5.1 Pipeline components
-
-```
-                    [User Prompt]
-                         │
-                         ▼
-                  2. Swarm Sampler
-                  (temp=0.5, M=10)
-                         │
-                         ▼
-                    [M Samples]────────────────┐
-                    │                          │
-                    ▼                          ▼
-          1. most_common_answer()         3. NLI Clusterer
-                    │                      (DeBERTa)
-                    │                          │
-                    │                          ▼
-                    │                     4. SE Calculator
-                    │                          │
-                    │                          ▼
-                    │                      [SE Score]
-                    │                          │
-                    └───────────────────> 5. Decision Gate
-                                               │
-                ┌──────────────────────────────┴──────────────┐
-                ▼                                             ▼
-         SE < τ: PASS                                 SE ≥ τ: FLAG
-      (return answer to user)                    (hallucination alert)
-```
-
-**1. most_common_answer** — the representative of the highest-probability semantic cluster from the M samples. This is the answer returned to the user. The paper uses a separate greedy/beam-search decode for this step; we avoid the extra inference call by reusing the samples already generated in step 2.
-
-**2. Swarm Sampler** — draws M=10 independent completions at temperature 0.5 to probe the model's uncertainty landscape. These are used for both selecting the best answer and computing SE. Kuhn et al. validate empirically (Fig. 3b) that M=10 balances diversity and cost well.
-
-**3. NLI Clusterer** — resolves linguistic variance by grouping the M samples into semantic equivalence classes using bidirectional DeBERTa entailment. Exploits transitivity (greedy, O(M·C)) so each new sample is compared against one cluster representative, not all members.
-
-**4. SE Calculator** — aggregates per-cluster probability mass from the log-probs recorded during sampling, then computes entropy over the cluster distribution. Output: a single scalar SE ∈ [0, log M].
-
-**5. Decision Gate** — compares SE against threshold τ. Default τ = ln(2) ≈ 0.69 (entropy of a 50/50 split). In production this should be calibrated on a labelled validation set to match the desired precision/recall trade-off for the application.
+*Qwen2.5-1.5B-Instruct · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Accuracy=39% · 90s wall time. Same PE overconfidence pattern as Mistral. SE AUROC (0.755) is slightly higher than Mistral (0.720) despite the smaller model — likely a sampling artifact at N=300; the ordering may shift with more data.*
 
 ---
 
-### 5.2 REST API design
+![OPT-2.7B results](outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png)
 
-```
-POST /detect
-Content-Type: application/json
-
-{
-  "text": "Who invented the telephone?",
-  "n_samples": 10,          // optional, default 10
-  "temperature": 0.5        // optional, default 0.5
-}
-```
-
-```json
-{
-  "answer":        "Alexander Graham Bell invented the telephone in 1876.",
-  "is_uncertain":  false,
-  "se_score":      0.301,
-  "pe_score":      2.302,
-  "n_clusters":    2,
-  "latency_ms":    12800
-}
-```
-
-The response gives the caller both the binary flag (`is_uncertain`) and the raw score (`se_score`) so downstream systems can apply their own threshold.
+*OPT-2.7B (base model, no instruction tuning) · N=300 · SE AUROC=0.501 ≈ random · PE AUROC=0.586 · Accuracy=3% · 252s wall time. With 3% accuracy, OPT rarely produces consistent answers even when correct — SE cannot separate uncertainty from noise. PE > SE here (the reverse of instruction-tuned models): OPT's noisy completions make token entropy sensitive to output format rather than factual uncertainty.*
 
 ---
 
-### 5.3 Computational complexity
+## 6. Limitations
 
-The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is ~18× smaller than Mistral-7B and the greedy algorithm keeps comparisons at O(M·C).
+**Requires logprob access.** SE needs token-level log-probs from the generating model. Black-box APIs (e.g. GPT-4 via OpenAI) do not expose these. Any open-source model works.
 
-Per-query cost breakdown (A10G, M=10, Mistral-7B-Instruct-v0.3) — measured wall time averaged over 300 questions:
+**Does not detect confident hallucinations.** If the model is consistently wrong in the same way across all M=10 samples, SE ≈ 0 and the answer is not flagged. SE detects *uncertainty*, not *incorrectness per se*.
 
-| Step | Time | Cost (A10G @ ~$1.10/hr) |
-|---|---|---|
-| LLM sampling (10 completions) | ~0.2s | ~$0.00006 |
-| NLI clustering (≤45 pairs) | ~1.1s | ~$0.0003 |
-| **Total** | **~1.3s** | **~$0.0004** |
+**NLI errors add noise.** DeBERTa achieves 92.7% semantic equivalence accuracy (Kuhn et al.). Errors in either direction corrupt the SE estimate.
 
-At 1M queries/day: ~$400/day on A10G. Switching to batched vLLM inference would reduce this by ~3–5×.
-
-### 5.4 Modal parallelism
-
-The benchmark uses `score_question.map()` to dispatch questions to parallel Modal workers. Each worker loads models once on cold start and processes subsequent questions without reloading. At 50 questions, Modal spun up ~10 parallel containers — wall-clock time was ~3 minutes instead of ~7.5 minutes sequential.
-
-This scales horizontally: 1,000 questions takes roughly the same wall-clock time as 50, just more containers.
-
-### 5.5 Path to 1M users
-
-| Bottleneck | Solution |
-|---|---|
-| LLM throughput | vLLM with continuous batching; PagedAttention |
-| NLI throughput | Batch all M² pairs in a single DeBERTa forward pass |
-| Cold start latency | Keep containers warm with `scaledown_window`; pre-warm on traffic spikes |
-| Cost | Diversity-steered sampling (Park & Cho, NeurIPS 2025) — same AUROC with ~4 samples instead of 10 |
-
----
-
-## 6. Trade-offs & Limitations
-
-**Unsupervised, no labels required.** SE requires no task-specific training data — it runs on any LLM out of the box. This is the main practical advantage over supervised methods (e.g. Kadavath et al., 2022), which need labelled confidence datasets and degrade under distribution shift.
-
-**Requires access to log-probabilities.** SE needs token-level log-probs from the generating model. This rules out black-box APIs that only return text. Any open-source model works; GPT-4 via the OpenAI API does not.
-
-**NLI entailment is imperfect.** The DeBERTa NLI model achieves 92.7% accuracy on the semantic equivalence task (Kuhn et al.). Errors in either direction — false equivalences or missed paraphrases — add noise to the SE estimate. A stronger NLI model improves results.
-
-**Small model, low accuracy.** A 1.5B model has limited factual recall. SE detects uncertainty well even here, but the practical value of hallucination detection increases with model size — a 7B+ model would be more appropriate for production.
-
-**SE does not detect confident hallucinations.** If the model is consistently wrong but consistently wrong in the same way (all 10 samples say the same incorrect thing), SE will be low and the answer will not be flagged. SE detects *uncertainty*, not *incorrectness per se*.
+**Scale matters.** OPT-2.7B shows SE AUROC ≈ 0.5. Model capability is a prerequisite for SE to be informative — Kuhn et al. achieve ~0.83 with OPT-30B.
 
 ---
 
 ## 7. Future Work
 
-**Semantic Entropy Probes — Kossen et al. (2024).** The primary production path. Replaces M=10 LLM generations with a single forward pass + O(d) linear probe on the frozen hidden state at the last input token position. Eliminates NLI clustering entirely at inference time. Training requires a one-time offline run to collect (hidden state, SE label) pairs, which is cheap. Implementation complete in `src/ctgt/kossen_2024/probe.py`; data collection and probe upload pipeline in `modal_app.py`. Recommended model for SEP training: `Mistral-7B-Instruct-v0.3` or `meta-llama/Llama-3.1-8B-Instruct` — both instruction-tuned at a scale where accuracy is meaningful.
+**INSIDE (Chen et al., ICLR 2024, 356 citations)** — EigenScore + feature clipping. No NLI; operates in embedding geometry. Requires forward hooks to modify activations in-flight. Full spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
 
-**INSIDE — Chen et al., ICLR 2024.** The most ambitious internal-state approach. Proposes two mechanisms:
+**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation. Same AUROC with ~4 samples instead of 10 — 60% LLM cost reduction with no architecture changes.
 
-- *EigenScore*: generates K=10 responses, extracts last-token embeddings at the **middle transformer layer** (≈ L/2), constructs the K×K covariance matrix Σ = Z^T · J · Z, and scores uncertainty as (1/K) Σᵢ log(λᵢ) over the eigenvalues. Semantic divergence spreads eigenvalue mass, raising the score. Outperforms SE (AUROC 82.7% vs ~65%) by operating in dense embedding space where paraphrase conflation is automatic.
+**p(True) baseline (Kadavath et al., 2022)** — ask the model "is your answer correct?" as a self-evaluation signal. A third AUROC comparison point alongside SE and PE.
 
-- *Feature Clipping*: a test-time activation intervention that truncates extreme values in the penultimate layer via a **PyTorch forward hook** (not just reading — actually modifying activations). A memory bank of N=3000 calibration embeddings sets the clip percentile (p=0.2). Reduces overconfident generations without retraining.
-
-Key engineering note: EigenScore and feature clipping both require **forward hooks** (`register_forward_hook`) rather than the passive `output_hidden_states=True` approach we currently use for SEPs. This distinction is documented with implementation notes in `src/ctgt/inside.py`.
-
-**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation, so fewer samples (≈4 instead of 10) are needed for the same AUROC. Direct 60% reduction in LLM cost with no architecture changes.
-
-**Larger models** — swap `Qwen2.5-1.5B` for `Qwen2.5-7B` or `Llama-3.1-8B`. Expected to significantly improve both accuracy and AUROC, approaching the paper's 30B results.
-
-**p(True) baseline** — Kadavath et al. (2022): ask the model "is your answer correct?" as a self-evaluation signal. Adds a third AUROC comparison point alongside SE and PE.
-
----
-
-## 8. Method Landscape
-
-| Paper | Internal access | What it does |
-|---|---|---|
-| Farquhar / Kuhn (Nature 2024) | Logprobs only | M=10 samples → NLI cluster → entropy over meanings |
-| Kossen et al. SEPs (2024) | Hidden states (read) | Linear probe on frozen last-token activation; single forward pass at inference |
-| Chen et al. INSIDE (ICLR 2024) | Hidden states (read + modify) | EigenScore on mid-layer covariance + forward-hook activation clipping |
-
-The progression from Kuhn → Kossen → INSIDE represents increasing depth of access to model internals: from output probabilities only, to reading internal representations, to modifying them at inference time.
+**Larger models** — Mistral-7B hits 61% accuracy. Llama-3.1-8B or Qwen2.5-7B would push accuracy higher and close the gap to Kuhn et al.'s results.
 
 ---
 
@@ -498,7 +228,7 @@ The progression from Kuhn → Kossen → INSIDE represents increasing depth of a
 - Kuhn, L., Gal, Y., & Farquhar, S. (2023). *Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation.* ICLR 2023. [arXiv:2302.09664](https://arxiv.org/abs/2302.09664)
 - Kossen, J., Han, J., Razzak, M., Schut, L., Malik, S., & Gal, Y. (2024). *Semantic Entropy Probes: Robust and Cheap Hallucination Detection in LLMs.* **161 citations.** [arXiv:2406.15927](https://arxiv.org/abs/2406.15927)
 - Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., & Ye, J. (2024). *INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection.* ICLR 2024. **356 citations.** [arXiv:2402.03744](https://arxiv.org/abs/2402.03744)
-- Park, J. W., & Cho, K. (2025). *Efficient Semantic Uncertainty Quantification in Language Models via Diversity-Steered Sampling.* NeurIPS 2025. [neurips.cc](https://neurips.cc/virtual/2025/loc/san-diego/poster/118777)
+- Park, J. W., & Cho, K. (2025). *Efficient Semantic Uncertainty Quantification in Language Models via Diversity-Steered Sampling.* NeurIPS 2025.
 - He, P. et al. (2020). *DeBERTa: Decoding-Enhanced BERT with Disentangled Attention.* [arXiv:2006.03654](https://arxiv.org/abs/2006.03654)
 - Kadavath, S. et al. (2022). *Language Models (Mostly) Know What They Know.* [arXiv:2207.05221](https://arxiv.org/abs/2207.05221)
 - Joshi, M. et al. (2017). *TriviaQA: A Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension.* ACL 2017. [arXiv:1705.03551](https://arxiv.org/abs/1705.03551)
