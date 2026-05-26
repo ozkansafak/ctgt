@@ -176,8 +176,8 @@ SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sam
 
 | Model | Params | PE AUROC | Kuhn wall time (N=300) | Kossen inference wall time (N=300) | Speedup | SEP best layer |
 |---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 62s | 1.2× | 21 |
-| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 51s | 2.1× | 21 |
+| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 50s | 1.5× | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 70s | 1.5× | 21 |
 | Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 31s | 2.9× | 17 |
 
 Both measured over N=300 questions in parallel on A10G. Kuhn: M=10 LLM samples + NLI clustering per question. Kossen inference: 1 forward pass + probe per question (no sampling, no NLI). Wall-time speedup is lower than the theoretical 10× per-question speedup because Modal's autoscaling already parallelises Kuhn's sampling across containers — the per-question serial cost ratio is ~10×, but both pipelines saturate available GPUs.
@@ -238,7 +238,95 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 ---
 
-## 7. Future Work
+## 7. System Design: Real-Time Kossen Inference
+
+The key architectural property of Kossen's SEP probe is that it decouples the hallucination score from the generation step. The two operations share the same forward pass, so they can run on the same request without any extra LLM call.
+
+### 7.1 Request flow
+
+```
+                    ┌─────────────────────────┐
+                    │   Incoming question Q    │
+                    └────────────┬────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │   LLM forward pass       │
+                    │   (frozen, 1 pass)       │
+                    └────────────┬────────────┘
+                                 │ hidden states available
+                    ┌────────────┴────────────┐
+                    │                         │
+         ┌──────────▼────────┐    ┌───────────▼──────────┐
+         │  Token generation │    │   Probe evaluation    │
+         │  (autoregressive) │    │   h[best_layer][-1]   │
+         │                   │    │   → sigmoid(W·h + b)  │
+         └──────────┬────────┘    └───────────┬──────────┘
+                    │                         │
+                    │  answer string A         │  P(uncertain) ∈ [0,1]
+                    └────────────┬────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │        Response          │
+                    │  { answer: A,            │
+                    │    hallucination_risk: p }│
+                    └─────────────────────────┘
+```
+
+The probe runs at the **last input token position** — the point where the model has attended to the full question but has not yet emitted a single output token. The hidden state at that position is already computed as part of the prefill step. Slicing it and running `sigmoid(W·h + b)` adds negligible latency (~0.5 ms) on top of the prefill.
+
+Token generation then proceeds in parallel (or sequentially, depending on implementation) from the same KV cache. No second forward pass is needed.
+
+### 7.2 Infrastructure
+
+```
+Client
+  │  HTTP POST /ask  { question }
+  ▼
+API Gateway
+  │
+  ▼
+Inference Server (single A10G)
+  ├── LLM weights loaded once, resident in GPU VRAM
+  ├── Probe weights (4096 × 1 float32, ~16 KB) loaded at startup
+  │
+  │  Per request:
+  │  1. Tokenize Q → input_ids
+  │  2. Prefill forward pass → KV cache, hidden_states[all layers]
+  │  3. Slice hidden_states[best_layer][-1] → h  (shape: d_model)
+  │  4. Probe score  p = σ(W · h + b)            (< 1 ms)
+  │  5. Autoregressive decode from KV cache → answer A
+  │  6. Return { answer: A, hallucination_risk: p }
+```
+
+**One GPU, one request, zero extra LLM calls.** The probe is a 16 KB weight matrix, negligible to store and compute.
+
+### 7.3 Latency budget (Mistral-7B, A10G)
+
+| Step | Latency |
+|---|---|
+| Tokenize | < 1 ms |
+| Prefill (question, ~20 tokens) | ~10 ms |
+| Probe score | < 1 ms |
+| Decode (answer, ~30 tokens) | ~200 ms |
+| **Total** | **~210 ms** |
+
+The probe adds < 0.5% overhead to total request latency.
+
+### 7.4 Offline training (one-time)
+
+The probe must be trained before deployment. This is a one-time offline cost:
+
+1. **Collect training data** — run the full Kuhn pipeline on N ≥ 500 questions → SE score per question. This is the only step that requires M=10 samples and NLI. Takes ~75s per 300 questions on A10G.
+2. **Binarize** — Otsu threshold γ* on SE scores → 0/1 uncertain labels.
+3. **Extract hidden states** — one forward pass per question, slice `hidden_states[layer][-1]` at every layer.
+4. **Grid-search layers** — fit logistic regression per layer, pick best validation AUROC. For 7–8B models, layer 21 (of 32) consistently wins.
+5. **Save probe** — `W` (d_model × 1) + `b` (scalar) + `best_layer` index → `sep_probe_<model>.pkl`.
+
+Re-training is only needed when the base LLM changes. The probe is not updated at inference time.
+
+---
+
+## 8. Future Work
 
 **INSIDE (Chen et al., ICLR 2024, 356 citations)** — EigenScore + feature clipping. No NLI; operates in embedding geometry. Requires forward hooks to modify activations in-flight. Full spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
 
