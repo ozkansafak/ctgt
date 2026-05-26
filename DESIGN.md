@@ -98,11 +98,11 @@ Two mechanisms operating on K=10 response embeddings at the **middle transformer
 
 ### 2.4 Method comparison
 
-| Method | Model access | Per-query cost | Key idea |
-|---|---|---|---|
-| Kuhn / Farquhar SE | Logprobs | M=10 samples + NLI | Entropy over semantic clusters |
-| Kossen SEP | Hidden states (read) | 1 forward pass | Linear probe on last-input-token activation |
-| Chen INSIDE | Hidden states (read + write) | K=10 samples, no NLI | EigenScore on mid-layer covariance + activation clipping |
+| Method | Model access | Per-query cost | Key idea | Status |
+|---|---|---|---|---|
+| Kuhn / Farquhar SE | Logprobs | M=10 samples + NLI | Entropy over semantic clusters | ✅ implemented |
+| Kossen SEP | Hidden states (read) | 1 forward pass | Linear probe on last-input-token activation | ✅ implemented |
+| Chen INSIDE | Hidden states (read + write) | K=10 samples, no NLI | EigenScore on mid-layer covariance + activation clipping | ❌ not implemented |
 
 The progression represents increasing depth of access: output probabilities → reading internals → modifying internals.
 
@@ -161,18 +161,26 @@ All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Moda
 
 ### 5.1 Summary
 
-All runs: N=300, M=10 samples, temp=0.5, Modal A10G GPU.
+**Kuhn SE vs Kossen SEP — hallucination detection AUROC**
 
-| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kuhn wall time | Kossen SEP AUROC | SEP gap | Best layer |
-|---|---|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 75s | 0.662 | −0.058 | 21 |
-| Meta-Llama-3.1-8B-Instruct | 8B | **73%** | **0.728** | 0.310 | 108s | **0.687** | −0.034 | 21 |
-| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | 90s | 0.692 | −0.042 | 17 |
-| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — | — | — |
-
-PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
+| Model | Acc | Kuhn SE AUROC | Kossen SEP AUROC | SEP gap |
+|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 61% | 0.720 | 0.662 | −0.058 |
+| Meta-Llama-3.1-8B-Instruct | **73%** | **0.728** | **0.687** | −0.034 |
+| Qwen2.5-1.5B-Instruct | 39% | 0.755 | 0.692 | −0.042 |
+| Kuhn et al. (OPT-30B) | ~50% | ~0.830 | — | — |
 
 SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sampling, no NLI.
+
+**Full details**
+
+| Model | Params | PE AUROC | Kuhn wall time | SEP best layer |
+|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 21 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 17 |
+
+PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
 
 ### 5.2 Per-model results
 
