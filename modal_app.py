@@ -23,7 +23,7 @@ import modal
 # ---------------------------------------------------------------------------
 # Model selection  — small by default for cheap prototyping
 # ---------------------------------------------------------------------------
-LLM_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"   # ~3 GB on disk; fits on T4
+LLM_MODEL = "facebook/opt-2.7b"   # ~5.4 GB on disk; fits on T4
 NLI_MODEL = "cross-encoder/nli-deberta-v3-large"
 
 

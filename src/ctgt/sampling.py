@@ -41,10 +41,13 @@ class LLMSampler:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
     def _build_prompt(self, question: str) -> str:
-        messages = [{"role": "user", "content": question}]
-        return self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        if self.tokenizer.chat_template is not None:
+            messages = [{"role": "user", "content": question}]
+            return self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+        # Base models (e.g. OPT) have no chat template — use plain Q&A format
+        return f"Q: {question}\nA:"
 
     def sample(
         self,
