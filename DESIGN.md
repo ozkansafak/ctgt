@@ -83,10 +83,10 @@ SE = log(M) ≈ 2.3 (natural log, and M=10) means every sample has a distinct me
 
 | Role | Model | Parameters | VRAM |
 |---|---|---|---|
-| LLM (generation) | `Qwen/Qwen2.5-1.5B-Instruct` | 1.5B | ~3 GB |
+| LLM (generation) | `mistralai/Mistral-7B-Instruct-v0.3` | 7B | ~14 GB |
 | NLI (clustering) | `cross-encoder/nli-deberta-v3-large` | 400M | ~1.5 GB |
 
-Both models run on a single **NVIDIA T4 GPU (15 GB VRAM)** via Modal. The LLM dominates cost; DeBERTa is ~4× smaller and much cheaper per call.
+Both models run on a single **NVIDIA A10G GPU (24 GB VRAM)** via Modal. The LLM dominates cost; DeBERTa is ~18× smaller and much cheaper per call.
 
 ### 3.2 Hyperparameters
 
@@ -131,14 +131,14 @@ $$\text{label} = \begin{cases} 0 \ (\text{correct}), & \text{RougeL}(y', y) > 0.
 
 For this example: RougeL("Alexander Graham Bell invented it in 1876.", "alexander graham bell") = 0.9 > 0.3 → **label = 0 (correct)**.
 
-After running all 50 questions, each has exactly one (SE score, label) pair:
+After running all N questions, each has exactly one (SE score, label) pair:
 
 ```
 question  1:  SE = 0.20,  label = 0  (correct)
 question  2:  SE = 1.85,  label = 1  (hallucination)
 question  3:  SE = 0.95,  label = 1  (hallucination)
 ...
-question 50:  SE = 1.42,  label = 0  (correct)
+question  N:  SE = 1.42,  label = 0  (correct)
 ```
 
 **Step 4 — Sweep threshold $\tau$ to build the ROC curve**
@@ -282,7 +282,7 @@ TriviaQA `rc.nocontext` validation set, M=10 samples, temperature=0.5, Modal GPU
 |---|---|---|---|---|---|---|
 | Mistral-7B-Instruct-v0.3 | 200 (5-fold CV) | 21 | 0.746 | **0.689** | −0.057 | ~10× |
 
-The SEP probe achieves **92% of SE's AUROC** using a single forward pass and a matrix multiply — no NLI clustering, no multiple samples.
+The SEP probe achieves **96% of SE's AUROC** using a single forward pass and a matrix multiply — no NLI clustering, no multiple samples.
 
 **Key finding on PE:** Both instruction-tuned models (Mistral, Qwen) show PE AUROC below 0.5 — the model is overconfident and produces the same wrong answer across all M=10 samples, making PE anticorrelated with error. SE is robust because it measures semantic diversity, not lexical. OPT-2.7B (base model) actually has PE > SE (0.586 vs 0.501) — the opposite pattern — because its noisy completions make PE sensitive to output format rather than factual uncertainty.
 
@@ -415,21 +415,19 @@ The response gives the caller both the binary flag (`is_uncertain`) and the raw 
 
 ---
 
-### 5.3 Scalability
-
 ### 5.3 Computational complexity
 
-The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is 4× smaller than the LLM and the greedy algorithm keeps comparisons at O(M·C).
+The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is ~18× smaller than Mistral-7B and the greedy algorithm keeps comparisons at O(M·C).
 
-Per-query cost breakdown (T4, M=10, Qwen2.5-1.5B) — measured wall time averaged over 50 questions:
+Per-query cost breakdown (A10G, M=10, Mistral-7B-Instruct-v0.3) — measured wall time averaged over 300 questions:
 
-| Step | Time | Cost (T4 @ $0.59/hr) |
+| Step | Time | Cost (A10G @ ~$1.10/hr) |
 |---|---|---|
-| LLM sampling (10 completions) | 10.5s | ~$0.0017 |
-| NLI clustering (≤45 pairs) | 2.3s | ~$0.0004 |
-| **Total** | **12.8s** | **~$0.0021** |
+| LLM sampling (10 completions) | ~0.2s | ~$0.00006 |
+| NLI clustering (≤45 pairs) | ~1.1s | ~$0.0003 |
+| **Total** | **~1.3s** | **~$0.0004** |
 
-At 1M queries/day: ~$2,100/day on T4. Switching to batched vLLM inference and A10G GPUs would reduce this by ~3–5×.
+At 1M queries/day: ~$400/day on A10G. Switching to batched vLLM inference would reduce this by ~3–5×.
 
 ### 5.4 Modal parallelism
 
@@ -464,7 +462,7 @@ This scales horizontally: 1,000 questions takes roughly the same wall-clock time
 
 ## 7. Future Work
 
-**Semantic Entropy Probes — Kossen et al. (2024).** The primary production path. Replaces M=10 LLM generations with a single forward pass + O(d) linear probe on the frozen hidden state at the last input token position. Eliminates NLI clustering entirely at inference time. Training requires a one-time offline run to collect (hidden state, SE label) pairs, which is cheap. Implementation complete in `src/ctgt/probe.py`; data collection and probe upload pipeline in `modal_app.py`. Recommended model for SEP training: `Mistral-7B-Instruct-v0.3` or `meta-llama/Llama-3.1-8B-Instruct` — both instruction-tuned at a scale where accuracy is meaningful.
+**Semantic Entropy Probes — Kossen et al. (2024).** The primary production path. Replaces M=10 LLM generations with a single forward pass + O(d) linear probe on the frozen hidden state at the last input token position. Eliminates NLI clustering entirely at inference time. Training requires a one-time offline run to collect (hidden state, SE label) pairs, which is cheap. Implementation complete in `src/ctgt/kossen_2024/probe.py`; data collection and probe upload pipeline in `modal_app.py`. Recommended model for SEP training: `Mistral-7B-Instruct-v0.3` or `meta-llama/Llama-3.1-8B-Instruct` — both instruction-tuned at a scale where accuracy is meaningful.
 
 **INSIDE — Chen et al., ICLR 2024.** The most ambitious internal-state approach. Proposes two mechanisms:
 
