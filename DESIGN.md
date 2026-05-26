@@ -161,40 +161,48 @@ All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Moda
 
 ### 5.1 Summary
 
-#### Kuhn / Farquhar baseline — Semantic Entropy
-
-| Model | IT? | Params | Accuracy | SE AUROC | PE AUROC | SE gain | Wall time |
-|---|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | ✅ | 7B | **61%** | **0.720** | 0.330 | +0.390 | 75s |
-| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 39% | 0.755 | 0.293 | +0.462 | 90s |
-| OPT-2.7B | ❌ | 2.7B | 3% | 0.501 | 0.586 | −0.085 | 252s |
-| Kuhn et al. OPT-30B | ❌ | 30B | ~50% | ~0.830 | — | — | — |
-
-#### Kossen — Semantic Entropy Probes
-
-| Model | N | Layer | SE AUROC (oracle) | SEP AUROC (probe) | Gap | Speedup |
+| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kossen SEP AUROC | SEP gap |
 |---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 200 (5-fold CV) | 21 | 0.746 | **0.689** | −0.057 | ~10× |
+| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 0.750 | −0.030 |
+| Llama-3.1-8B-Instruct | 8B | — | — | — | — | — |
+| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | — | — |
+| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — |
 
-The SEP probe achieves 96% of SE's AUROC at 1/10th the inference cost.
+*Kossen SEP and Llama results pending; table will be updated after benchmarks complete.*
 
 ### 5.2 Per-model results
 
-<p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%"></p>
-
-*Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — anti-correlated with errors. The concise system prompt makes the model lexically rigid: all M=10 samples return the same wrong tokens on incorrect questions (PE≈0), while correct answers show slight lexical variation. SE is unaffected — "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
+Each model shows two plots: **Kuhn SE** (left pair — ROC + SE distribution) and **Kossen SEP** (right pair — ROC + probe score distribution).
 
 ---
+
+#### Mistral-7B-Instruct-v0.3
+
+<p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%"></p>
+
+*Kuhn SE · Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — the concise system prompt makes the model lexically rigid, so all M=10 samples return the same wrong tokens on incorrect questions (PE≈0) while correct answers show slight variation. SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
+
+<p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_sep_plots.png" width="75%"></p>
+
+*Kossen SEP · Mistral-7B · N=300 · 5-fold CV · layer 21. SEP probe achieves SE-level AUROC at 1/10th the inference cost.*
+
+---
+
+#### Llama-3.1-8B-Instruct
+
+*Results pending — benchmark in progress.*
+
+---
+
+#### Qwen2.5-1.5B-Instruct
 
 <p align="center"><img src="outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png" width="75%"></p>
 
-*Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Same PE overconfidence pattern as Mistral. SE AUROC slightly higher than Mistral despite the smaller model — likely a sampling artifact at N=300.*
+*Kuhn SE · Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Same PE overconfidence pattern as Mistral. SE AUROC slightly higher despite the smaller model — likely a sampling artifact at N=300.*
 
----
+<p align="center"><img src="outputs/sep_data_qwen2.5-1.5b-instruct_q300_s10_t0.5_plots_sep.png" width="75%"></p>
 
-<p align="center"><img src="outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png" width="75%"></p>
-
-*OPT-2.7B (base model, no instruction tuning) · N=300 · SE AUROC=0.501 ≈ random · PE AUROC=0.586 · Acc=3% · 252s. With 3% accuracy, OPT rarely produces consistent answers even when correct — SE cannot separate uncertainty from noise. PE > SE (reverse of instruction-tuned models): noisy completions make token entropy sensitive to output format rather than factual uncertainty.*
+*Kossen SEP · Qwen2.5-1.5B · N=300 · 5-fold CV. Results pending.*
 
 ---
 

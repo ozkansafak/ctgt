@@ -32,11 +32,69 @@ def _latest_sep_data() -> Path:
     )
 
 
+def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_hall_cv: float, out_path: "Path") -> None:
+    try:
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from sklearn.metrics import roc_curve
+
+        se_scores = [r["semantic_entropy"] for r in rows]
+        pe_scores = [r["predictive_entropy"] for r in rows]
+        labels_wrong = [1 - int(r["is_correct"]) for r in rows]
+
+        model_short = data["llm_model"].split("/")[-1]
+        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "")
+        n_q = data["n_questions"]
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+        fig.suptitle(
+            f"Semantic Entropy Probes (Kossen 2024) · {model_short} · N={n_q} · layer {probe.best_layer}",
+            fontsize=10,
+        )
+
+        ax = axes[0]
+        for scores, label, color in [
+            (se_scores,      f"SE oracle (AUROC={data['se_auroc']:.3f})",  "#2196F3"),
+            (sep_scores_cv,  f"SEP probe (AUROC={sep_hall_cv:.3f})",       "#4CAF50"),
+            (pe_scores,      f"PE       (AUROC={data['pe_auroc']:.3f})",   "#FF5722"),
+        ]:
+            fpr, tpr, _ = roc_curve(labels_wrong, scores)
+            ax.plot(fpr, tpr, lw=2, label=label)
+        ax.plot([0, 1], [0, 1], "k--", lw=1)
+        ax.set_xlabel("False Positive Rate")
+        ax.set_ylabel("True Positive Rate")
+        ax.set_title("ROC Curve")
+        ax.legend(loc="lower right")
+        ax.grid(alpha=0.3)
+
+        ax = axes[1]
+        correct_sep = [sep_scores_cv[i] for i, r in enumerate(rows) if r["is_correct"]]
+        wrong_sep   = [sep_scores_cv[i] for i, r in enumerate(rows) if not r["is_correct"]]
+        bins = np.linspace(0, 1, 25)
+        ax.hist(wrong_sep,   bins=bins, alpha=0.6, label="Wrong",   color="#F44336")
+        ax.hist(correct_sep, bins=bins, alpha=0.9, label="Correct", color="#4CAF50",
+                edgecolor="black", linewidth=0.8)
+        ax.axvline(0.5, color="k", linestyle="--", lw=1)
+        ax.set_xlabel("P(uncertain) — SEP probe score")
+        ax.set_ylabel("Count")
+        ax.set_title("SEP Score: Correct vs Wrong Answers")
+        ax.legend()
+        ax.grid(alpha=0.3)
+
+        plt.tight_layout()
+        plt.savefig(out_path, dpi=150)
+        print(f"\nSEP plots saved to {out_path}")
+        plt.show()
+    except ImportError:
+        print("\nInstall matplotlib to generate plots:  pip install matplotlib")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default=None, help="Path to SEP training data JSON")
     parser.add_argument("--test-size", type=float, default=0.2, help="Fraction held out for evaluation")
-    parser.add_argument("--output", default="outputs/sep_probe.pkl", help="Where to save the fitted probe")
+    parser.add_argument("--output", default=None, help="Where to save the fitted probe (default: outputs/sep_probe_<model>.pkl)")
+    parser.add_argument("--no-plot", action="store_true")
     args = parser.parse_args()
 
     path = Path(args.input) if args.input else _latest_sep_data()
@@ -44,6 +102,10 @@ def main() -> None:
     data = json.loads(path.read_text())
     rows = data["rows"]
     print(f"  {len(rows)} questions | LLM: {data['llm_model']}")
+
+    model_slug = data["llm_model"].split("/")[-1].lower()
+    default_out = f"outputs/sep_probe_{model_slug}.pkl"
+    out = Path(args.output) if args.output else Path(default_out)
 
     se_scores = [r["semantic_entropy"] for r in rows]
 
@@ -109,11 +171,13 @@ def main() -> None:
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     sep_hall_fold, se_hall_fold, sep_se_fold = [], [], []
+    sep_scores_cv = np.zeros(len(rows))
 
     for fold_train, fold_test in skf.split(X_all, hall_labels_all):
         clf = LogisticRegression(C=1.0, max_iter=1000, solver="lbfgs")
         clf.fit(X_all[fold_train], se_labels_all[fold_train])
         proba = clf.predict_proba(X_all[fold_test])[:, 1]
+        sep_scores_cv[fold_test] = proba
 
         sep_hall_fold.append(safe_auroc([hall_labels_all[i] for i in fold_test], proba))
         se_hall_fold.append( safe_auroc([hall_labels_all[i] for i in fold_test], all_se[fold_test]))
@@ -140,11 +204,14 @@ def main() -> None:
     print(f"  Inference speedup  : ~10× fewer LLM forward passes")
     print(f"  Compute class      : O(d) = O({hidden_dim}) vs O(M · NLI calls)")
 
-    out = Path(args.output)
     out.parent.mkdir(exist_ok=True)
     probe.save(out)
     print(f"\nProbe saved → {out}")
     print("Next: modal run modal_app.py::app.upload_probe --path", out)
+
+    if not args.no_plot:
+        plot_out = path.with_name(path.stem + "_sep_plots.png")
+        _plot_sep(data, probe, rows, sep_scores_cv, sep_hall_cv, plot_out)
 
 
 if __name__ == "__main__":

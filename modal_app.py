@@ -3,11 +3,13 @@ Modal deployment for LLM hallucination detection.
 
 Implements two methods:
   Kuhn / Farquhar 2024 (1561 citations) — Semantic Entropy baseline
-    modal run modal_app.py::app.benchmark --n-questions 200
+    modal run modal_app.py::app.benchmark --n-questions 300
+    modal run modal_app.py::app.benchmark --n-questions 300 --llm-model meta-llama/Llama-3.1-8B-Instruct
     modal run modal_app.py::app.analyze  --question "Who painted the Mona Lisa?"
 
   Kossen et al. 2024 (161 citations) — Semantic Entropy Probes
-    modal run modal_app.py::app.collect_sep_training_data --n-questions 200
+    modal run modal_app.py::app.collect_sep_training_data --n-questions 300
+    modal run modal_app.py::app.collect_sep_training_data --n-questions 300 --llm-model Qwen/Qwen2.5-1.5B-Instruct
     python train_probe.py
     modal run modal_app.py::app.upload_probe
     modal run modal_app.py::app.analyze_fast --question "Who painted the Mona Lisa?"
@@ -20,10 +22,17 @@ from __future__ import annotations
 import modal
 
 # ---------------------------------------------------------------------------
-# Model selection  — small by default for cheap prototyping
+# Model selection
 # ---------------------------------------------------------------------------
-LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"   # ~14 GB; use A10G
+LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"   # default
 NLI_MODEL = "cross-encoder/nli-deberta-v3-large"
+
+# All LLMs pre-baked into the image so cold starts are fast for any model.
+_ALL_LLM_MODELS = [
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "meta-llama/Llama-3.1-8B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -38,8 +47,9 @@ def _download_weights() -> None:
     """
     from huggingface_hub import snapshot_download
 
-    print(f"Downloading {LLM_MODEL} …")
-    snapshot_download(LLM_MODEL)
+    for model in _ALL_LLM_MODELS:
+        print(f"Downloading {model} …")
+        snapshot_download(model)
 
     print(f"Downloading {NLI_MODEL} …")
     snapshot_download(NLI_MODEL)
@@ -114,33 +124,32 @@ class DetectorService:
 
 
 # ---------------------------------------------------------------------------
-# Benchmark worker — module-level cache so each container loads models once
+# Benchmark worker — per-model cache so each container loads models once
 # ---------------------------------------------------------------------------
-_detector = None
+_detectors: dict = {}
 
 
-def _get_detector():
-    """Lazy singleton: models load once per container and stay warm."""
-    global _detector
-    if _detector is None:
+def _get_detector(llm_model: str = LLM_MODEL):
+    """Lazy cache keyed by model name: loads once per (container, model) pair."""
+    if llm_model not in _detectors:
         from ctgt.kuhn_2024.detection import SemanticEntropyDetector
         from ctgt.kuhn_2024.entailment import EntailmentClustering
         from ctgt.sampling import LLMSampler
 
-        sampler = LLMSampler(model_name=LLM_MODEL)
+        sampler = LLMSampler(model_name=llm_model)
         clusterer = EntailmentClustering(model_name=NLI_MODEL)
-        _detector = SemanticEntropyDetector(sampler=sampler, clusterer=clusterer)
-    return _detector
+        _detectors[llm_model] = SemanticEntropyDetector(sampler=sampler, clusterer=clusterer)
+    return _detectors[llm_model]
 
 
 @app.function(gpu="A10G", timeout=600)
-def score_question(question: str, n_samples: int = 10, temperature: float = 0.5) -> dict:
+def score_question(question: str, n_samples: int = 10, temperature: float = 0.5, llm_model: str = LLM_MODEL) -> dict:
     """
     Score one question.  Modal keeps containers warm between .map() calls so
     _get_detector() only pays the model-load cost on the first question per
     container, not on every call.
     """
-    detector = _get_detector()
+    detector = _get_detector(llm_model)
     result = detector.analyze(question, n_samples=n_samples, temperature=temperature)
     return {
         "question": question,
@@ -165,6 +174,7 @@ def score_question_with_states(
     n_samples: int = 10,
     temperature: float = 0.5,
     n_last_layers: int = 12,
+    llm_model: str = LLM_MODEL,
 ) -> dict:
     """Score one question (full SE pipeline) and also extract LLM hidden states.
 
@@ -175,7 +185,7 @@ def score_question_with_states(
         n_last_layers: How many of the final transformer layers to return.
                        Reduces payload size; later layers are most informative.
     """
-    detector = _get_detector()
+    detector = _get_detector(llm_model)
     result = detector.analyze(question, n_samples=n_samples, temperature=temperature)
 
     n_layers = detector.sampler.model.config.num_hidden_layers  # transformer blocks only
@@ -250,13 +260,17 @@ def analyze(question: str = "What is the capital of France?", n_samples: int = 1
 
 
 @app.local_entrypoint()
-def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 0.5):
+def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 0.5, llm_model: str = LLM_MODEL):
     """
     Evaluate SE vs PE on TriviaQA (closed-book).
 
     Questions are scored in parallel across Modal T4 workers; Modal autoscales
     and keeps containers warm, so model-load cost is amortised across questions.
     AUROC is computed locally once all results arrive.
+
+    Example:
+        modal run modal_app.py::app.benchmark --n-questions 300
+        modal run modal_app.py::app.benchmark --n-questions 300 --llm-model meta-llama/Llama-3.1-8B-Instruct
     """
     import json
     from pathlib import Path
@@ -274,12 +288,12 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
     aliases_list = [item["answer"]["normalized_aliases"] for item in items]
 
     import time as _time
-    print(f"Dispatching {len(questions)} questions to Modal (n_samples={n_samples}, temperature={temperature}) …")
+    print(f"Dispatching {len(questions)} questions to Modal (model={llm_model}, n_samples={n_samples}, temperature={temperature}) …")
     _t_start = _time.perf_counter()
     raw = list(
         score_question.map(
             questions,
-            kwargs={"n_samples": n_samples, "temperature": temperature},
+            kwargs={"n_samples": n_samples, "temperature": temperature, "llm_model": llm_model},
             order_outputs=True,
         )
     )
@@ -315,7 +329,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
     print(f"{'='*56}")
 
     from datetime import datetime
-    model_slug = LLM_MODEL.split("/")[-1].lower()
+    model_slug = llm_model.split("/")[-1].lower()
     timestamp  = datetime.now().strftime("%Y%m%d_%H%M%S")
     fname      = f"{model_slug}_q{len(rows)}_s{n_samples}_t{temperature}_{timestamp}.json"
     Path("outputs").mkdir(exist_ok=True)
@@ -323,7 +337,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
 
     payload = json.dumps(
         {
-            "llm_model": LLM_MODEL,
+            "llm_model": llm_model,
             "nli_model": NLI_MODEL,
             "n_questions": len(rows),
             "n_samples": n_samples,
@@ -348,6 +362,7 @@ def collect_sep_training_data(
     n_questions: int = 200,
     n_samples: int = 10,
     temperature: float = 0.5,
+    llm_model: str = LLM_MODEL,
 ):
     """Collect SE scores + LLM hidden states for SEP probe training.
 
@@ -355,7 +370,8 @@ def collect_sep_training_data(
     entropy scores.  Feed the output JSON to train_probe.py to fit the probe.
 
     Example:
-        modal run modal_app.py::app.collect_sep_training_data --n-questions 200
+        modal run modal_app.py::app.collect_sep_training_data --n-questions 300
+        modal run modal_app.py::app.collect_sep_training_data --n-questions 300 --llm-model Qwen/Qwen2.5-1.5B-Instruct
     """
     import json
     import time as _time
@@ -376,13 +392,13 @@ def collect_sep_training_data(
 
     print(
         f"Dispatching {len(questions)} questions with hidden state extraction "
-        f"(n_samples={n_samples}, temperature={temperature}) …"
+        f"(model={llm_model}, n_samples={n_samples}, temperature={temperature}) …"
     )
     _t0 = _time.perf_counter()
     raw = list(
         score_question_with_states.map(
             questions,
-            kwargs={"n_samples": n_samples, "temperature": temperature},
+            kwargs={"n_samples": n_samples, "temperature": temperature, "llm_model": llm_model},
             order_outputs=True,
         )
     )
@@ -402,7 +418,7 @@ def collect_sep_training_data(
     pe_auroc = roc_auc_score(labels_wrong, [r["predictive_entropy"] for r in rows])
     accuracy = 1 - sum(labels_wrong) / len(labels_wrong)
 
-    model_slug = LLM_MODEL.split("/")[-1].lower()
+    model_slug = llm_model.split("/")[-1].lower()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     fname = f"sep_data_{model_slug}_q{n_questions}_s{n_samples}_t{temperature}_{timestamp}.json"
     Path("outputs").mkdir(exist_ok=True)
@@ -410,7 +426,7 @@ def collect_sep_training_data(
 
     payload = json.dumps(
         {
-            "llm_model": LLM_MODEL,
+            "llm_model": llm_model,
             "nli_model": NLI_MODEL,
             "n_questions": len(rows),
             "n_samples": n_samples,
