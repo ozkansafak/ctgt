@@ -1,0 +1,224 @@
+# Technical Design Doc: Hallucination Detection via Semantic Entropy
+
+**Author:** Ozkan Safak  
+**Date:** May 2026  
+**Repo:** https://github.com/ozkansafak/ctgt
+
+---
+
+## 1. Introduction & Problem Definition
+
+Large Language Models (LLMs) hallucinate — they produce confident-sounding outputs that are factually wrong. This is a fundamental reliability problem: a model can generate fluent, authoritative text about things it does not know.
+
+The core challenge in detecting hallucinations is that **confidence is hard to measure from the outside**. The model does not say "I'm not sure about this." It just generates tokens.
+
+One natural signal is the model's own token probabilities. If the model assigns low probability to its output, it may be uncertain. But this fails in practice for a subtle reason: **natural language has many ways to say the same thing**. The model may be highly confident about a *meaning* while appearing uncertain at the token level simply because there are multiple valid phrasings.
+
+> "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing, but share almost no tokens.
+
+A naive entropy measure over token sequences treats these as two different outcomes and inflates the uncertainty estimate — incorrectly flagging a confident answer as uncertain.
+
+---
+
+## 2. Method: Semantic Entropy
+
+We implement **Semantic Entropy** (Kuhn, Gal & Farquhar, ICLR 2023), which computes entropy over *meanings* rather than token sequences.
+
+### 2.1 Why not token-level entropy?
+
+Standard **Predictive Entropy (PE)** measures the spread of the model's output distribution at the token level:
+
+```
+PE = -∑_s  p(s|x) · log p(s|x)
+```
+
+This is inflated by paraphrases — semantically identical answers that differ in wording. **Semantic Entropy (SE)** collapses paraphrases into a single cluster before computing entropy:
+
+```
+SE = -∑_c  p(c|x) · log p(c|x)
+     where p(c|x) = ∑_{s ∈ c} p(s|x)
+```
+
+High SE means the model generates answers with genuinely different *meanings* — a strong hallucination signal.
+
+### 2.2 The three steps
+
+**Step 1 — Sample**
+
+Draw M=10 completions from the LLM at temperature T=0.5. Temperature 0.5 balances diversity and accuracy — too low and all samples are identical (no signal), too high and accuracy degrades (noisy signal). Kuhn et al. validate this empirically.
+
+For each completion, we compute its **length-normalised log-probability**:
+
+```
+log_prob_normalised = (1/N) · ∑_i log p(token_i | context, tokens_{<i})
+```
+
+Length normalisation ensures short and long answers are comparable — without it, longer sequences are penalised simply for having more tokens.
+
+**Step 2 — Cluster by meaning**
+
+We use **DeBERTa-large** (He et al., 2020), a 400M parameter model fine-tuned on the Multi-NLI dataset, to check whether two answers mean the same thing. For each pair (A, B), we run the NLI model in both directions:
+
+```
+A entails B  AND  B entails A  →  semantically equivalent  →  same cluster
+```
+
+Both directions must hold. A one-way implication is not enough: "Paris is in France" entails "Paris exists" but they do not mean the same thing.
+
+We use a greedy clustering algorithm that exploits **transitivity**: each new answer is compared against only one representative per existing cluster, not every member. This reduces worst-case comparisons from O(M²) to O(M·C), where C is the number of clusters — typically much smaller than M.
+
+**Step 3 — Compute Semantic Entropy**
+
+Sum probabilities within each cluster, then compute entropy over the cluster distribution:
+
+```
+p(cluster_c) = ∑_{s ∈ c} exp(log_prob_s)   (normalised across all clusters)
+SE = -∑_c  p(c) · log p(c)
+```
+
+SE = 0 means all samples share one meaning — the model is certain.  
+SE = log(M) ≈ 2.3 means every sample has a distinct meaning — maximally uncertain.
+
+---
+
+## 3. System Design
+
+### 3.1 Models
+
+| Role | Model | Parameters | VRAM |
+|---|---|---|---|
+| LLM (generation) | `Qwen/Qwen2.5-1.5B-Instruct` | 1.5B | ~3 GB |
+| NLI (clustering) | `cross-encoder/nli-deberta-v3-large` | 400M | ~1.5 GB |
+
+Both models run on a single **NVIDIA T4 GPU (15 GB VRAM)** via Modal. The LLM dominates cost; DeBERTa is ~4× smaller and much cheaper per call.
+
+### 3.2 Hyperparameters
+
+| Parameter | Value | Rationale |
+|---|---|---|
+| Samples M | 10 | Kuhn et al. show diminishing returns beyond 10 |
+| Temperature | 0.5 | Optimal balance of diversity vs accuracy (Kuhn et al., Fig. 3b) |
+| Max new tokens | 128 | Sufficient for factual QA answers |
+| SE threshold | ln(2) ≈ 0.69 | Entropy of a 50/50 split between two meanings |
+
+### 3.3 Evaluation metric: AUROC
+
+We evaluate using **AUROC** (Area Under the ROC Curve) — the probability that a randomly chosen *wrong* answer has higher SE than a randomly chosen *correct* answer. 
+
+- AUROC = 0.5 → SE is no better than random at detecting hallucinations  
+- AUROC = 1.0 → SE perfectly separates hallucinations from correct answers
+
+AUROC is appropriate here because we care about *ranking* — which answers to trust — not binary classification at a fixed threshold.
+
+### 3.4 Dataset: TriviaQA (closed-book)
+
+We evaluate on **TriviaQA** `rc.nocontext` (validation set) — 17,944 trivia questions answered from memory, with no supporting document. Closed-book is the right setting because it forces genuine uncertainty: the model either knows the answer or it doesn't.
+
+**Correctness criterion:** RougeL(model answer, any gold alias) > 0.3, following Kuhn et al.
+
+Example item:
+```python
+{
+    "question": "Which American-born Sinclair won the Nobel Prize for Literature in 1930?",
+    "answer": {"normalized_aliases": ["sinclair lewis", "harry sinclair lewis", ...]}
+}
+```
+
+---
+
+## 4. Results
+
+Benchmark run: 50 questions, M=10 samples, Qwen2.5-1.5B on Modal T4.
+
+| Method | AUROC |
+|---|---|
+| **Semantic Entropy (ours)** | **0.780** |
+| Predictive Entropy (baseline) | 0.752 |
+| Random | 0.500 |
+
+SE outperforms PE by **+0.028 AUROC points**. The semantic clustering step adds genuine signal even with a small 1.5B model.
+
+**Model accuracy: 6%.** The 1.5B model is too small to reliably recall trivia from memory. Kuhn et al. use a 30B OPT model and report ~50% accuracy and SE AUROC ~0.83. The low accuracy here is expected — the key result is that SE ranks uncertain answers above confident ones better than PE does, regardless of model size.
+
+![Benchmark results](benchmark_plots.png)
+
+**Left:** ROC curves — SE (blue) is above PE (orange), both well above the random diagonal.  
+**Right:** SE distribution — correct answers (green) cluster at lower SE; wrong answers (red) pile up above SE=1.5. The model's uncertainty correlates with its errors.
+
+Aggregate statistics confirm the pattern:
+
+| | Correct answers | Wrong answers |
+|---|---|---|
+| Avg SE | 1.157 | 1.733 |
+| Avg # clusters | 4.67 | 7.30 |
+
+Wrong answers produce more semantically distinct clusters — the model is genuinely uncertain about which fact to state.
+
+---
+
+## 5. Scalability
+
+### Computational complexity
+
+The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is 4× smaller than the LLM and the greedy algorithm keeps comparisons at O(M·C).
+
+Per-query cost breakdown (T4, M=10, Qwen2.5-1.5B):
+
+| Step | Time | Cost (T4 @ $0.59/hr) |
+|---|---|---|
+| LLM sampling (10 completions) | ~8s | ~$0.0013 |
+| NLI clustering (≤45 pairs) | ~1s | ~$0.0002 |
+| **Total** | **~9s** | **~$0.0015** |
+
+At 1M queries/day: ~$1,500/day on T4. Switching to batched vLLM inference and A10G GPUs would reduce this by ~3–5×.
+
+### Modal parallelism
+
+The benchmark uses `score_question.map()` to dispatch questions to parallel Modal workers. Each worker loads models once on cold start and processes subsequent questions without reloading. At 50 questions, Modal spun up ~10 parallel containers — wall-clock time was ~3 minutes instead of ~7.5 minutes sequential.
+
+This scales horizontally: 1,000 questions takes roughly the same wall-clock time as 50, just more containers.
+
+### Path to 1M users
+
+| Bottleneck | Solution |
+|---|---|
+| LLM throughput | vLLM with continuous batching; PagedAttention |
+| NLI throughput | Batch all M² pairs in a single DeBERTa forward pass |
+| Cold start latency | Keep containers warm with `scaledown_window`; pre-warm on traffic spikes |
+| Cost | Diversity-steered sampling (Park & Cho, NeurIPS 2025) — same AUROC with ~4 samples instead of 10 |
+
+---
+
+## 6. Trade-offs & Limitations
+
+**Unsupervised, no labels required.** SE requires no task-specific training data — it runs on any LLM out of the box. This is the main practical advantage over supervised methods (Lin et al., 2022; Kadavath et al., 2022), which need labelled confidence datasets and degrade under distribution shift.
+
+**Requires access to log-probabilities.** SE needs token-level log-probs from the generating model. This rules out black-box APIs that only return text. Any open-source model works; GPT-4 via the OpenAI API does not.
+
+**NLI entailment is imperfect.** The DeBERTa NLI model achieves 92.7% accuracy on the semantic equivalence task (Kuhn et al.). Errors in either direction — false equivalences or missed paraphrases — add noise to the SE estimate. A stronger NLI model improves results.
+
+**Small model, low accuracy.** A 1.5B model has limited factual recall. SE detects uncertainty well even here, but the practical value of hallucination detection increases with model size — a 7B+ model would be more appropriate for production.
+
+**SE does not detect confident hallucinations.** If the model is consistently wrong but consistently wrong in the same way (all 10 samples say the same incorrect thing), SE will be low and the answer will not be flagged. SE detects *uncertainty*, not *incorrectness per se*.
+
+---
+
+## 7. Future Work
+
+**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation, so fewer samples (≈4 instead of 10) are needed for the same AUROC. Direct 60% reduction in LLM cost.
+
+**Larger model** — swap `Qwen2.5-1.5B` for `Qwen2.5-7B` or `Llama-3.1-8B`. Expected to significantly improve both accuracy and AUROC, approaching the paper's 30B results.
+
+**Retrieval-augmented generation (RAG)** — combine SE with a retrieval step. SE flags uncertain answers; a retriever then fetches supporting evidence for those questions only. Cost-efficient: retrieval runs only when SE > threshold.
+
+**p(True) baseline** — Kadavath et al. (2022) propose asking the model "is your answer correct?" as a self-evaluation signal. Adding this baseline would make the evaluation table more complete and directly reproduce the paper's comparison.
+
+---
+
+## References
+
+- Kuhn, L., Gal, Y., & Farquhar, S. (2023). *Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation.* ICLR 2023. [arXiv:2302.09664](https://arxiv.org/abs/2302.09664)
+- Park, J. W., & Cho, K. (2025). *Efficient Semantic Uncertainty Quantification in Language Models via Diversity-Steered Sampling.* NeurIPS 2025. [neurips.cc](https://neurips.cc/virtual/2025/loc/san-diego/poster/118777)
+- He, P. et al. (2020). *DeBERTa: Decoding-Enhanced BERT with Disentangled Attention.* [arXiv:2006.03654](https://arxiv.org/abs/2006.03654)
+- Kadavath, S. et al. (2022). *Language Models (Mostly) Know What They Know.* [arXiv:2207.05221](https://arxiv.org/abs/2207.05221)
+- Joshi, M. et al. (2017). *TriviaQA: A Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension.* ACL 2017. [arXiv:1705.03551](https://arxiv.org/abs/1705.03551)

@@ -1,0 +1,29 @@
+[project]
+name = "ctgt"
+version = "0.1.0"
+description = "Prototype project for LLM hallucination detection and mitigation."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "modal>=1.0",
+  "transformers>=4.43.0",
+  "torch>=2.3.0",
+  "accelerate>=0.31.0",
+  "sentencepiece",
+  "protobuf",
+  "datasets>=2.20.0",
+  "rouge-score>=0.1.2",
+  "scikit-learn>=1.5.0",
+  "tqdm>=4.66.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "black>=24.7",
+  "ruff>=0.0.306"
+]
+
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
