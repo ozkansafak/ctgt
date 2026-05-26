@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass, field
 
 from .entailment import EntailmentClustering
@@ -19,6 +20,8 @@ class DetectionResult:
     samples: list[Sample]
     clusters: list[list[int]]
     is_uncertain: bool
+    time_llm_s: float = 0.0   # wall time for LLM sampling
+    time_nli_s: float = 0.0   # wall time for DeBERTa clustering
 
     @property
     def answers(self) -> list[str]:
@@ -93,15 +96,19 @@ class SemanticEntropyDetector:
             DetectionResult with entropy scores, cluster assignments, and a
             binary `is_uncertain` flag based on `self.threshold`.
         """
+        t0 = time.perf_counter()
         samples = self.sampler.sample(
             question,
             n=n_samples,
             temperature=temperature,
             max_new_tokens=max_new_tokens,
         )
+        t1 = time.perf_counter()
         clusters = self.clusterer.cluster(
             [s.text for s in samples], context=question
         )
+        t2 = time.perf_counter()
+
         se = semantic_entropy(samples, clusters, length_normalize=length_normalize)
         pe = predictive_entropy(samples, length_normalize=length_normalize)
 
@@ -112,6 +119,8 @@ class SemanticEntropyDetector:
             samples=samples,
             clusters=clusters,
             is_uncertain=se > self.threshold,
+            time_llm_s=t1 - t0,
+            time_nli_s=t2 - t1,
         )
 
     # ------------------------------------------------------------------

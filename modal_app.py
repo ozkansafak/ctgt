@@ -149,6 +149,8 @@ def score_question(question: str, n_samples: int = 10) -> dict:
         "predictive_entropy": result.predictive_entropy,
         "n_clusters": result.n_clusters,
         "most_common_answer": result.most_common_answer,
+        "time_llm_s": result.time_llm_s,
+        "time_nli_s": result.time_nli_s,
     }
 
 
@@ -219,11 +221,17 @@ def benchmark(n_questions: int = 200, n_samples: int = 10):
     pe_auroc = roc_auc_score(labels_wrong, [r["predictive_entropy"] for r in rows])
     accuracy = 1 - sum(labels_wrong) / len(labels_wrong)
 
+    avg_llm = sum(r["time_llm_s"] for r in raw) / len(raw)
+    avg_nli = sum(r["time_nli_s"] for r in raw) / len(raw)
+
     print(f"\n{'='*56}")
     print(f" TriviaQA closed-book  n={len(rows)}  accuracy={accuracy:.1%}")
     print(f"   Semantic entropy AUROC   : {se_auroc:.3f}")
     print(f"   Predictive entropy AUROC : {pe_auroc:.3f}")
     print(f"   SE improvement           : {se_auroc - pe_auroc:+.3f}")
+    print(f"   Avg LLM sampling time    : {avg_llm:.1f}s  (M={n_samples} samples)")
+    print(f"   Avg NLI clustering time  : {avg_nli:.1f}s")
+    print(f"   Avg total per question   : {avg_llm + avg_nli:.1f}s")
     print(f"{'='*56}")
 
     out = Path("benchmark_results.json")
@@ -237,6 +245,8 @@ def benchmark(n_questions: int = 200, n_samples: int = 10):
                 "accuracy": accuracy,
                 "se_auroc": se_auroc,
                 "pe_auroc": pe_auroc,
+                "avg_llm_s": avg_llm,
+                "avg_nli_s": avg_nli,
                 "rows": rows,
             },
             indent=2,
