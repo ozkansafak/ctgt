@@ -69,6 +69,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         pe_scores    = [r["predictive_entropy"]   for r in rows]
 
         model_short = data["llm_model"].split("/")[-1]
+        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "")
         n_q   = data["n_questions"]
         n_s   = data["n_samples"]
         temp  = data["temperature"]
@@ -76,10 +77,10 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
 
         fig, axes = plt.subplots(1, 2, figsize=(9, 3.75))
         fig.suptitle(
-            f"Semantic Entropy — Kuhn et al. (2023) · "
+            f"Semantic Entropy (Kuhn 2023) · "
             f"{model_short} · N={n_q} · M={n_s} · "
-            f"temp={temp} · Accuracy={acc:.0%}",
-            fontsize=12,
+            f"temp={temp} · Acc={acc:.0%}",
+            fontsize=11,
         )
 
         # ROC curves
@@ -115,7 +116,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         ax.tick_params(labelsize=10)
         ax.grid(alpha=0.3)
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.93])
         out = path.with_name(path.stem + "_plots.png")
         plt.savefig(out, dpi=150)
         print(f"\nPlots saved to {out}")
