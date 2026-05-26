@@ -366,9 +366,7 @@ PE AUROC = 0.330 (below random): with the concise system prompt, Mistral reliabl
 
 **1. most_common_answer** — the representative of the highest-probability semantic cluster from the M samples. This is the answer returned to the user. The paper uses a separate greedy/beam-search decode for this step; we avoid the extra inference call by reusing the samples already generated in step 2.
 
-**2. Swarm Sampler** — draws M=10 independent completions at temperature 0.5 to probe the model's uncertainty landscape. These are used for both selecting the best answer and computing SE.
-
-**2. Swarm Sampler** — probes the model's uncertainty landscape. Uses multinomial sampling at T=0.5 to draw M=10 independent completions. These are used only for entropy estimation, not returned to the user. Kuhn et al. validate empirically (Fig. 3b) that M=10 balances diversity and cost well.
+**2. Swarm Sampler** — draws M=10 independent completions at temperature 0.5 to probe the model's uncertainty landscape. These are used for both selecting the best answer and computing SE. Kuhn et al. validate empirically (Fig. 3b) that M=10 balances diversity and cost well.
 
 **3. NLI Clusterer** — resolves linguistic variance by grouping the M samples into semantic equivalence classes using bidirectional DeBERTa entailment. Exploits transitivity (greedy, O(M·C)) so each new sample is compared against one cluster representative, not all members.
 
