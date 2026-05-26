@@ -4,7 +4,7 @@ Modal deployment for LLM hallucination detection.
 Implements two methods:
   Kuhn / Farquhar 2024 (1561 citations) — Semantic Entropy baseline
     modal run modal_app.py::app.benchmark --n-questions 300
-    modal run modal_app.py::app.benchmark --n-questions 300 --llm-model meta-llama/Llama-3.1-8B-Instruct
+    modal run modal_app.py::app.benchmark --n-questions 300 --llm-model NousResearch/Meta-Llama-3.1-8B-Instruct
     modal run modal_app.py::app.analyze  --question "Who painted the Mona Lisa?"
 
   Kossen et al. 2024 (161 citations) — Semantic Entropy Probes
@@ -30,7 +30,7 @@ NLI_MODEL = "cross-encoder/nli-deberta-v3-large"
 # All LLMs pre-baked into the image so cold starts are fast for any model.
 _ALL_LLM_MODELS = [
     "mistralai/Mistral-7B-Instruct-v0.3",
-    "meta-llama/Llama-3.1-8B-Instruct",
+    "NousResearch/Meta-Llama-3.1-8B-Instruct",  # public mirror, no HF token needed
     "Qwen/Qwen2.5-1.5B-Instruct",
 ]
 
@@ -270,7 +270,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
 
     Example:
         modal run modal_app.py::app.benchmark --n-questions 300
-        modal run modal_app.py::app.benchmark --n-questions 300 --llm-model meta-llama/Llama-3.1-8B-Instruct
+        modal run modal_app.py::app.benchmark --n-questions 300 --llm-model NousResearch/Meta-Llama-3.1-8B-Instruct
     """
     import json
     from pathlib import Path
@@ -309,9 +309,17 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
         )
         rows.append({**r, "is_correct": correct})
 
+    import math
     labels_wrong = [1 - int(r["is_correct"]) for r in rows]
-    se_auroc = roc_auc_score(labels_wrong, [r["semantic_entropy"] for r in rows])
-    pe_auroc = roc_auc_score(labels_wrong, [r["predictive_entropy"] for r in rows])
+    se_scores = [r["semantic_entropy"] for r in rows]
+    pe_scores = [r["predictive_entropy"] for r in rows]
+    valid_se = [(lw, s) for lw, s in zip(labels_wrong, se_scores) if not math.isnan(s)]
+    valid_pe = [(lw, s) for lw, s in zip(labels_wrong, pe_scores) if not math.isnan(s)]
+    nan_count = sum(1 for s in se_scores if math.isnan(s))
+    if nan_count:
+        print(f"  Warning: {nan_count}/{len(rows)} questions had NaN entropy — excluded from AUROC")
+    se_auroc = roc_auc_score(*zip(*valid_se)) if valid_se else float("nan")
+    pe_auroc = roc_auc_score(*zip(*valid_pe)) if valid_pe else float("nan")
     accuracy = 1 - sum(labels_wrong) / len(labels_wrong)
 
     avg_llm = sum(r["time_llm_s"] for r in raw) / len(raw)
@@ -413,9 +421,18 @@ def collect_sep_training_data(
         )
         rows.append({**r, "is_correct": correct})
 
+    import math
     labels_wrong = [1 - int(r["is_correct"]) for r in rows]
-    se_auroc = roc_auc_score(labels_wrong, [r["semantic_entropy"] for r in rows])
-    pe_auroc = roc_auc_score(labels_wrong, [r["predictive_entropy"] for r in rows])
+    se_scores = [r["semantic_entropy"] for r in rows]
+    pe_scores = [r["predictive_entropy"] for r in rows]
+    # Filter NaNs for AUROC (some models produce NaN entropy on degenerate outputs)
+    valid_se = [(lw, s) for lw, s in zip(labels_wrong, se_scores) if not math.isnan(s)]
+    valid_pe = [(lw, s) for lw, s in zip(labels_wrong, pe_scores) if not math.isnan(s)]
+    nan_count = sum(1 for s in se_scores if math.isnan(s))
+    if nan_count:
+        print(f"  Warning: {nan_count}/{len(rows)} questions had NaN entropy — excluded from AUROC")
+    se_auroc = roc_auc_score(*zip(*valid_se)) if valid_se else float("nan")
+    pe_auroc = roc_auc_score(*zip(*valid_pe)) if valid_pe else float("nan")
     accuracy = 1 - sum(labels_wrong) / len(labels_wrong)
 
     model_slug = llm_model.split("/")[-1].lower()

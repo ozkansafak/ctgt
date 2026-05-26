@@ -161,18 +161,22 @@ All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Moda
 
 ### 5.1 Summary
 
-| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kossen SEP AUROC | SEP gap |
-|---|---|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 0.750 | −0.030 |
-| Llama-3.1-8B-Instruct | 8B | — | — | — | — | — |
-| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | — | — |
-| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — |
+All runs: N=300, M=10 samples, temp=0.5, Modal A10G GPU.
 
-*Kossen SEP and Llama results pending; table will be updated after benchmarks complete.*
+| Model | Params | Acc | Kuhn SE AUROC | PE AUROC | Kossen SEP AUROC | SEP gap | Best layer |
+|---|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 7B | 61% | 0.720 | 0.330 | 0.662 | −0.058 | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | **73%** | **0.728** | 0.310 | **0.687** | −0.034 | 21 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 39% | 0.755 | 0.293 | 0.692 | −0.042 | 17 |
+| Kuhn et al. (OPT-30B) | 30B | ~50% | ~0.830 | — | — | — | — |
+
+PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
+
+SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sampling, no NLI.
 
 ### 5.2 Per-model results
 
-Each model shows two plots: **Kuhn SE** (left pair — ROC + SE distribution) and **Kossen SEP** (right pair — ROC + probe score distribution).
+Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and **Kossen SEP** (ROC curve + probe score distribution).
 
 ---
 
@@ -180,17 +184,23 @@ Each model shows two plots: **Kuhn SE** (left pair — ROC + SE distribution) an
 
 <p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%"></p>
 
-*Kuhn SE · Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — the concise system prompt makes the model lexically rigid, so all M=10 samples return the same wrong tokens on incorrect questions (PE≈0) while correct answers show slight variation. SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
+*Kuhn SE · Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — the concise system prompt makes the model lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight variation. SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
 
 <p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_sep_plots.png" width="75%"></p>
 
-*Kossen SEP · Mistral-7B · N=300 · 5-fold CV · layer 21. SEP probe achieves SE-level AUROC at 1/10th the inference cost.*
+*Kossen SEP · Mistral-7B · N=300 · 5-fold CV · layer 21 · SEP AUROC=0.662 · gap=−0.058.*
 
 ---
 
-#### Llama-3.1-8B-Instruct
+#### Meta-Llama-3.1-8B-Instruct
 
-*Results pending — benchmark in progress.*
+<p align="center"><img src="outputs/meta-llama-3.1-8b-instruct_q300_s10_t0.5_20260526_033925_plots.png" width="75%"></p>
+
+*Kuhn SE · LLaMA-3.1-8B · N=300 · SE AUROC=0.728 · PE AUROC=0.310 · Acc=73% · 108s. Highest accuracy of all tested models. Same PE overconfidence pattern.*
+
+<p align="center"><img src="outputs/sep_data_meta-llama-3.1-8b-instruct_q300_s10_t0.5_20260526_033955_sep_plots.png" width="75%"></p>
+
+*Kossen SEP · LLaMA-3.1-8B · N=300 · 5-fold CV · layer 21 · SEP AUROC=0.687 · gap=−0.034. Smallest probe gap of the three models.*
 
 ---
 
@@ -198,11 +208,11 @@ Each model shows two plots: **Kuhn SE** (left pair — ROC + SE distribution) an
 
 <p align="center"><img src="outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png" width="75%"></p>
 
-*Kuhn SE · Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Same PE overconfidence pattern as Mistral. SE AUROC slightly higher despite the smaller model — likely a sampling artifact at N=300.*
+*Kuhn SE · Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Highest SE AUROC despite smallest model size — likely a sampling artifact at N=300.*
 
-<p align="center"><img src="outputs/sep_data_qwen2.5-1.5b-instruct_q300_s10_t0.5_plots_sep.png" width="75%"></p>
+<p align="center"><img src="outputs/sep_data_qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_034402_sep_plots.png" width="75%"></p>
 
-*Kossen SEP · Qwen2.5-1.5B · N=300 · 5-fold CV. Results pending.*
+*Kossen SEP · Qwen2.5-1.5B · N=300 · 5-fold CV · layer 17 · SEP AUROC=0.692 · gap=−0.042.*
 
 ---
 
