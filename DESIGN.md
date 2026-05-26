@@ -101,20 +101,89 @@ Both models run on a single **NVIDIA T4 GPU (15 GB VRAM)** via Modal. The LLM do
 | Max new tokens | 128 | Sufficient for factual QA answers |
 | SE threshold | ln(2) ≈ 0.69 | Entropy of a 50/50 split between two meanings |
 
-### 3.3 Evaluation metric: AUROC
+### 3.3 From SE Score to AUROC
 
-We evaluate using **AUROC** (Area Under the ROC Curve) — the probability that a randomly chosen *wrong* answer has higher SE than a randomly chosen *correct* answer. 
+The goal is not to predict the answer to a question — it is to build a **meta-detector** that predicts whether the model's generated answer is correct or a hallucination. SE is the score that drives this detector. Here is how it materialises the ROC curve:
 
-- AUROC = 0.5 → SE is no better than random at detecting hallucinations  
+**Step 1 — Generate the primary answer**
+
+For each question $x$, generate a single primary answer $y'$. Kuhn et al. use beam search (`num_beams=5`) for a stable, deterministic output. In our implementation we use `most_common_answer` — the representative of the highest-probability semantic cluster from the M=10 samples — which serves the same role without an extra inference call.
+
+**Step 2 — Compute the uncertainty score (SE)**
+
+Separately sample $M=10$ answers at temperature 0.5. Cluster them with DeBERTa NLI. Compute SE. This single scalar is the score for the ROC curve — every question gets exactly one SE value.
+
+*Numerical example — "Who invented the telephone?"*
+
+```
+s1:  "Alexander Graham Bell invented it in 1876."  log_prob = -0.12  ┐
+s2:  "The telephone was invented by Bell in 1876."  log_prob = -0.15  ├─ Cluster 1  p = 0.95
+s3:  "Bell is credited with the telephone."         log_prob = -0.18  ┘
+...
+s10: "Nikola Tesla invented the telephone."         log_prob = -2.10  ── Cluster 2  p = 0.05
+
+SE = -(0.95·log 0.95 + 0.05·log 0.05) = 0.20
+```
+
+The highest-probability cluster (Cluster 1) wins — its representative `s1` becomes `most_common_answer`.
+
+**Step 3 — Define ground truth labels**
+
+Compare `most_common_answer` against the gold aliases from TriviaQA using RougeL:
+
+$$\text{label} = \begin{cases} 0 \ (\text{correct}), & \text{RougeL}(y', y) > 0.3 \\ 1 \ (\text{hallucination}), & \text{RougeL}(y', y) \le 0.3 \end{cases}$$
+
+For this example: RougeL("Alexander Graham Bell invented it in 1876.", "alexander graham bell") = 0.9 > 0.3 → **label = 0 (correct)**.
+
+After running all 50 questions, each has exactly one (SE score, label) pair:
+
+```
+question  1:  SE = 0.20,  label = 0  (correct)
+question  2:  SE = 1.85,  label = 1  (hallucination)
+question  3:  SE = 0.95,  label = 1  (hallucination)
+...
+question 50:  SE = 1.42,  label = 0  (correct)
+```
+
+**Step 4 — Sweep threshold $\tau$ to build the ROC curve**
+
+For each value of $\tau$ from 0 to $\max(SE)$:
+
+$$\text{Predict hallucination} = \begin{cases} \text{True (Positive)}, & SE \ge \tau \\ \text{False (Negative)}, & SE < \tau \end{cases}$$
+
+At $\tau = 1.0$ using the four questions above:
+
+| Question | SE | Label | Prediction | Outcome |
+|---|---|---|---|---|
+| 1 | 0.20 | 0 (correct) | negative | **TN** |
+| 2 | 1.85 | 1 (hallucination) | positive | **TP** |
+| 3 | 0.95 | 1 (hallucination) | negative | **FN** |
+| 50 | 1.42 | 0 (correct) | positive | **FP** |
+
+Sweeping $\tau$ across all values traces the full ROC curve.
+
+**Step 5 — AUROC**
+
+The area under the ROC curve equals the probability that a randomly chosen hallucinated answer has higher SE than a randomly chosen correct answer:
+
+- AUROC = 0.5 → SE is no better than random  
 - AUROC = 1.0 → SE perfectly separates hallucinations from correct answers
 
-AUROC is appropriate here because we care about *ranking* — which answers to trust — not binary classification at a fixed threshold.
+AUROC is appropriate here because we care about *ranking* — which answers to trust — not classification at a fixed threshold.
 
 ### 3.4 Dataset: TriviaQA (closed-book)
 
 We evaluate on **TriviaQA** `rc.nocontext` (validation set) — 17,944 trivia questions answered from memory, with no supporting document. Closed-book is the right setting because it forces genuine uncertainty: the model either knows the answer or it doesn't.
 
 **Correctness criterion:** RougeL(model answer, any gold alias) > 0.3, following Kuhn et al.
+
+RougeL is the F-score of the Longest Common Subsequence (LCS) between reference $X$ (length $m$) and generated answer $Y$ (length $n$):
+
+$$R_{lcs} = \frac{LCS(X,Y)}{m}, \quad P_{lcs} = \frac{LCS(X,Y)}{n}$$
+
+$$\text{RougeL} = \frac{(1+\beta^2)\,R_{lcs}\,P_{lcs}}{R_{lcs} + \beta^2 P_{lcs}}, \quad \beta=1$$
+
+We check the model's best answer against every gold alias; a match ($\text{RougeL} > 0.3$) on any alias counts as correct.
 
 Example item:
 ```python
