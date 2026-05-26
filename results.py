@@ -74,12 +74,12 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         temp  = data["temperature"]
         acc   = data["accuracy"]
 
-        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+        fig, axes = plt.subplots(1, 2, figsize=(9, 3.75))
         fig.suptitle(
             f"Semantic Entropy — Kuhn et al. (2023) · "
             f"{model_short} · N={n_q} · M={n_s} · "
             f"temp={temp} · Accuracy={acc:.0%}",
-            fontsize=10,
+            fontsize=12,
         )
 
         # ROC curves
@@ -93,10 +93,11 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
             ax.plot(fpr, tpr, marker=marker, fillstyle=fillstyle,
                     color=color, linestyle="none", ms=8, label=label)
         ax.plot([0, 1], [0, 1], "k--", lw=1)
-        ax.set_xlabel("False Positive Rate")
-        ax.set_ylabel("True Positive Rate")
-        ax.set_title("ROC Curve")
-        ax.legend(loc="lower right")
+        ax.set_xlabel("False Positive Rate", fontsize=11)
+        ax.set_ylabel("True Positive Rate", fontsize=11)
+        ax.set_title("ROC Curve", fontsize=12)
+        ax.legend(loc="lower right", fontsize=9)
+        ax.tick_params(labelsize=10)
         ax.grid(alpha=0.3)
 
         # SE distribution: correct vs wrong
@@ -107,10 +108,11 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         ax.hist(wrong_se,   bins=bins, alpha=0.6,  label="Wrong",   color="#F44336")
         ax.hist(correct_se, bins=bins, alpha=0.9,  label="Correct", color="#4CAF50",
                 edgecolor="black", linewidth=0.8)
-        ax.set_xlabel("Semantic Entropy")
-        ax.set_ylabel("Count")
-        ax.set_title("SE Distribution: Correct vs Wrong Answers")
-        ax.legend()
+        ax.set_xlabel("Semantic Entropy", fontsize=11)
+        ax.set_ylabel("Count", fontsize=11)
+        ax.set_title("SE Distribution: Correct vs Wrong Answers", fontsize=12)
+        ax.legend(fontsize=10)
+        ax.tick_params(labelsize=10)
         ax.grid(alpha=0.3)
 
         plt.tight_layout()
