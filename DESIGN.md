@@ -180,19 +180,19 @@ The SEP probe achieves 96% of SE's AUROC at 1/10th the inference cost.
 
 ### 5.2 Per-model results
 
-<img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%">
+<p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%"></p>
 
 *Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — anti-correlated with errors. The concise system prompt makes the model lexically rigid: all M=10 samples return the same wrong tokens on incorrect questions (PE≈0), while correct answers show slight lexical variation. SE is unaffected — "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
 
 ---
 
-<img src="outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png" width="75%">
+<p align="center"><img src="outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png" width="75%"></p>
 
 *Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Same PE overconfidence pattern as Mistral. SE AUROC slightly higher than Mistral despite the smaller model — likely a sampling artifact at N=300.*
 
 ---
 
-<img src="outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png" width="75%">
+<p align="center"><img src="outputs/opt-2.7b_q300_s10_t0.5_20260526_021812_plots.png" width="75%"></p>
 
 *OPT-2.7B (base model, no instruction tuning) · N=300 · SE AUROC=0.501 ≈ random · PE AUROC=0.586 · Acc=3% · 252s. With 3% accuracy, OPT rarely produces consistent answers even when correct — SE cannot separate uncertainty from noise. PE > SE (reverse of instruction-tuned models): noisy completions make token entropy sensitive to output format rather than factual uncertainty.*
 
