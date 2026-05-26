@@ -201,15 +201,17 @@ All benchmarks: 50 questions, M=10 samples, temperature=0.5, TriviaQA `rc.nocont
 
 ### 4.1 Summary table
 
-| Model | Type | Accuracy | SE AUROC | PE AUROC | SE gain | LLM time/q | NLI time/q | Wall time |
-|---|---|---|---|---|---|---|---|---|
-| Qwen2.5-1.5B | Instruction-tuned | 6% | **0.723** | 0.660 | +0.064 | 10.7s | 2.5s | 103s |
-| OPT-2.7B | Base model | 4% | 0.688 | 0.562 | +0.125 | 17.4s | 2.7s | — |
-| Kuhn et al. OPT-30B | Base model | ~50% | ~0.830 | — | — | — | — | — |
+| Model | Instruction-tuned | Params | Accuracy | SE AUROC | PE AUROC | SE gain | LLM time/q | NLI time/q | Wall time |
+|---|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-1.5B-Instruct | ✅ Yes | 1.5B | 6% | **0.723** | 0.660 | +0.064 | 10.7s | 2.5s | 103s |
+| OPT-2.7B | ❌ No | 2.7B | 4% | 0.688 | 0.562 | +0.125 | 17.4s | 2.7s | — |
+| Kuhn et al. OPT-30B | ❌ No | 30B | ~50% | ~0.830 | — | — | — | — | — |
 
-SE consistently outranks PE as an uncertainty signal across both models. OPT-2.7B is larger but scores lower AUROC than Qwen-1.5B — OPT is a base model with no instruction tuning, so its Q&A completions are noisier and SE has less signal to work with.
+SE consistently outranks PE as an uncertainty signal on both models.
 
-Kuhn et al. use a 30B OPT model and report SE AUROC ~0.83 at ~50% accuracy. The low accuracy here (4–6%) is expected for a 1.5B model on closed-book trivia — the key result is that SE separates uncertain from confident answers better than PE does, regardless of model size.
+**Why OPT-2.7B scores lower than Qwen-1.5B despite being larger:** OPT is a base model — it was only trained on raw text (books, web pages) and never fine-tuned to follow instructions. It produces answers via autocomplete from a `Q: ... A:` prompt, which makes its completions noisier and less structured. Some of that noise comes from *how to format the answer* rather than *which fact to state*, which dilutes the SE signal. This is **not a fair size comparison** — a proper apples-to-apples comparison would use an instruction-tuned model at both sizes, e.g. Qwen2.5-7B-Instruct or Llama-3.1-8B-Instruct.
+
+Kuhn et al. use OPT-30B (also a base model) and report SE AUROC ~0.83 at ~50% accuracy — the high accuracy reflects model scale, not instruction tuning. The low accuracy here (4–6%) is expected for small models on closed-book trivia.
 
 ---
 
@@ -238,7 +240,7 @@ Kuhn et al. use a 30B OPT model and report SE AUROC ~0.83 at ~50% accuracy. The 
 ### 5.1 Pipeline components
 
 ```
-[User Prompt] ──────────────────────────────────────────────────┐
+[User Prompt] ───────────────────────────────────────────────────┐
                                                                  │
                     ┌────────────────────────────────────────────┤
                     ▼                                            ▼
