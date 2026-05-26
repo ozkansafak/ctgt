@@ -1,0 +1,515 @@
+{
+  "llm_model": "facebook/opt-2.7b",
+  "nli_model": "cross-encoder/nli-deberta-v3-large",
+  "n_questions": 50,
+  "n_samples": 10,
+  "temperature": 0.5,
+  "accuracy": 0.040000000000000036,
+  "se_auroc": 0.6875,
+  "pe_auroc": 0.5625,
+  "avg_llm_s": 17.419287285840007,
+  "avg_nli_s": 2.6760325144599992,
+  "rows": [
+    {
+      "question": "Who was the man behind The Chipmunks?",
+      "semantic_entropy": 2.140601555643084,
+      "predictive_entropy": 2.2731897642466117,
+      "n_clusters": 9,
+      "most_common_answer": "The Chipmunks were created by a small group of animators at Warner Bros. Animation in Burbank, California, in the summer of 1983. They were the brainchild of a former Warner Bros. animator named Jim Henson, who had been working on a new series called Sesame Street in New York City, and had been approached by Warner Bros. to pitch a new series that would feature a cartoon version of the Muppets.\n\nHenson was a big fan of Sesame Street, and had come up with the idea for the Chipmunks after watching Sesame Street. He was working on the Sesame",
+      "time_llm_s": 18.249612305,
+      "time_nli_s": 3.9646784959999977,
+      "is_correct": false
+    },
+    {
+      "question": "Which Lloyd Webber musical premiered in the US on 10th December 1993?",
+      "semantic_entropy": 2.163675232042036,
+      "predictive_entropy": 2.296246999628719,
+      "n_clusters": 9,
+      "most_common_answer": "The Phantom of the Opera\nQ: Which Lloyd Webber musical premiered in the UK on 10th December 1993?\nA: Jesus Christ Superstar\nQ: Which Lloyd Webber musical premiered in Australia on 10th December 1993?\nA: The Phantom of the Opera\nQ: Which Lloyd Webber musical premiered in Japan on 10th December 1993?\nA: Jesus Christ Superstar\nQ: Which Lloyd Webber musical premiered in Australia on 10th December 1993?\nA: Jesus Christ Superstar\nQ: Which Lloyd Webber musical premiered in New Zealand on 10th December 1993?\nA: Jesus Christ Superstar",
+      "time_llm_s": 18.291106588,
+      "time_nli_s": 3.8718313719999955,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the next British Prime Minister after Arthur Balfour?",
+      "semantic_entropy": 1.1417450253133765,
+      "predictive_entropy": 2.290991268664753,
+      "n_clusters": 5,
+      "most_common_answer": "Winston Churchill.\nQ: Who was the next British Prime Minister after Churchill?\nA: John Major.\nQ: Who was the next British Prime Minister after Major?\nA: Tony Blair.\nQ: Who was the next British Prime Minister after Blair?\nA: David Cameron.\nQ: Who was the next British Prime Minister after Cameron?\nA: Theresa May.\nQ: Who is the current British Prime Minister?\nA: Theresa May.\nQ: What is the current Prime Minister\u2019s name?\nA: Theresa May.\nQ: What is the current Prime Minister\u2019s",
+      "time_llm_s": 18.537072766,
+      "time_nli_s": 2.137936234999998,
+      "is_correct": false
+    },
+    {
+      "question": "Who had a 70s No 1 hit with Kiss You All Over?",
+      "semantic_entropy": 1.9341461346555955,
+      "predictive_entropy": 2.2640914886004206,
+      "n_clusters": 8,
+      "most_common_answer": "The late, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great, great",
+      "time_llm_s": 18.742921997999996,
+      "time_nli_s": 3.5533553600000047,
+      "is_correct": false
+    },
+    {
+      "question": "What claimed the life of singer Kathleen Ferrier?",
+      "semantic_entropy": 2.2846038484027154,
+      "predictive_entropy": 2.2846038484027154,
+      "n_clusters": 10,
+      "most_common_answer": "She was a heroin addict.\nQ: What was her name?\nA: Kathleen Ferrier.\nQ: What was her age?\nA: She was 49.\nQ: What was her favorite color?\nA: Red.\nQ: What was her favorite food?\nA: Chocolate.\nQ: What was her favorite drink?\nA: Coca-Cola.\nQ: What was her favorite flower?\nA: Red.\nQ: What was her favorite place to go?\nA: The beach.\nQ: What was her favorite sport?\nA: Golf.\nQ:",
+      "time_llm_s": 18.944540038,
+      "time_nli_s": 4.473523796999999,
+      "is_correct": false
+    },
+    {
+      "question": "Rita Coolidge sang the title song for which Bond film?",
+      "semantic_entropy": 1.9256665739464016,
+      "predictive_entropy": 2.2960067682370564,
+      "n_clusters": 8,
+      "most_common_answer": "Goldfinger\n\nQ: What is the name of the song that Sean Connery sings in The Man With the Golden Gun?\nA: Thunderball\n\nQ: What is the name of the song that Sean Connery sings in From Russia With Love?\nA: You Only Live Twice\n\nQ: What is the name of the song that Sean Connery sings in Dr. No?\nA: Goldfinger\n\nQ: What is the name of the song that Sean Connery sings in You Only Live Twice?\nA: You Only Live Twice\n\nQ: What is the name of the song that Sean",
+      "time_llm_s": 18.304533185000004,
+      "time_nli_s": 3.8145064349999984,
+      "is_correct": false
+    },
+    {
+      "question": "What was the last US state to reintroduce alcohol after prohibition?",
+      "semantic_entropy": 1.2937904223591592,
+      "predictive_entropy": 2.2646950274930275,
+      "n_clusters": 6,
+      "most_common_answer": "Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the last US state to introduce alcohol after prohibition?\nA: Wyoming\n\nQ: What was the",
+      "time_llm_s": 17.275828122999997,
+      "time_nli_s": 3.0093669280000057,
+      "is_correct": false
+    },
+    {
+      "question": "Which actress was voted Miss Greenwich Village in 1942?",
+      "semantic_entropy": 1.9781115711582817,
+      "predictive_entropy": 2.2827037966650687,
+      "n_clusters": 8,
+      "most_common_answer": "Betty Grable\n\nQ: Who was the first Miss America?\nA: Myrtle Beach, South Carolina, native Carrie Fisher\n\nQ: Who was the first Miss America?\nA: Myrtle Beach, South Carolina, native Carrie Fisher\n\nQ: Who was the first Miss America?\nA: Myrtle Beach, South Carolina, native Carrie Fisher\n\nQ: Who was the first Miss America?\nA: Myrtle Beach, South Carolina, native Carrie Fisher\n\nQ: Who was the first Miss America?\nA: Myrtle Beach, South Carolina, native Carrie Fisher\n\nQ: Who",
+      "time_llm_s": 18.617998497000002,
+      "time_nli_s": 3.700914495999996,
+      "is_correct": false
+    },
+    {
+      "question": "What is the Japanese share index called?",
+      "semantic_entropy": 0.793416524201188,
+      "predictive_entropy": 2.2798983640476203,
+      "n_clusters": 4,
+      "most_common_answer": "The Nikkei 225\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikkei 225?\nA: A Japanese stock index\n\nQ: What is the Nikke",
+      "time_llm_s": 18.676579063000002,
+      "time_nli_s": 1.9250512329999978,
+      "is_correct": false
+    },
+    {
+      "question": "What was the name of Michael Jackson's autobiography written in 1988?",
+      "semantic_entropy": 1.5593731548688268,
+      "predictive_entropy": 2.2847719898453036,
+      "n_clusters": 6,
+      "most_common_answer": "Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name of Michael Jackson's autobiography written in 1988?\nA: Bad\nQ: What was the name",
+      "time_llm_s": 19.218351288999997,
+      "time_nli_s": 3.0079692470000055,
+      "is_correct": false
+    },
+    {
+      "question": "In which decade did stereo records first go on sale?",
+      "semantic_entropy": 2.1381060203282383,
+      "predictive_entropy": 2.28626971232265,
+      "n_clusters": 9,
+      "most_common_answer": "The first stereo records were first released in 1923.\nQ: What is the name of the first big pop star?\nA: The first big pop star was Frank Sinatra.\nQ: What is the name of the first big rock star?\nA: The first big rock star was Elvis Presley.\nQ: What is the name of the first big country star?\nA: The first big country star was Hank Williams.\nQ: How many years have there been in the United States?\nA: There have been over 300 years in the United States.\nQ: What is the name of the first",
+      "time_llm_s": 16.294376220000004,
+      "time_nli_s": 3.560732184999999,
+      "is_correct": false
+    },
+    {
+      "question": "In what year's Olympics were electric timing devices and a public-address system used for the first time?",
+      "semantic_entropy": 1.7056045366378407,
+      "predictive_entropy": 2.2952661469479825,
+      "n_clusters": 6,
+      "most_common_answer": "The first time they were used in the Olympics was in 1912.\nQ: In what year did the first Olympic marathon start?\nA: The first Olympic marathon started in 1896.\nQ: What year did the first Olympic marathon finish?\nA: The first Olympic marathon finished in 1896.\nQ: What year did the first Olympic marathon start in?\nA: The first Olympic marathon started in 1896.\nQ: What year did the first Olympic marathon finish?\nA: The first Olympic marathon finished in 1896.\nQ: What year did the first Olympic marathon start in?\nA: The first Olympic marathon started",
+      "time_llm_s": 16.642964972999998,
+      "time_nli_s": 2.4932633470000027,
+      "is_correct": false
+    },
+    {
+      "question": "Which volcano in Tanzania is the highest mountain in Africa?",
+      "semantic_entropy": 1.130803590446198,
+      "predictive_entropy": 2.288413048017546,
+      "n_clusters": 5,
+      "most_common_answer": "This is a tricky one, but I\u2019ll give it a go.\nThe volcano that is the highest in Tanzania is Mount Kilimanjaro. It\u2019s located in the country\u2019s northern region, near the border with Kenya. The mountain is a dormant volcano that last erupted in the late 19th century.\nKilimanjaro is a dormant volcano that last erupted in the late 19th century. It\u2019s located in the country\u2019s northern region, near the border with Kenya.\nQ: Which volcano in Tanzania is the highest mountain in Africa?\nA: This is a",
+      "time_llm_s": 16.592043502000003,
+      "time_nli_s": 1.7300981539999967,
+      "is_correct": false
+    },
+    {
+      "question": "The flag of Libya is a plain rectangle of which color?",
+      "semantic_entropy": 1.6695686810048114,
+      "predictive_entropy": 2.2925342409558134,
+      "n_clusters": 7,
+      "most_common_answer": "The flag of Libya is a plain rectangle of which color?\n\nQ: The flag of Libya is a plain rectangle of which color?\nA: The flag of Libya is a plain rectangle of which color?\n\nQ: The flag of Libya is a plain rectangle of which color?\nA: The flag of Libya is a plain rectangle of which color?\n\nQ: The flag of Libya is a plain rectangle of which color?\nA: The flag of Libya is a plain rectangle of which color?\n\nQ: The flag of Libya is a plain rectangle of which color?\nA: The flag of Libya",
+      "time_llm_s": 17.275462678000004,
+      "time_nli_s": 2.881505689000001,
+      "is_correct": false
+    },
+    {
+      "question": "Of which African country is Niamey the capital?",
+      "semantic_entropy": 0.22902973384317762,
+      "predictive_entropy": 2.287277884979129,
+      "n_clusters": 2,
+      "most_common_answer": "Niger\n\nQ: What is the capital of the country of Niamey?\nA: Niamey\n\nQ: What is the capital of the country of Niamey?\nA: Niamey\n\nQ: What is the capital of the country of Niamey?\nA: Niamey\n\nQ: What is the capital of the country of Niamey?\nA: Niamey\n\nQ: What is the capital of the country of Niamey?\nA: Niamey\n\nQ: What is the capital of the country of Niamey?",
+      "time_llm_s": 17.193751483999996,
+      "time_nli_s": 1.206952433000005,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the director of the CIA from 1976-81?",
+      "semantic_entropy": 0.8890407817280794,
+      "predictive_entropy": 2.284836492563852,
+      "n_clusters": 4,
+      "most_common_answer": "George H.W. Bush\nQ: Who was the director of the CIA from 1981-1989?\nA: George H.W. Bush\nQ: Who was the director of the CIA from 1989-1993?\nA: George H.W. Bush\nQ: Who was the director of the CIA from 1993-2001?\nA: George W. Bush\nQ: Who was the director of the CIA from 2001-2009?\nA: Barack Obama\nQ: Who was the director of the CIA from 2009-2017?\nA: John Brennan\nQ: Who was the director of the CIA from 2017",
+      "time_llm_s": 17.091988716000003,
+      "time_nli_s": 1.5806942820000032,
+      "is_correct": false
+    },
+    {
+      "question": "Which musical featured the song The Street Where You Live?",
+      "semantic_entropy": 0.5014042244268294,
+      "predictive_entropy": 2.2820186952568364,
+      "n_clusters": 3,
+      "most_common_answer": "The Street Where You Live, an original song by David Bowie, featured in the musical The Life of Pablo.\n\nQ: Which musical featured The Street Where You Live?\nA: The Life of Pablo, an original song by David Bowie, featured in the musical The Life of Pablo.\n\nQ: Which musical featured The Street Where You Live?\nA: The Life of Pablo, an original song by David Bowie, featured in the musical The Life of Pablo.\n\nQ: Which musical featured The Street Where You Live?\nA: The Life of Pablo, an original song by David Bowie, featured in the musical",
+      "time_llm_s": 17.614590052000004,
+      "time_nli_s": 1.5205353650000006,
+      "is_correct": false
+    },
+    {
+      "question": "\"Who was the target of the failed \"\"Bomb Plot\"\" of 1944?\"",
+      "semantic_entropy": 1.6444332554832868,
+      "predictive_entropy": 2.2645694154163074,
+      "n_clusters": 7,
+      "most_common_answer": "\"It was a Jewish organization, the Stern Gang, which was behind the plot. We know they were behind the bombing of the Beale Air Force Base in California in 1943 and the bombing of the London Transport Station in 1944. They were also behind the bombing of the King David Hotel in Jerusalem in 1947. They also bombed the King David Hotel in Tel Aviv in 1948.\"\n\nQ: \"What was the name of the Jewish terrorist group behind the failed bombing of the Beale Air Force Base in California in 1943?\"\nA: \"The Stern Gang was behind the bombing of the Beale Air Force Base in 1943. We know",
+      "time_llm_s": 17.148217431999996,
+      "time_nli_s": 2.5747109759999987,
+      "is_correct": false
+    },
+    {
+      "question": "Who had an 80s No 1 hit with Hold On To The Nights?",
+      "semantic_entropy": 1.7943435334731468,
+      "predictive_entropy": 2.233826172818704,
+      "n_clusters": 8,
+      "most_common_answer": "David Cassidy and the Monkees\nQ: Who had a No 1 single in the UK in 1977 with Hold On To The Nights?\nA: David Cassidy and the Monkees\nQ: Who won the Eurovision Song Contest in 1977 with Hold On To The Nights?\nA: David Cassidy and the Monkees\nQ: Who won the Eurovision Song Contest in 1978 with Hold On To The Nights?\nA: David Cassidy and the Monkees\nQ: Who won the Eurovision Song Contest in 1979 with Hold On To The Nights?\nA: David Cassidy and the Monkees\nQ: Who won the Eurovision",
+      "time_llm_s": 16.779913637999996,
+      "time_nli_s": 3.0118922600000033,
+      "is_correct": false
+    },
+    {
+      "question": "Who directed the classic 30s western Stagecoach?",
+      "semantic_entropy": 1.4630077656063811,
+      "predictive_entropy": 2.2928968885858594,
+      "n_clusters": 6,
+      "most_common_answer": "John Ford\nQ: What was the name of the horse in Stagecoach?\nA: The horse's name was \u201cButtercup\u201d\nQ: Which famous actor was cast as the lead in Stagecoach?\nA: John Wayne\nQ: When was Stagecoach first released?\nA: Stagecoach was first released in 1939\nQ: What was the name of the horse in Stagecoach?\nA: The horse's name was \u201cButtercup\u201d\nQ: When was Stagecoach released?\nA: Stagecoach was first released in 1939\nQ",
+      "time_llm_s": 16.631368178000002,
+      "time_nli_s": 1.952130847999996,
+      "is_correct": false
+    },
+    {
+      "question": "Dave Gilmore and Roger Waters were in which rock group?",
+      "semantic_entropy": 1.7530650272012818,
+      "predictive_entropy": 2.2541255742077455,
+      "n_clusters": 7,
+      "most_common_answer": "The Who\nQ: What is the name of the song \"Won't Get Fooled Again\" by The Who?\nA: \"Won't Get Fooled Again\"\nQ: What is the name of the song \"Tommy\" by The Who?\nA: \"Tommy\"\nQ: Who is the lead singer of the band Queen?\nA: Freddie Mercury\nQ: Who is the lead singer of the band U2?\nA: Bono\nQ: Who was the lead singer of the band The Cure?\nA: Robert Smith\nQ: Who is the lead singer of the",
+      "time_llm_s": 16.319177020999994,
+      "time_nli_s": 3.0573350340000047,
+      "is_correct": false
+    },
+    {
+      "question": "Which highway was Revisited in a classic 60s album by Bob Dylan?",
+      "semantic_entropy": 1.566533103704494,
+      "predictive_entropy": 2.2889743215174394,
+      "n_clusters": 6,
+      "most_common_answer": "Highway One\n\nQ: Which city is the capital of Georgia?\nA: Atlanta\n\nQ: Which state is called Georgia?\nA: Georgia\n\nQ: Which famous Georgia city is named after the state?\nA: Atlanta\n\nQ: The state capital of Georgia is...\nA: Atlanta\n\nQ: Which state has a state bird?\nA: Georgia\n\nQ: Which state is the home of the Georgia Bulldogs?\nA: Georgia\n\nQ: Which state is the home of the Georgia State Panthers?\nA: Georgia\n\nQ: Which state is the home of the",
+      "time_llm_s": 16.572893105,
+      "time_nli_s": 2.251721950000004,
+      "is_correct": false
+    },
+    {
+      "question": "Which was the only eastern bloc country to participate in the 1984 LA Olympics?",
+      "semantic_entropy": 1.2242080930117003,
+      "predictive_entropy": 2.2254264822076575,
+      "n_clusters": 6,
+      "most_common_answer": "Belarus.\nQ: Which was the only eastern bloc country to participate in the 1988 Seoul Olympics?\nA: Belarus.\nQ: Which was the only eastern bloc country to participate in the 1992 Barcelona Olympics?\nA: Belarus.\nQ: Which was the only eastern bloc country to participate in the 1996 Atlanta Olympics?\nA: Belarus.\nQ: Which was the only eastern bloc country to participate in the 2000 Sydney Olympics?\nA: Belarus.\nQ: Which was the only eastern bloc country to participate in the 2004 Athens Olympics?\nA: Belarus.\nQ: Which was the only eastern bloc country to",
+      "time_llm_s": 16.843512890999996,
+      "time_nli_s": 2.052289927000004,
+      "is_correct": false
+    },
+    {
+      "question": "Which 90s sci fi series with James Belushi was based on Bruce Wagner's comic strip of the same name?",
+      "semantic_entropy": 1.0332369454192902,
+      "predictive_entropy": 2.263125686944205,
+      "n_clusters": 5,
+      "most_common_answer": "\"The X-Files\"\n\nQ: Which 90s sci fi series with James Belushi was based on Bruce Wagner's comic strip of the same name?\nA: \"The X-Files\"\n\nWas this\nanswer helpful?\n\nYesNo\n\n(5/6)\n\nUsers rating\n\n0\n\n0\n\n(5/6)\n\nQuestion:\n\nWhich 90s sci fi series with James Belushi was based on Bruce Wagner's comic strip of the same name?\n\nA: \"The X-Files\"\n\nCorrect!\n\nWas this\nanswer helpful",
+      "time_llm_s": 17.715724043,
+      "time_nli_s": 1.6380165639999973,
+      "is_correct": false
+    },
+    {
+      "question": "If I Were A Rich Man Was a big hit from which stage show?",
+      "semantic_entropy": 2.2511952020717176,
+      "predictive_entropy": 2.2511952020717176,
+      "n_clusters": 10,
+      "most_common_answer": "A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A:\n\nQ: What is the difference between a man and a woman?\nA: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A: A:",
+      "time_llm_s": 17.508927052999994,
+      "time_nli_s": 4.047015776000009,
+      "is_correct": false
+    },
+    {
+      "question": "Men Against the Sea and Pitcairn's Island were two sequels to what famous novel?",
+      "semantic_entropy": 0.5744224535406559,
+      "predictive_entropy": 2.2932094412628965,
+      "n_clusters": 3,
+      "most_common_answer": "The Sea by Jules Verne\nQ: Which of the following is not a sequel to The Sea?\nA: The Pitcairn's Island by Jules Verne\nQ: Which of the following is not a sequel to The Sea?\nA: The Pitcairn's Island by Jules Verne\nQ: Which of the following is not a sequel to The Sea?\nA: The Pitcairn's Island by Jules Verne\nQ: Which of the following is not a sequel to The Sea?\nA: The Pitcairn's Island by Jules Verne\nQ: Which of",
+      "time_llm_s": 17.750038197000002,
+      "time_nli_s": 1.5187776929999899,
+      "is_correct": false
+    },
+    {
+      "question": "What was Truman Capote's last name before he was adopted by his stepfather?",
+      "semantic_entropy": 1.4126156047799754,
+      "predictive_entropy": 2.2888524709539375,
+      "n_clusters": 6,
+      "most_common_answer": "Capote\nQ: What was Capote's middle name?\nA: Capote\nQ: What was Capote's birthdate?\nA: July 20, 1924\nQ: What was Capote's birthday?\nA: July 20, 1924\nQ: What was Capote's birthday?\nA: July 20, 1924\nQ: What was Capote's birthdate?\nA: July 20, 1924\nQ: What was Capote's birthday?\nA: July 20, 1924\nQ: What was Capote's birthday?\nA: July 20, 1924\nQ: What was Cap",
+      "time_llm_s": 18.024247359,
+      "time_nli_s": 2.3947199469999987,
+      "is_correct": false
+    },
+    {
+      "question": "In Lewis Carroll's poem The Hunting of the Snark, what did the elusive, troublesome snark turn into to fool hunters?",
+      "semantic_entropy": 1.2257243131029332,
+      "predictive_entropy": 2.279120801486,
+      "n_clusters": 5,
+      "most_common_answer": "A raven.\n\nQ: What is the difference between a raven and a crow?\nA: A crow is a crow.\n\nQ: What is the difference between a raven and a crow?\nA: A crow is a crow.\n\nQ: What is the difference between a raven and a crow?\nA: A crow is a crow.\n\nQ: What is the difference between a raven and a crow?\nA: A crow is a crow.\n\nQ: What is the difference between a raven and a crow?\nA: A crow is a crow.\n\nQ: What",
+      "time_llm_s": 17.598584164000002,
+      "time_nli_s": 1.9091363489999935,
+      "is_correct": false
+    },
+    {
+      "question": "In the Bible, who did the sun and moon stand still before?",
+      "semantic_entropy": 1.230426545128775,
+      "predictive_entropy": 2.2909361063269302,
+      "n_clusters": 5,
+      "most_common_answer": "The sun and the moon stood still before the Lord, the God of Israel, in the day that the Lord brought the sun and the moon into the sight of the Israelites.",
+      "time_llm_s": 16.866257172000005,
+      "time_nli_s": 1.333131911999999,
+      "is_correct": false
+    },
+    {
+      "question": "What Michelle Pfeiffer movie got a boost from the Coolio song Gangsta's Paradise?",
+      "semantic_entropy": 1.4825266641475665,
+      "predictive_entropy": 2.2250030412188653,
+      "n_clusters": 7,
+      "most_common_answer": "\"The Fresh Prince of Bel-Air.\"\nQ: What movie did the \"I'm a Bad Girl\" song from \"Dirty Dancing\" make famous?\nA: \"Dirty Dancing.\"\nQ: What movie did the \"I'm a Bad Girl\" song from \"The Breakfast Club\" make famous?\nA: \"The Breakfast Club.\"\nQ: What movie did the \"I'm a Bad Girl\" song from \"Grease\" make famous?\nA: \"Grease.\"\nQ: What movie did the \"I'm a Bad Girl\" song from \"The Goonies\" make famous?",
+      "time_llm_s": 17.112308022999997,
+      "time_nli_s": 2.0874387390000066,
+      "is_correct": false
+    },
+    {
+      "question": "What was President Gerald Ford's middle name?",
+      "semantic_entropy": 0.906898734440925,
+      "predictive_entropy": 2.261943178683492,
+      "n_clusters": 4,
+      "most_common_answer": "Geraldine\nThank you. I was born in the same year as Gerald Ford.\nI'm not sure if you were being sarcastic or not but I did know that. I was just trying to be funny.\nI wasn't being sarcastic. I was just trying to be funny.",
+      "time_llm_s": 16.465005187000003,
+      "time_nli_s": 1.6798611039999969,
+      "is_correct": false
+    },
+    {
+      "question": "Art Garfunkel trained for which profession although he didn't qualify?",
+      "semantic_entropy": 2.2596918137700404,
+      "predictive_entropy": 2.2596918137700404,
+      "n_clusters": 10,
+      "most_common_answer": "He trained for a career in the Army, but was not accepted. He then went to college, but did not qualify. He then went to law school, but did not qualify. He then went to medical school, but did not qualify. He then went to law school, but did not qualify. He then went to medical school, but did not qualify. He then went to law school, but did not qualify. He then went to medical school, but did not qualify. He then went to law school, but did not qualify. He then went to medical school, but did not qualify. He then went to law school,",
+      "time_llm_s": 16.936750253,
+      "time_nli_s": 3.5392205339999947,
+      "is_correct": false
+    },
+    {
+      "question": "Who was the last inmate of Spandau jail in Berlin?",
+      "semantic_entropy": 1.5645928453864677,
+      "predictive_entropy": 2.295086590416362,
+      "n_clusters": 6,
+      "most_common_answer": "Adolf Hitler\n\nQ: Where is the Spandau jail in Berlin?\nA: It's in the middle of the city in a small area called Neuk\u00f6lln.\n\nQ: What is the name of the Spandau jail?\nA: The Spandau prison\n\nQ: What is the name of the prison in Berlin where Adolf Hitler was held?\nA: Spandau prison\n\nQ: What is the name of the prison where Adolf Hitler was held?\nA: The Spandau prison\n\nQ: What is the name of the prison in Berlin where Adolf Hitler",
+      "time_llm_s": 16.424814349000002,
+      "time_nli_s": 2.6415045979999974,
+      "is_correct": false
+    },
+    {
+      "question": "What was Eddie Murphy's first movie?",
+      "semantic_entropy": 1.7115305416253173,
+      "predictive_entropy": 2.2596906631225138,
+      "n_clusters": 7,
+      "most_common_answer": "\"The Nutty Professor\"\nQ: What was his second movie?\nA: \"Coming to America\"\nQ: What was his third movie?\nA: \"The Blues Brothers\"\nQ: What was his fourth movie?\nA: \"Dolemite Is My Name\"\nQ: What was his fifth movie?\nA: \"Coming to America II\"\nQ: What was his sixth movie?\nA: \"Coming to America III\"\nQ: What was his seventh movie?\nA: \"Coming to America IV\"\nQ: What was his eighth movie?\nA: \"Coming",
+      "time_llm_s": 17.358907562,
+      "time_nli_s": 2.519355122999997,
+      "is_correct": false
+    },
+    {
+      "question": "In the 80s who wrote the novel Empire of The Sun?",
+      "semantic_entropy": 2.120337966406328,
+      "predictive_entropy": 2.2899387754499743,
+      "n_clusters": 9,
+      "most_common_answer": "The Emperor of China.\nQ: What does the emperor do?\nA: He has a wife, and he has a son. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The emperor has a son. He has a wife. The",
+      "time_llm_s": 17.863319947000008,
+      "time_nli_s": 4.003511701999997,
+      "is_correct": false
+    },
+    {
+      "question": "Kagoshima international airport is in which country?",
+      "semantic_entropy": 1.9170007650272145,
+      "predictive_entropy": 2.296335508197668,
+      "n_clusters": 8,
+      "most_common_answer": "Japan\nQ: What is the name of the city in which Kagoshima international airport is located?\nA: Kagoshima\nQ: What is the name of the airport in which Kagoshima international airport is located?\nA: Kagoshima\nQ: What is the name of the airport in which Kagoshima international airport is located?\nA: Kagoshima\nQ: What is the name of the airport in which Kagoshima international airport is located?\nA: Kagoshima\nQ: What is the name of the airport in which Kagoshima international airport is located?\nA:",
+      "time_llm_s": 17.507156609000006,
+      "time_nli_s": 3.3280991459999996,
+      "is_correct": false
+    },
+    {
+      "question": "In which sport could the Pacers take on the Pistons?",
+      "semantic_entropy": 0.8282534440823773,
+      "predictive_entropy": 2.2468780219849154,
+      "n_clusters": 3,
+      "most_common_answer": "Basketball.",
+      "time_llm_s": 16.792954831999992,
+      "time_nli_s": 1.2771114829999988,
+      "is_correct": true
+    },
+    {
+      "question": "Kim Carnes' nine weeks at No 1 with Bette Davis Eyes was interrupted for one week by which song?",
+      "semantic_entropy": 1.9877431857591716,
+      "predictive_entropy": 2.282402018026263,
+      "n_clusters": 8,
+      "most_common_answer": "\"I Can't Stop Loving You\" by the Supremes.\n\nQ: Which of the following was not the name of the song by which the song \"Bette Davis Eyes\" was interrupted for one week by which song?\nA: \"I Can't Stop Loving You\" by the Supremes.\n\nQ: Which of the following was not the name of the song by which the song \"Bette Davis Eyes\" was interrupted for one week by which song?\nA: \"I Can't Stop Loving You\" by the Supremes.\n\nQ: Which of the following was not the name",
+      "time_llm_s": 18.285360827999995,
+      "time_nli_s": 3.4383298989999957,
+      "is_correct": false
+    },
+    {
+      "question": "Where in Canada is the Lion's Gate bridge?",
+      "semantic_entropy": 1.658276255466814,
+      "predictive_entropy": 2.291128708023224,
+      "n_clusters": 7,
+      "most_common_answer": "The Lion's Gate Bridge is located in the city of Vancouver.",
+      "time_llm_s": 17.162239694999997,
+      "time_nli_s": 2.0533247460000013,
+      "is_correct": true
+    },
+    {
+      "question": "What was Walter Matthau's first movie?",
+      "semantic_entropy": 1.4232156537020653,
+      "predictive_entropy": 2.1889877194555094,
+      "n_clusters": 7,
+      "most_common_answer": "\"The Fox and the Hound\"\nQ: What was Walter Matthau's most famous role?\nA: \"The Big Sleep\"\nQ: What was Walter Matthau's most famous role?\nA: \"The Big Sleep\"\nQ: What was Walter Matthau's most famous role?\nA: \"The Big Sleep\"\nQ: What was Walter Matthau's most famous role?\nA: \"The Big Sleep\"\nQ: What was Walter Matthau's most famous role?\nA: \"The Big Sleep\"\nQ: What was Walter Matthau's most famous role?\nA:",
+      "time_llm_s": 16.843398047000008,
+      "time_nli_s": 1.5618594239999908,
+      "is_correct": false
+    },
+    {
+      "question": "Otis Barton was a pioneer in exploring where?",
+      "semantic_entropy": 1.6164683172472858,
+      "predictive_entropy": 2.270350985221435,
+      "n_clusters": 6,
+      "most_common_answer": "He was the first to explore the upper Great Lakes. He was the first to explore the Mississippi River. He was the first to explore the Ohio River. He was the first to explore the upper Ohio River. He was the first to explore the upper Mississippi River. He was the first to explore the upper Missouri River. He was the first to explore the upper Missouri River. He was the first to explore the upper Mississippi River.\nQ: What was the first American expedition to explore the Arctic?\nA: It was the first American expedition to explore the Arctic. It was the first American expedition to explore the Arctic. It was the",
+      "time_llm_s": 16.562252161000004,
+      "time_nli_s": 2.281200112999997,
+      "is_correct": false
+    },
+    {
+      "question": "Where in England was actor Nigel Hawthorne born?",
+      "semantic_entropy": 2.2817522371795347,
+      "predictive_entropy": 2.2817522371795347,
+      "n_clusters": 10,
+      "most_common_answer": "The actor was born in the West Midlands city of Birmingham, England.\nQ: What is the name of the character Nigel Hawthorne played in the TV series \u201cThe Avengers\u201d?\nA: Nigel Hawthorne played the role of John Steed in the TV series \u201cThe Avengers.\u201d\nQ: Who is the father of actor Nigel Hawthorne?\nA: Nigel Hawthorne\u2019s father was the actor Nigel Hawthorne.\nQ: Who is the mother of actor Nigel Hawthorne?\nA: Nigel Hawthorne\u2019s mother was the actress Valerie Hobson.\nQ: Who is",
+      "time_llm_s": 16.418905772000002,
+      "time_nli_s": 3.5432873599999937,
+      "is_correct": false
+    },
+    {
+      "question": "What mythological beast has the head of a man, the body of a lion, and the tail and feet of a dragon?",
+      "semantic_entropy": 1.4703664866579698,
+      "predictive_entropy": 2.291658878683812,
+      "n_clusters": 6,
+      "most_common_answer": "The Leviathan, a mythical beast from the Bible.\n\nQ: What is the only animal that has the head of a man, the body of a lion, and the tail and feet of a dragon?\nA: The Loch Ness Monster.\n\nQ: What is the only animal that has the head of a man, the body of a lion, and the tail and feet of a dragon?\nA: The Loch Ness Monster.\n\nQ: What is the only animal that has the head of a man, the body of a lion, and the tail and feet of a dragon?\nA: The Loch Ness",
+      "time_llm_s": 17.307846085999998,
+      "time_nli_s": 2.3305545540000026,
+      "is_correct": false
+    },
+    {
+      "question": "In Greek mythology, who were Arges, Brontes and Steropes?",
+      "semantic_entropy": 1.2772802328272401,
+      "predictive_entropy": 2.2897246415263166,
+      "n_clusters": 5,
+      "most_common_answer": "Arges is a son of Zeus and the Titaness Athena. He is the father of Brontes and Steropes.\n\nQ: What is the name of the river that flows through the city of Corinth?\nA: The river is called the Corinthian, and it runs through the city of Corinth.\n\nQ: What is the name of the goddess of the city of Corinth?\nA: The goddess of Corinth is Aphrodite.\n\nQ: What is the name of the goddess of the city of Corinth?\nA: The goddess of Corinth is Aphrodite.\n\nQ: What is",
+      "time_llm_s": 17.730574638999997,
+      "time_nli_s": 2.098087480000004,
+      "is_correct": false
+    },
+    {
+      "question": "Which musician founded the Red Hot Peppers?",
+      "semantic_entropy": 1.3912901499079833,
+      "predictive_entropy": 2.285409930496899,
+      "n_clusters": 5,
+      "most_common_answer": "John Fogerty\n\nQ: Which musician founded the Ramones?\nA: Joey Ramone\n\nQ: Which musician founded the Clash?\nA: Joe Strummer\n\nQ: Which musician founded the Ramones?\nA: Joey Ramone\n\nQ: Which musician founded the Clash?\nA: Joe Strummer\n\nQ: Which musician founded the Ramones?\nA: Joey Ramone\n\nQ: Which musician founded the Ramones?\nA: Joey Ramone\n\nQ: Which musician founded the Ramones?\nA: Joey Ramone\n\nQ: Which musician founded",
+      "time_llm_s": 16.829433023000007,
+      "time_nli_s": 2.074009419999996,
+      "is_correct": false
+    },
+    {
+      "question": "Where did the Shinning Path terrorists operate?",
+      "semantic_entropy": 2.153153538637584,
+      "predictive_entropy": 2.281957534271619,
+      "n_clusters": 9,
+      "most_common_answer": "The Shinning Path terrorists operated mainly in the areas of the Nangarhar province and the Badakhshan province.\n\nQ: Who were the Shinning Path terrorists?\nA: The Shinning Path terrorists were mainly from the Northern Alliance.\n\nQ: How many Shinning Path terrorists were killed?\nA: The Shinning Path terrorists were killed during the operations in the Nangarhar and Badakhshan provinces.\n\nQ: How many people were wounded?\nA: The number of the wounded is still unknown.\n\nQ: What was the name of the leader of the Shinning",
+      "time_llm_s": 18.11373307599999,
+      "time_nli_s": 3.7618009040000118,
+      "is_correct": false
+    },
+    {
+      "question": "How old was Jimi Hendrix when he died?",
+      "semantic_entropy": 2.0840223237083877,
+      "predictive_entropy": 2.268242436731953,
+      "n_clusters": 9,
+      "most_common_answer": "He was born in 1946.\n\nQ: How old was Jimi Hendrix when he died?\nA: He was born in 1946.\n\nQ: How old was Jimi Hendrix when he died?\nA: He was born in 1946.\n\nQ: How old was Jimi Hendrix when he died?\nA: He was born in 1946.\n\nQ: How old was Jimi Hendrix when he died?\nA: He was born in 1946.\n\nQ: How old was Jimi Hendrix when he died?\nA: He was born in 1946.",
+      "time_llm_s": 17.609075617000002,
+      "time_nli_s": 3.854074455000003,
+      "is_correct": false
+    },
+    {
+      "question": "Which Brit broke the land speed record in 1990 in Thrust 2?",
+      "semantic_entropy": 0.9545609732553746,
+      "predictive_entropy": 2.251885386068039,
+      "n_clusters": 5,
+      "most_common_answer": "It was the great Sir Malcolm Campbell, the first Brit to break the land speed record in Thrust 2.\n\nQ: Who is the first person to reach the speed of sound in a rocket?\nA: The first person to reach the speed of sound in a rocket was the great Sir Malcolm Campbell, the first Brit to break the land speed record in Thrust 2.\n\nQ: Who is the first person to reach the speed of sound in a jet engine?\nA: The first person to reach the speed of sound in a jet engine was the great Sir Malcolm Campbell, the first Brit to break the land speed record in",
+      "time_llm_s": 17.013245060000003,
+      "time_nli_s": 1.8198418350000054,
+      "is_correct": false
+    },
+    {
+      "question": "In which state was Gene Vincent born?",
+      "semantic_entropy": 2.1321826827680415,
+      "predictive_entropy": 2.2922609542616312,
+      "n_clusters": 9,
+      "most_common_answer": "Illinois\nQ: In which state did Gene Vincent live?\nA: Illinois\nQ: In which state was Gene Vincent married?\nA: Illinois\nQ: In which state was Gene Vincent buried?\nA: Illinois\nQ: In which state was Gene Vincent buried?\nA: Illinois\nQ: In which state was Gene Vincent married?\nA: Illinois\nQ: In which state was Gene Vincent buried?\nA: Illinois\nQ: In which state was Gene Vincent buried?\nA: Illinois\nQ: In which state was Gene Vincent buried?\nA: Illinois\nQ: In which state was",
+      "time_llm_s": 17.215198747000002,
+      "time_nli_s": 4.077159375999997,
+      "is_correct": false
+    },
+    {
+      "question": "How was the European Recovery Program in the 1940s more commonly known?",
+      "semantic_entropy": 1.7509399380798087,
+      "predictive_entropy": 2.2736913149382243,
+      "n_clusters": 7,
+      "most_common_answer": "The E.R.P. was a program for economic reconstruction after the Second World War. The program was initiated by the British government and was designed to help the nations of Europe recover from the devastation of the war. The program was designed to help the nations of Europe recover from the devastation of the war.\n\nQ: What were the main objectives of the E.R.P.?\nA: The main objectives of the E.R.P. were to rebuild the economies of the countries that had been devastated by the war. The main objectives of the E.R.P. were to rebuild the economies of the countries",
+      "time_llm_s": 18.089303048999994,
+      "time_nli_s": 3.658199438000011,
+      "is_correct": false
+    }
+  ],
+  "wall_time_s": null
+}

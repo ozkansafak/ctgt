@@ -5,4 +5,3 @@ __pycache__/
 .venv/
 .env
 benchmark_results.json
-outputs/

@@ -57,7 +57,7 @@ def print_summary(data: dict) -> None:
     print("╚══════════════════════════════════════════════════════╝")
 
 
-def plot_auroc(data: dict) -> None:
+def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
     try:
         import matplotlib.pyplot as plt
         import numpy as np
@@ -102,7 +102,7 @@ def plot_auroc(data: dict) -> None:
         ax.grid(alpha=0.3)
 
         plt.tight_layout()
-        out = Path("benchmark_plots.png")
+        out = path.with_name(path.stem + "_plots.png")
         plt.savefig(out, dpi=150)
         print(f"\nPlots saved to {out}")
         plt.show()
@@ -137,7 +137,7 @@ def main() -> None:
     print_summary(data)
     print_table(data["rows"])
     if not args.no_plot:
-        plot_auroc(data)
+        plot_auroc(data, path)
 
 
 if __name__ == "__main__":
