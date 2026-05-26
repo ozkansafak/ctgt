@@ -1,9 +1,5 @@
 # Technical Design Doc: Hallucination Detection via Semantic Entropy
 
-**Author:** Ozkan Safak  
-**Date:** May 2026  
-**Repo:** https://github.com/ozkansafak/ctgt
-
 ---
 
 ## 1. Introduction & Problem Definition
@@ -14,7 +10,7 @@ The core challenge in detecting hallucinations is that **confidence is hard to m
 
 One natural signal is the model's own token probabilities. If the model assigns low probability to its output, it may be uncertain. But this fails in practice for a subtle reason: **natural language has many ways to say the same thing**. The model may be highly confident about a *meaning* while appearing uncertain at the token level simply because there are multiple valid phrasings.
 
-> "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing, but share almost no tokens.
+> "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing, hence should be tied to the same semantic cluster.
 
 A naive entropy measure over token sequences treats these as two different outcomes and inflates the uncertainty estimate — incorrectly flagging a confident answer as uncertain.
 
@@ -22,7 +18,7 @@ A naive entropy measure over token sequences treats these as two different outco
 
 ## 2. Method: Semantic Entropy
 
-We implement **Semantic Entropy** (Kuhn, Gal & Farquhar, ICLR 2023), which computes entropy over *meanings* rather than token sequences.
+We implement **Semantic Entropy** (Kuhn et al, 2023), which computes entropy over *meanings* rather than token sequences.
 
 ### 2.1 Why not token-level entropy?
 
@@ -247,24 +243,24 @@ Kuhn et al. use OPT-30B (also a base model) and report SE AUROC ~0.83 at ~50% ac
                   (temp=0.5, M=10)
                          │
                          ▼
-                    [M Samples]
-                    │          │
-                    ▼          ▼
-          1. most_common   3. NLI Clusterer
-             _answer()       (DeBERTa)
-                    │          │
-                    │          ▼
-                    │     4. SE Calculator
-                    │          │
-                    │          ▼
-                    │      [SE Score]
-                    │          │
-                    └────> 5. Decision Gate
-                               │
-                ┌──────────────┴──────────────┐
-                ▼                             ▼
-         SE < τ: PASS                 SE ≥ τ: FLAG
-      (return answer to user)    (hallucination alert)
+                    [M Samples]────────────────┐
+                    │                          │
+                    ▼                          ▼
+          1. most_common_answer()         3. NLI Clusterer
+                    │                      (DeBERTa)
+                    │                          │
+                    │                          ▼
+                    │                     4. SE Calculator
+                    │                          │
+                    │                          ▼
+                    │                      [SE Score]
+                    │                          │
+                    └───────────────────> 5. Decision Gate
+                                               │
+                ┌──────────────────────────────┴──────────────┐
+                ▼                                             ▼
+         SE < τ: PASS                                 SE ≥ τ: FLAG
+      (return answer to user)                    (hallucination alert)
 ```
 
 **1. most_common_answer** — the representative of the highest-probability semantic cluster from the M samples. This is the answer returned to the user. The paper uses a separate greedy/beam-search decode for this step; we avoid the extra inference call by reusing the samples already generated in step 2.
@@ -358,19 +354,42 @@ This scales horizontally: 1,000 questions takes roughly the same wall-clock time
 
 ## 7. Future Work
 
-**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation, so fewer samples (≈4 instead of 10) are needed for the same AUROC. Direct 60% reduction in LLM cost.
+**Semantic Entropy Probes — Kossen et al. (2024).** The primary production path. Replaces M=10 LLM generations with a single forward pass + O(d) linear probe on the frozen hidden state at the last input token position. Eliminates NLI clustering entirely at inference time. Training requires a one-time offline run to collect (hidden state, SE label) pairs, which is cheap. Implementation complete in `src/ctgt/probe.py`; data collection and probe upload pipeline in `modal_app.py`. Recommended model for SEP training: `Mistral-7B-Instruct-v0.3` or `meta-llama/Llama-3.1-8B-Instruct` — both instruction-tuned at a scale where accuracy is meaningful.
 
-**Larger model** — swap `Qwen2.5-1.5B` for `Qwen2.5-7B` or `Llama-3.1-8B`. Expected to significantly improve both accuracy and AUROC, approaching the paper's 30B results.
+**INSIDE — Chen et al., ICLR 2024.** The most ambitious internal-state approach. Proposes two mechanisms:
 
-**Retrieval-augmented generation (RAG)** — combine SE with a retrieval step. SE flags uncertain answers; a retriever then fetches supporting evidence for those questions only. Cost-efficient: retrieval runs only when SE > threshold.
+- *EigenScore*: generates K=10 responses, extracts last-token embeddings at the **middle transformer layer** (≈ L/2), constructs the K×K covariance matrix Σ = Z^T · J · Z, and scores uncertainty as (1/K) Σᵢ log(λᵢ) over the eigenvalues. Semantic divergence spreads eigenvalue mass, raising the score. Outperforms SE (AUROC 82.7% vs ~65%) by operating in dense embedding space where paraphrase conflation is automatic.
 
-**p(True) baseline** — Kadavath et al. (2022) propose asking the model "is your answer correct?" as a self-evaluation signal. Adding this baseline would make the evaluation table more complete and directly reproduce the paper's comparison.
+- *Feature Clipping*: a test-time activation intervention that truncates extreme values in the penultimate layer via a **PyTorch forward hook** (not just reading — actually modifying activations). A memory bank of N=3000 calibration embeddings sets the clip percentile (p=0.2). Reduces overconfident generations without retraining.
+
+Key engineering note: EigenScore and feature clipping both require **forward hooks** (`register_forward_hook`) rather than the passive `output_hidden_states=True` approach we currently use for SEPs. This distinction is documented with implementation notes in `src/ctgt/inside.py`.
+
+**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation, so fewer samples (≈4 instead of 10) are needed for the same AUROC. Direct 60% reduction in LLM cost with no architecture changes.
+
+**Larger models** — swap `Qwen2.5-1.5B` for `Qwen2.5-7B` or `Llama-3.1-8B`. Expected to significantly improve both accuracy and AUROC, approaching the paper's 30B results.
+
+**p(True) baseline** — Kadavath et al. (2022): ask the model "is your answer correct?" as a self-evaluation signal. Adds a third AUROC comparison point alongside SE and PE.
+
+---
+
+## 8. Method Landscape
+
+| Paper | Internal access | What it does |
+|---|---|---|
+| Farquhar / Kuhn (Nature 2024) | Logprobs only | M=10 samples → NLI cluster → entropy over meanings |
+| Kossen et al. SEPs (2024) | Hidden states (read) | Linear probe on frozen last-token activation; single forward pass at inference |
+| Chen et al. INSIDE (ICLR 2024) | Hidden states (read + modify) | EigenScore on mid-layer covariance + forward-hook activation clipping |
+
+The progression from Kuhn → Kossen → INSIDE represents increasing depth of access to model internals: from output probabilities only, to reading internal representations, to modifying them at inference time.
 
 ---
 
 ## References
 
+- Farquhar, S., Kossen, J., Kuhn, L., & Gal, Y. (2024). *Detecting Hallucinations in Large Language Models Using Semantic Consistency.* Nature. [arXiv:2303.08896](https://arxiv.org/abs/2303.08896)
 - Kuhn, L., Gal, Y., & Farquhar, S. (2023). *Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation.* ICLR 2023. [arXiv:2302.09664](https://arxiv.org/abs/2302.09664)
+- Kossen, J., Han, J., Razzak, M., Schut, L., Malik, S., & Gal, Y. (2024). *Semantic Entropy Probes: Robust and Cheap Hallucination Detection in LLMs.* [arXiv:2406.15927](https://arxiv.org/abs/2406.15927)
+- Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., & Ye, J. (2024). *INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection.* ICLR 2024. [arXiv:2402.03744](https://arxiv.org/abs/2402.03744)
 - Park, J. W., & Cho, K. (2025). *Efficient Semantic Uncertainty Quantification in Language Models via Diversity-Steered Sampling.* NeurIPS 2025. [neurips.cc](https://neurips.cc/virtual/2025/loc/san-diego/poster/118777)
 - He, P. et al. (2020). *DeBERTa: Decoding-Enhanced BERT with Disentangled Attention.* [arXiv:2006.03654](https://arxiv.org/abs/2006.03654)
 - Kadavath, S. et al. (2022). *Language Models (Mostly) Know What They Know.* [arXiv:2207.05221](https://arxiv.org/abs/2207.05221)

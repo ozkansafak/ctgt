@@ -111,3 +111,35 @@ class LLMSampler:
             )
 
         return samples
+
+    def extract_hidden_states(
+        self,
+        question: str,
+        layers: list[int] | None = None,
+    ) -> dict[str, list[float]]:
+        """Single forward pass on the prompt; returns last-input-token hidden state per layer.
+
+        Args:
+            question: The question/prompt to encode.
+            layers: Which layer indices to return. None → all layers (embedding + transformer).
+
+        Returns:
+            Dict mapping str(layer_idx) → hidden state vector (list of floats).
+            Keys are strings so the dict is directly JSON-serializable.
+        """
+        prompt = self._build_prompt(question)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+
+        with torch.no_grad():
+            outputs = self.model(**inputs, output_hidden_states=True)
+
+        # outputs.hidden_states: tuple of (1, seq_len, hidden_dim) per layer
+        # Layer 0 is the embedding; layers 1..N are transformer blocks.
+        result: dict[str, list[float]] = {}
+        for layer_idx, hs in enumerate(outputs.hidden_states):
+            if layers is not None and layer_idx not in layers:
+                continue
+            # Last input token position contains context accumulated over full prompt
+            last_tok = hs[0, -1, :].float().cpu().numpy().tolist()
+            result[str(layer_idx)] = last_tok
+        return result

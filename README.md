@@ -114,14 +114,26 @@ python results.py
 ## Project structure
 
 ```
-modal_app.py          # Modal deployment: GPU service + benchmark entrypoints
-benchmark.py          # Local benchmark runner (no Modal required)
+modal_app.py          # Modal deployment: GPU service + all benchmark entrypoints
+train_probe.py        # Local: train SEP logistic regression from collected data
 results.py            # Visualise benchmark_results.json → table + ROC plots
+benchmark.py          # Local benchmark runner (no Modal required)
+outputs/              # Benchmark JSONs + plots (committed)
+
 src/ctgt/
-  sampling.py         # LLMSampler: batch generation + log-prob extraction
+  # ── Baseline: Kuhn / Farquhar 2024 ──────────────────────────
+  sampling.py         # LLMSampler: batch generation, log-prob extraction,
+                      #   hidden state extraction (output_hidden_states=True)
   entailment.py       # EntailmentClustering: bidirectional NLI via DeBERTa
   scoring.py          # semantic_entropy() and predictive_entropy()
-  detection.py        # SemanticEntropyDetector: orchestrates the pipeline
+  detection.py        # SemanticEntropyDetector: orchestrates the full pipeline
+
+  # ── Production: Kossen 2024 ──────────────────────────────────
+  probe.py            # SEProbe: Otsu binarisation, layer grid search,
+                      #   logistic regression fit/predict, save/load
+
+  # ── Future: Chen et al. INSIDE 2024 ─────────────────────────
+  inside.py           # INSIDEDetector stub — full spec documented, not yet built
 ```
 
 ---
@@ -222,9 +234,34 @@ gpu = "A10G"
 
 ---
 
+## Method comparison
+
+| Paper | Internal access | What it does |
+|---|---|---|
+| Farquhar / Kuhn (Nature 2024) | Logprobs only | M=10 samples → NLI cluster → entropy over meanings |
+| Kossen et al. SEPs (2024) | Hidden states (read) | Linear probe on frozen last-token activation; single forward pass at inference |
+| Chen et al. INSIDE (ICLR 2024) | Hidden states (read + modify) | EigenScore on mid-layer covariance + forward-hook activation clipping |
+
+The progression is deliberate: Kuhn is the well-validated baseline; Kossen reduces inference cost by ~10× using the model's own representations; INSIDE goes further by *modifying* activations at inference time to suppress overconfident generations.
+
+---
+
 ## Related work
 
-**Park & Cho (NeurIPS 2025)** extend this method with *diversity-steered sampling* — penalising semantically redundant outputs during generation so you get better entropy estimates with fewer samples. This directly addresses the main scalability bottleneck of our approach: fewer LLM calls = cheaper per query. A natural next step for a production system.
+**Park & Cho (NeurIPS 2025)** extend Kuhn with *diversity-steered sampling* — penalising semantically redundant outputs during generation so you get better entropy estimates with fewer samples. Fewer LLM calls = cheaper per query. A natural next step for production.
+
+**Kossen et al. (2024)** introduce Semantic Entropy Probes: train a logistic regression layer on the LLM's own frozen hidden states to predict whether SE would be high, replacing M=10 heavy generations with a single forward pass and an O(d) matrix multiply. Implemented in `src/ctgt/probe.py`.
+
+**Chen et al. INSIDE (ICLR 2024)** propose EigenScore — measuring semantic consistency via the eigenvalues of the responses' covariance matrix in dense embedding space — and feature clipping, which truncates extreme activations in the penultimate layer via a PyTorch forward hook to reduce overconfident generations. Documented as a future-work stub in `src/ctgt/inside.py`.
+
+---
+
+## References
+
+- Farquhar, S., Kossen, J., Kuhn, L., & Gal, Y. (2024). *Detecting Hallucinations in Large Language Models Using Semantic Consistency.* Nature. [arXiv:2303.08896](https://arxiv.org/abs/2303.08896)
+- Kossen, J., Han, J., Razzak, M., Schut, L., Malik, S., & Gal, Y. (2024). *Semantic Entropy Probes: Robust and Cheap Hallucination Detection in LLMs.* [arXiv:2406.15927](https://arxiv.org/abs/2406.15927)
+- Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., & Ye, J. (2024). *INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection.* ICLR 2024. [arXiv:2402.03744](https://arxiv.org/abs/2402.03744)
+- Park, J. W., & Cho, K. (2025). *Efficient Semantic Uncertainty Quantification in Language Models via Diversity-Steered Sampling.* NeurIPS 2025.
 
 ---
 
