@@ -77,7 +77,7 @@ SE = -∑_c  p(c) · log p(c)
 ```
 
 SE = 0 means all samples share one meaning — the model is certain.  
-SE = log(M) ≈ 2.3 means every sample has a distinct meaning — maximally uncertain.
+SE = log(M) ≈ 2.3 (natural log, and M=10) means every sample has a distinct meaning — maximally uncertain.
 
 ---
 
@@ -240,33 +240,36 @@ Kuhn et al. use OPT-30B (also a base model) and report SE AUROC ~0.83 at ~50% ac
 ### 5.1 Pipeline components
 
 ```
-[User Prompt] ───────────────────────────────────────────────────┐
-                                                                 │
-                    ┌────────────────────────────────────────────┤
-                    ▼                                            ▼
-             1. Main Generator                        2. Swarm Sampler
-             (greedy / beam search)                   (temp=0.5, M=10)
-                    │                                            │
-                    ▼                                            ▼
-             [Primary Answer y']                         [M Samples]
-                    │                                            │
-                    │                                            ▼
-                    │                                  3. NLI Clusterer
-                    │                                  (DeBERTa, bidir.)
-                    │                                            │
-                    │                                            ▼
-                    │                                  4. SE Calculator
-                    │                                            │
-                    │                                            ▼
-                    └──────────────────> 5. Decision Gate ──> [SE Score]
-                                              │
-                              ┌───────────────┴───────────────┐
-                              ▼                               ▼
-                     SE < τ: PASS                    SE ≥ τ: FLAG
-                  (return y' to user)         (hallucination alert)
+                    [User Prompt]
+                         │
+                         ▼
+                  2. Swarm Sampler
+                  (temp=0.5, M=10)
+                         │
+                         ▼
+                    [M Samples]
+                    │          │
+                    ▼          ▼
+          1. most_common   3. NLI Clusterer
+             _answer()       (DeBERTa)
+                    │          │
+                    │          ▼
+                    │     4. SE Calculator
+                    │          │
+                    │          ▼
+                    │      [SE Score]
+                    │          │
+                    └────> 5. Decision Gate
+                               │
+                ┌──────────────┴──────────────┐
+                ▼                             ▼
+         SE < τ: PASS                 SE ≥ τ: FLAG
+      (return answer to user)    (hallucination alert)
 ```
 
-**1. Main Generator** — produces the actual answer returned to the user. Uses greedy decoding or beam search (num_beams=5) for a stable, deterministic output. In our current implementation this is approximated by `most_common_answer` — the representative of the highest-probability cluster — avoiding a separate inference call.
+**1. most_common_answer** — the representative of the highest-probability semantic cluster from the M samples. This is the answer returned to the user. The paper uses a separate greedy/beam-search decode for this step; we avoid the extra inference call by reusing the samples already generated in step 2.
+
+**2. Swarm Sampler** — draws M=10 independent completions at temperature 0.5 to probe the model's uncertainty landscape. These are used for both selecting the best answer and computing SE.
 
 **2. Swarm Sampler** — probes the model's uncertainty landscape. Uses multinomial sampling at T=0.5 to draw M=10 independent completions. These are used only for entropy estimation, not returned to the user. Kuhn et al. validate empirically (Fig. 3b) that M=10 balances diversity and cost well.
 
