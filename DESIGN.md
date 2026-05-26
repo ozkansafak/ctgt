@@ -167,7 +167,43 @@ The area under the ROC curve equals the probability that a randomly chosen hallu
 
 AUROC is appropriate here because we care about *ranking* — which answers to trust — not classification at a fixed threshold.
 
-### 3.4 Dataset: TriviaQA (closed-book)
+### 3.4 Kossen 2024: Semantic Entropy Probes — inputs, training, and inference
+
+The SEP method trains a logistic regression that approximates SE from a single forward pass. It has two phases:
+
+**Offline training (one-time, expensive):**
+
+1. Run the full Kuhn pipeline on N questions — M=10 samples per question → NLI clustering → one SE score per question. This is the *teacher*.
+2. Binarize SE scores into 0/1 labels using an Otsu threshold γ*:
+   - `label = 1` (high uncertainty) if SE > γ*
+   - `label = 0` (low uncertainty) if SE ≤ γ*
+3. For each question, also run one forward pass and extract the hidden state at the **last input token position** (the token just before the model starts generating) from every layer.
+4. Layer grid search: train a logistic regression per layer, compute train AUROC, pick the best layer.
+5. Refit the final logistic regression on `hidden_state[best_layer] → label`.
+
+**Logistic regression I/O:**
+
+| | Description |
+|---|---|
+| **Input** | hidden state vector at the last input token, best layer — shape `(d,)`, e.g. `(4096,)` for Mistral-7B |
+| **Output** | P(high SE) ∈ [0, 1] — probability the model is uncertain about this question |
+
+**At inference (cheap):**
+
+1. Tokenize the question.
+2. One forward pass through the frozen LLM (`output_hidden_states=True`).
+3. Slice out `hidden_state[best_layer][-1]` — the last input token at the best layer.
+4. Matrix multiply: `W · h + b` → P(high SE).
+
+No sampling, no NLI, no clustering. O(d) compute. ~10× fewer LLM forward passes than Kuhn.
+
+**Why the last input token?**
+
+The last input token is the position immediately before generation begins. At this position, the transformer has attended to the entire question and its internal representation encodes the model's "state of knowledge" about what it's about to answer. Final layers tend to be most informative for this short-form QA task (contrasting with Chen INSIDE, which finds middle layers better for long-form generation).
+
+---
+
+### 3.5 Dataset: TriviaQA (closed-book)
 
 We evaluate on **TriviaQA** `rc.nocontext` (validation set) — 17,944 trivia questions answered from memory, with no supporting document. Closed-book is the right setting because it forces genuine uncertainty: the model either knows the answer or it doesn't.
 
