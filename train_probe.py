@@ -73,7 +73,7 @@ def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_ha
         bins = np.linspace(0, 1, 25)
         ax.hist(wrong_sep,   bins=bins, alpha=0.6, label="Wrong",   color="#F44336",
                 edgecolor="black", linewidth=0.8)
-        ax.hist(correct_sep, bins=bins, alpha=0.9, label="Correct", color="#4CAF50")
+        ax.hist(correct_sep, bins=bins, alpha=0.5, label="Correct", color="#4CAF50")
         ax.axvline(0.5, color="k", linestyle="--", lw=1)
         ax.set_xlabel("P(uncertain) — SEP probe score")
         ax.set_ylabel("Count")
@@ -95,7 +95,28 @@ def main() -> None:
     parser.add_argument("--test-size", type=float, default=0.2, help="Fraction held out for evaluation")
     parser.add_argument("--output", default=None, help="Where to save the fitted probe (default: outputs/sep_probe_<model>.pkl)")
     parser.add_argument("--no-plot", action="store_true")
+    parser.add_argument("--replot", default=None, metavar="EVAL_JSON",
+                        help="Skip training; regenerate plot from a saved .eval.json file")
     args = parser.parse_args()
+
+    if args.replot:
+        import json as _json
+        eval_data = _json.loads(Path(args.replot).read_text())
+        rows_mock = [
+            {"semantic_entropy": se, "predictive_entropy": pe, "is_correct": ic}
+            for se, pe, ic in zip(eval_data["se_scores"], eval_data["pe_scores"], eval_data["is_correct"])
+        ]
+
+        class _Probe:
+            best_layer = eval_data["best_layer"]
+            threshold  = eval_data["threshold"]
+
+        plot_out = Path(args.replot).with_name(
+            Path(args.replot).stem.replace(".eval", "") + "_sep_plots.png"
+        )
+        _plot_sep(eval_data, _Probe(), rows_mock,
+                  np.array(eval_data["sep_scores_cv"]), eval_data["sep_hall_cv"], plot_out)
+        return
 
     path = Path(args.input) if args.input else _latest_sep_data()
     print(f"Reading {path}")
@@ -208,6 +229,26 @@ def main() -> None:
     probe.save(out)
     print(f"\nProbe saved → {out}")
     print("Next: modal run modal_app.py::app.upload_probe --path", out)
+
+    # Save eval data so future plot runs don't need to re-train.
+    eval_out = out.with_suffix(".eval.json")
+    eval_payload = {
+        "llm_model":     data["llm_model"],
+        "n_questions":   data["n_questions"],
+        "se_auroc":      data["se_auroc"],
+        "pe_auroc":      data["pe_auroc"],
+        "accuracy":      data["accuracy"],
+        "best_layer":    probe.best_layer,
+        "threshold":     probe.threshold,
+        "sep_hall_cv":   sep_hall_cv,
+        "se_scores":     [r["semantic_entropy"]   for r in rows],
+        "pe_scores":     [r["predictive_entropy"] for r in rows],
+        "is_correct":    [r["is_correct"]          for r in rows],
+        "sep_scores_cv": sep_scores_cv.tolist(),
+    }
+    import json as _json
+    eval_out.write_text(_json.dumps(eval_payload, indent=2))
+    print(f"Eval data saved → {eval_out}  (use --replot to regenerate plot without retraining)")
 
     if not args.no_plot:
         plot_out = path.with_name(path.stem + "_sep_plots.png")

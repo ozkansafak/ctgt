@@ -105,7 +105,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         bins = np.linspace(0, max(se_scores) + 0.1, 25)
         ax.hist(wrong_se,   bins=bins, alpha=0.6,  label="Wrong",   color="#F44336",
                 edgecolor="black", linewidth=0.8)
-        ax.hist(correct_se, bins=bins, alpha=0.9,  label="Correct", color="#4CAF50")
+        ax.hist(correct_se, bins=bins, alpha=0.5,  label="Correct", color="#4CAF50")
         ax.set_xlabel("Semantic Entropy")
         ax.set_ylabel("Count")
         ax.set_title("SE Distribution: Correct vs Wrong Answers")
