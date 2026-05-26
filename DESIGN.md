@@ -201,13 +201,13 @@ Benchmark run: 50 questions, M=10 samples, Qwen2.5-1.5B on Modal T4.
 
 | Method | AUROC |
 |---|---|
-| **Semantic Entropy (ours)** | **0.780** |
-| Predictive Entropy (baseline) | 0.752 |
+| **Semantic Entropy (ours)** | **0.771** |
+| Predictive Entropy (baseline) | 0.604 |
 | Random | 0.500 |
 
-SE outperforms PE by **+0.028 AUROC points**. The semantic clustering step adds genuine signal even with a small 1.5B model.
+SE outperforms PE by **+0.167 AUROC points**. The semantic clustering step adds substantial signal even with a small 1.5B model.
 
-**Model accuracy: 6%.** The 1.5B model is too small to reliably recall trivia from memory. Kuhn et al. use a 30B OPT model and report ~50% accuracy and SE AUROC ~0.83. The low accuracy here is expected — the key result is that SE ranks uncertain answers above confident ones better than PE does, regardless of model size.
+**Model accuracy: 4%.** The 1.5B model is too small to reliably recall trivia from memory. Kuhn et al. use a 30B OPT model and report ~50% accuracy and SE AUROC ~0.83. The low accuracy here is expected — the key result is that SE ranks uncertain answers above confident ones better than PE does, regardless of model size.
 
 ![Benchmark results](benchmark_plots.png)
 
@@ -231,15 +231,15 @@ Wrong answers produce more semantically distinct clusters — the model is genui
 
 The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is 4× smaller than the LLM and the greedy algorithm keeps comparisons at O(M·C).
 
-Per-query cost breakdown (T4, M=10, Qwen2.5-1.5B):
+Per-query cost breakdown (T4, M=10, Qwen2.5-1.5B) — measured wall time averaged over 50 questions:
 
 | Step | Time | Cost (T4 @ $0.59/hr) |
 |---|---|---|
-| LLM sampling (10 completions) | ~8s | ~$0.0013 |
-| NLI clustering (≤45 pairs) | ~1s | ~$0.0002 |
-| **Total** | **~9s** | **~$0.0015** |
+| LLM sampling (10 completions) | 10.5s | ~$0.0017 |
+| NLI clustering (≤45 pairs) | 2.3s | ~$0.0004 |
+| **Total** | **12.8s** | **~$0.0021** |
 
-At 1M queries/day: ~$1,500/day on T4. Switching to batched vLLM inference and A10G GPUs would reduce this by ~3–5×.
+At 1M queries/day: ~$2,100/day on T4. Switching to batched vLLM inference and A10G GPUs would reduce this by ~3–5×.
 
 ### Modal parallelism
 
