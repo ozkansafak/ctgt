@@ -225,9 +225,80 @@ Wrong answers produce more semantically distinct clusters — the model is genui
 
 ---
 
-## 5. Scalability
+## 5. Production Inference Architecture
 
-### Computational complexity
+### 5.1 Pipeline components
+
+```
+[User Prompt] ──────────────────────────────────────────────────┐
+                                                                 │
+                    ┌────────────────────────────────────────────┤
+                    ▼                                            ▼
+             1. Main Generator                        2. Swarm Sampler
+             (greedy / beam search)                   (temp=0.5, M=10)
+                    │                                            │
+                    ▼                                            ▼
+             [Primary Answer y']                         [M Samples]
+                    │                                            │
+                    │                                            ▼
+                    │                                  3. NLI Clusterer
+                    │                                  (DeBERTa, bidir.)
+                    │                                            │
+                    │                                            ▼
+                    │                                  4. SE Calculator
+                    │                                            │
+                    │                                            ▼
+                    └──────────────────> 5. Decision Gate ──> [SE Score]
+                                              │
+                              ┌───────────────┴───────────────┐
+                              ▼                               ▼
+                     SE < τ: PASS                    SE ≥ τ: FLAG
+                  (return y' to user)         (hallucination alert)
+```
+
+**1. Main Generator** — produces the actual answer returned to the user. Uses greedy decoding or beam search (num_beams=5) for a stable, deterministic output. In our current implementation this is approximated by `most_common_answer` — the representative of the highest-probability cluster — avoiding a separate inference call.
+
+**2. Swarm Sampler** — probes the model's uncertainty landscape. Uses multinomial sampling at T=0.5 to draw M=10 independent completions. These are used only for entropy estimation, not returned to the user. Kuhn et al. validate empirically (Fig. 3b) that M=10 balances diversity and cost well.
+
+**3. NLI Clusterer** — resolves linguistic variance by grouping the M samples into semantic equivalence classes using bidirectional DeBERTa entailment. Exploits transitivity (greedy, O(M·C)) so each new sample is compared against one cluster representative, not all members.
+
+**4. SE Calculator** — aggregates per-cluster probability mass from the log-probs recorded during sampling, then computes entropy over the cluster distribution. Output: a single scalar SE ∈ [0, log M].
+
+**5. Decision Gate** — compares SE against threshold τ. Default τ = ln(2) ≈ 0.69 (entropy of a 50/50 split). In production this should be calibrated on a labelled validation set to match the desired precision/recall trade-off for the application.
+
+---
+
+### 5.2 REST API design
+
+```
+POST /detect
+Content-Type: application/json
+
+{
+  "text": "Who invented the telephone?",
+  "n_samples": 10,          // optional, default 10
+  "temperature": 0.5        // optional, default 0.5
+}
+```
+
+```json
+{
+  "answer":        "Alexander Graham Bell invented the telephone in 1876.",
+  "is_uncertain":  false,
+  "se_score":      0.301,
+  "pe_score":      2.302,
+  "n_clusters":    2,
+  "latency_ms":    12800
+}
+```
+
+The response gives the caller both the binary flag (`is_uncertain`) and the raw score (`se_score`) so downstream systems can apply their own threshold.
+
+---
+
+### 5.3 Scalability
+
+### 5.3 Computational complexity
 
 The bottleneck is **LLM inference**: M forward passes through the generative model per query. The NLI clustering is comparatively cheap — DeBERTa is 4× smaller than the LLM and the greedy algorithm keeps comparisons at O(M·C).
 
@@ -241,13 +312,13 @@ Per-query cost breakdown (T4, M=10, Qwen2.5-1.5B) — measured wall time average
 
 At 1M queries/day: ~$2,100/day on T4. Switching to batched vLLM inference and A10G GPUs would reduce this by ~3–5×.
 
-### Modal parallelism
+### 5.4 Modal parallelism
 
 The benchmark uses `score_question.map()` to dispatch questions to parallel Modal workers. Each worker loads models once on cold start and processes subsequent questions without reloading. At 50 questions, Modal spun up ~10 parallel containers — wall-clock time was ~3 minutes instead of ~7.5 minutes sequential.
 
 This scales horizontally: 1,000 questions takes roughly the same wall-clock time as 50, just more containers.
 
-### Path to 1M users
+### 5.5 Path to 1M users
 
 | Bottleneck | Solution |
 |---|---|
