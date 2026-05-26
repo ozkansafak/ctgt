@@ -167,39 +167,73 @@ The area under the ROC curve equals the probability that a randomly chosen hallu
 
 AUROC is appropriate here because we care about *ranking* — which answers to trust — not classification at a fixed threshold.
 
-### 3.4 Kossen 2024: Semantic Entropy Probes — inputs, training, and inference
+### 3.4 Method: Semantic Entropy Probes (Kossen et al., 2024)
 
-The SEP method trains a logistic regression that approximates SE from a single forward pass. It has two phases:
+Kuhn's SE is accurate but slow: every question needs M=10 LLM samples plus NLI clustering. Kossen's key insight is that **the model already "knows" whether it's uncertain before it generates a single token** — that knowledge is encoded in the hidden states at the last input position. A cheap linear probe can read it out.
 
-**Offline training (one-time, expensive):**
+The method has two phases: a one-time offline training phase, and a fast per-question inference phase.
 
-1. Run the full Kuhn pipeline on N questions — M=10 samples per question → NLI clustering → one SE score per question. This is the *teacher*.
-2. Binarize SE scores into 0/1 labels using an Otsu threshold γ*:
-   - `label = 1` (high uncertainty) if SE > γ*
-   - `label = 0` (low uncertainty) if SE ≤ γ*
-3. For each question, also run one forward pass and extract the hidden state at the **last input token position** (the token just before the model starts generating) from every layer.
-4. Layer grid search: train a logistic regression per layer, compute train AUROC, pick the best layer.
-5. Refit the final logistic regression on `hidden_state[best_layer] → label`.
+---
 
-**Logistic regression I/O:**
+#### Phase 1 — Training (done once, offline)
 
-| | Description |
-|---|---|
-| **Input** | hidden state vector at the last input token, best layer — shape `(d,)`, e.g. `(4096,)` for Mistral-7B |
-| **Output** | P(high SE) ∈ [0, 1] — probability the model is uncertain about this question |
+**Step 1 — Generate training labels using Kuhn's pipeline**
 
-**At inference (cheap):**
+Run the full Kuhn SE pipeline on N=300 questions. This gives one SE score per question — a continuous number measuring how semantically diverse the model's 10 answers were. This is the *teacher signal*.
 
-1. Tokenize the question.
-2. One forward pass through the frozen LLM (`output_hidden_states=True`).
-3. Slice out `hidden_state[best_layer][-1]` — the last input token at the best layer.
-4. Matrix multiply: `W · h + b` → P(high SE).
+**Step 2 — Binarize SE scores into labels**
 
-No sampling, no NLI, no clustering. O(d) compute. ~10× fewer LLM forward passes than Kuhn.
+Convert continuous SE scores to binary labels using an Otsu threshold γ* (automatically chosen to minimise within-class variance):
 
-**Why the last input token?**
+```
+label = 1  (uncertain)   if SE > γ*
+label = 0  (confident)   if SE ≤ γ*
+```
 
-The last input token is the position immediately before generation begins. At this position, the transformer has attended to the entire question and its internal representation encodes the model's "state of knowledge" about what it's about to answer. Final layers tend to be most informative for this short-form QA task (contrasting with Chen INSIDE, which finds middle layers better for long-form generation).
+**Step 3 — Extract hidden states**
+
+For the same N=300 questions, run one *additional* forward pass through the frozen LLM with `output_hidden_states=True`. From each forward pass, extract the activation at the **last input token** — the token immediately before the model begins generating — at every layer. This gives one vector of shape `(d,)` per layer per question (d=4096 for Mistral-7B).
+
+Why the last input token? At that position, the transformer has attended to the entire question. Its hidden state is the model's compressed "state of knowledge" just before it commits to an answer.
+
+**Step 4 — Find the best layer**
+
+Train a logistic regression on each layer's hidden states independently and compute AUROC on a held-out split. Pick the layer with the highest AUROC (layer 21 for Mistral-7B). Refit the final logistic regression on all training data using that layer.
+
+---
+
+#### Phase 2 — Inference (per question, fast)
+
+**Step 1 — One forward pass**
+
+Tokenize the question and run a single forward pass through the frozen LLM. No sampling. No temperature. Just one deterministic pass.
+
+**Step 2 — Slice the hidden state**
+
+Extract the hidden state at position `[-1]` (last input token) from `best_layer`. This is a single vector of shape `(d,)`.
+
+**Step 3 — Score with the probe**
+
+```
+P(uncertain) = sigmoid(W · h + b)
+```
+
+One matrix multiply. Returns a number in [0, 1]. Above 0.5 → flag as uncertain.
+
+---
+
+#### Summary
+
+| | Kuhn SE | Kossen SEP |
+|---|---|---|
+| LLM forward passes | M=10 per question | 1 per question |
+| NLI calls | up to M² per question | 0 |
+| What it uses | token probabilities | hidden state activations |
+| Probe training | none | one-time offline run |
+| AUROC (Mistral-7B, N=300) | 0.720 | 0.689 (5-fold CV) |
+| Speedup | 1× | ~10× |
+
+The probe achieves 96% of SE's AUROC at 1/10th the inference cost.
 
 ---
 
