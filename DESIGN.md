@@ -4,19 +4,19 @@
 
 ## 1. Introduction
 
-LLMs hallucinate — they produce confident-sounding outputs that are factually wrong. The model doesn't say "I'm not sure." It just generates tokens.
+LLMs hallucinate: they produce confident-sounding outputs that are factually wrong. The model doesn't say "I'm not sure." It just generates tokens.
 
 One natural signal is token-level probability. But this fails because natural language has many ways to express the same meaning. A model confident about a fact may still generate varied phrasings across samples, inflating apparent uncertainty.
 
 > "Bell invented the telephone" and "The telephone was invented by Bell" mean the same thing but count as two different outcomes under token entropy.
 
-This project implements and benchmarks three papers that measure hallucination risk by testing whether the model's answers agree with themselves — at increasing depths of model access.
+This project implements and benchmarks three papers that measure hallucination risk by testing whether the model's answers agree with themselves, at increasing depths of model access.
 
 ---
 
 ## 2. Methods
 
-### 2.1 Semantic Entropy — Kuhn / Farquhar (2024)  *(implemented)*
+### 2.1 Semantic Entropy: Kuhn / Farquhar (2024)  *(implemented)*
 
 Standard **Predictive Entropy (PE)** measures spread at the token level:
 
@@ -30,17 +30,17 @@ This is inflated by paraphrases. **Semantic Entropy (SE)** collapses paraphrases
 SE = -∑_c  p(c|x) · log p(c|x),   p(c|x) = ∑_{s ∈ c} p(s|x)
 ```
 
-High SE means the model's answers genuinely disagree on *meaning* — a strong hallucination signal.
+High SE means the model's answers genuinely disagree on *meaning*, a strong hallucination signal.
 
-1. **Sample** — draw M=10 completions at temperature 0.5; record length-normalised log-prob for each: `log_prob = (1/n) · ∑ log p(token_i)`
-2. **Cluster** — run DeBERTa NLI bidirectionally against each cluster's representative; assign on mutual entailment, else open a new cluster. O(M·C) not O(M²).
-3. **Aggregate** — sum sequence probabilities within each cluster: `p(c) = ∑_{s∈c} exp(log_prob_s)`
-4. **Entropy** — `SE = -∑_c p(c) · log p(c)`. SE=0: one shared meaning. SE≈log(10)=2.3: every sample differs.
-5. **Evaluate** — SE is the hallucination score. Label = RougeL(best answer, gold) > 0.3. Sweep threshold → AUROC.
+1. **Sample:** draw M=10 completions at temperature 0.5; record length-normalised log-prob for each: `log_prob = (1/n) · ∑ log p(token_i)`
+2. **Cluster:** run DeBERTa NLI bidirectionally against each cluster's representative; assign on mutual entailment, else open a new cluster. O(M·C) not O(M²).
+3. **Aggregate:** sum sequence probabilities within each cluster: `p(c) = ∑_{s∈c} exp(log_prob_s)`
+4. **Entropy:** `SE = -∑_c p(c) · log p(c)`. SE=0: one shared meaning. SE≈log(10)=2.3: every sample differs.
+5. **Evaluate:** SE is the hallucination score. Label = RougeL(best answer, gold) > 0.3. Sweep threshold → AUROC.
 
 ---
 
-### 2.2 Semantic Entropy Probes — Kossen (2024)  *(implemented)*
+### 2.2 Semantic Entropy Probes: Kossen (2024)  *(implemented)*
 
 Kuhn needs M=10 samples plus NLI per question. Kossen's insight: **the model already encodes its uncertainty in the hidden states before generating a single output token**. A cheap linear probe can read it out.
 
@@ -55,18 +55,18 @@ Kuhn needs M=10 samples plus NLI per question. Kossen's insight: **the model alr
 **Inference (per question):**
 
 1. One forward pass through the frozen LLM.
-2. Slice `hidden_state[best_layer][-1]` — shape `(d,)`.
-3. `P(uncertain) = sigmoid(W · h + b)` — one matrix multiply.
+2. Slice `hidden_state[best_layer][-1]`, shape `(d,)`.
+3. `P(uncertain) = sigmoid(W · h + b)`, one matrix multiply.
 
 No sampling. No NLI. No clustering. ~10× fewer forward passes than Kuhn.
 
 ---
 
-### 2.3 INSIDE — Chen et al. (ICLR 2024)  *(not yet implemented)*
+### 2.3 INSIDE: Chen et al. (ICLR 2024)  *(not yet implemented)*
 
 Two mechanisms operating on K=10 response embeddings at the **middle transformer layer** (≈ L/2):
 
-**EigenScore:** build a covariance matrix Σ = Z^T · J · Z over the K hidden-state vectors Z. Score = (1/K) Σᵢ log(λᵢ). When responses are semantically similar, eigenvalue mass concentrates on one component (low score). When they diverge, eigenvalues spread (high score). No NLI needed — semantic divergence is captured in embedding geometry. Reported AUROC on TriviaQA/LLaMA-7B: ~83% vs ~65% for SE.
+**EigenScore:** build a covariance matrix Σ = Z^T · J · Z over the K hidden-state vectors Z. Score = (1/K) Σᵢ log(λᵢ). When responses are semantically similar, eigenvalue mass concentrates on one component (low score). When they diverge, eigenvalues spread (high score). No NLI needed; semantic divergence is captured in embedding geometry. Reported AUROC on TriviaQA/LLaMA-7B: ~83% vs ~65% for SE.
 
 **Feature Clipping:** a forward hook that clips extreme activations in the penultimate layer using percentile thresholds from a calibration set. Unlike Kossen (read-only), this *modifies* the computation graph at inference time. Reduces overconfident generations without retraining. Full implementation spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
 
@@ -86,7 +86,7 @@ The progression represents increasing depth of access: output probabilities → 
 
 ## 3. Dataset: TriviaQA
 
-We evaluate on **TriviaQA** `rc.nocontext` (validation set, 17,944 questions) — trivia answered from memory, no supporting document. Closed-book forces genuine uncertainty: the model either knows the answer or it doesn't.
+We evaluate on **TriviaQA** `rc.nocontext` (validation set, 17,944 questions): trivia answered from memory, no supporting document. Closed-book forces genuine uncertainty: the model either knows the answer or it doesn't.
 
 **Correctness criterion:** RougeL(model answer, any gold alias) > 0.3, following Kuhn et al.
 
@@ -107,9 +107,9 @@ SE ≥ τ  →  flag as hallucination
 SE < τ  →  return answer to user
 ```
 
-Rather than fixing τ and measuring accuracy, we sweep τ and compute **AUROC** — the probability that a randomly chosen hallucinated answer has higher SE than a randomly chosen correct answer. AUROC = 0.5 is random; AUROC = 1.0 is perfect separation.
+Rather than fixing τ and measuring accuracy, we sweep τ and compute **AUROC**, the probability that a randomly chosen hallucinated answer has higher SE than a randomly chosen correct answer. AUROC = 0.5 is random; AUROC = 1.0 is perfect separation.
 
-*Example — "Who invented the telephone?"*
+*Example: "Who invented the telephone?"*
 
 ```
 s1:  "Alexander Graham Bell"      log_prob = -0.12 ┐
@@ -137,16 +137,16 @@ All runs: TriviaQA `rc.nocontext`, N=300 questions, M=10 samples, temp=0.5, Moda
 
 ### 5.1 Summary
 
-**Kuhn SE vs Kossen SEP — hallucination detection AUROC**
+**Kuhn SE vs Kossen SEP: hallucination detection AUROC**
 
 | Model | Acc | Kuhn SE AUROC | Kossen SEP AUROC | SEP gap |
 |---|---|---|---|---|
 | Mistral-7B-Instruct-v0.3 | 61% | 0.720 | 0.662 | −0.058 |
 | Meta-Llama-3.1-8B-Instruct | **73%** | **0.728** | **0.687** | −0.034 |
 | Qwen2.5-1.5B-Instruct | 39% | 0.755 | 0.692 | −0.042 |
-| Kuhn et al. (OPT-30B) | ~50% | ~0.830 | — | — |
+| Kuhn et al. (OPT-30B) | ~50% | ~0.830 | n/a | n/a |
 
-SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sampling, no NLI.
+SEP probes recover 91–96% of SE's AUROC using a single forward pass: no sampling, no NLI.
 
 **Full details**
 
@@ -156,7 +156,7 @@ SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sam
 | Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 70s | 1.5× | 21 |
 | Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 31s | 2.9× | 17 |
 
-Both measured over N=300 questions in parallel on A10G. Kuhn: M=10 LLM samples + NLI clustering per question. Kossen inference: 1 forward pass + probe per question (no sampling, no NLI). Wall-time speedup is lower than the theoretical 10× per-question speedup because Modal's autoscaling already parallelises Kuhn's sampling across containers — the per-question serial cost ratio is ~10×, but both pipelines saturate available GPUs.
+Both measured over N=300 questions in parallel on A10G. Kuhn: M=10 LLM samples + NLI clustering per question. Kossen inference: 1 forward pass + probe per question (no sampling, no NLI). Wall-time speedup is lower than the theoretical 10× per-question speedup because Modal's autoscaling already parallelises Kuhn's sampling across containers; the per-question serial cost ratio is ~10×, but both pipelines saturate available GPUs.
 
 PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
 
@@ -170,7 +170,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 <p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_plots.png" width="75%"></p>
 
-*Kuhn SE · Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal — the concise system prompt makes the model lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight variation. SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
+*Kuhn SE · Mistral-7B · N=300 · SE AUROC=0.720 · PE AUROC=0.330 · Acc=61% · 75s. PE falls below the diagonal: the concise system prompt makes the model lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight variation. SE is unaffected: "JFK", "John Kennedy", "John F. Kennedy" all land in one cluster.*
 
 <p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q300_s10_t0.5_20260526_021404_sep_plots.png" width="75%"></p>
 
@@ -194,7 +194,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 <p align="center"><img src="outputs/qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_021523_plots.png" width="75%"></p>
 
-*Kuhn SE · Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Highest SE AUROC despite smallest model size — likely a sampling artifact at N=300.*
+*Kuhn SE · Qwen2.5-1.5B · N=300 · SE AUROC=0.755 · PE AUROC=0.293 · Acc=39% · 90s. Highest SE AUROC despite smallest model size, likely a sampling artifact at N=300.*
 
 <p align="center"><img src="outputs/sep_data_qwen2.5-1.5b-instruct_q300_s10_t0.5_20260526_034402_sep_plots.png" width="75%"></p>
 
@@ -210,7 +210,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 **NLI errors add noise.** DeBERTa achieves 92.7% semantic equivalence accuracy (Kuhn et al.). Errors in either direction corrupt the SE estimate.
 
-**Scale matters.** OPT-2.7B shows SE AUROC ≈ 0.5. Model capability is a prerequisite for SE to be informative — Kuhn et al. achieve ~0.83 with OPT-30B.
+**Scale matters.** OPT-2.7B shows SE AUROC ≈ 0.5. Model capability is a prerequisite for SE to be informative; Kuhn et al. achieve ~0.83 with OPT-30B.
 
 ---
 
@@ -248,7 +248,7 @@ The key architectural property of Kossen's SEP probe is that it decouples the ha
                     └─────────────────────────┘
 ```
 
-The probe runs at the **last input token position** — the point where the model has attended to the full question but has not yet emitted a single output token. The hidden state at that position is already computed as part of the prefill step. Slicing it and running `sigmoid(W·h + b)` adds negligible latency (~0.5 ms) on top of the prefill.
+The probe runs at the **last input token position**, the point where the model has attended to the full question but has not yet emitted a single output token. The hidden state at that position is already computed as part of the prefill step. Slicing it and running `sigmoid(W·h + b)` adds negligible latency (~0.5 ms) on top of the prefill.
 
 Token generation then proceeds in parallel (or sequentially, depending on implementation) from the same KV cache. No second forward pass is needed.
 
@@ -292,11 +292,11 @@ The probe adds < 0.5% overhead to total request latency.
 
 The probe must be trained before deployment. This is a one-time offline cost:
 
-1. **Collect training data** — run the full Kuhn pipeline on N ≥ 500 questions → SE score per question. This is the only step that requires M=10 samples and NLI. Takes ~75s per 300 questions on A10G.
-2. **Binarize** — Otsu threshold γ* on SE scores → 0/1 uncertain labels.
-3. **Extract hidden states** — one forward pass per question, slice `hidden_states[layer][-1]` at every layer.
-4. **Grid-search layers** — fit logistic regression per layer, pick best validation AUROC. For 7–8B models, layer 21 (of 32) consistently wins.
-5. **Save probe** — `W` (d_model × 1) + `b` (scalar) + `best_layer` index → `sep_probe_<model>.pkl`.
+1. **Collect training data:** run the full Kuhn pipeline on N ≥ 500 questions → SE score per question. This is the only step that requires M=10 samples and NLI. Takes ~75s per 300 questions on A10G.
+2. **Binarize:** Otsu threshold γ* on SE scores → 0/1 uncertain labels.
+3. **Extract hidden states:** one forward pass per question, slice `hidden_states[layer][-1]` at every layer.
+4. **Grid-search layers:** fit logistic regression per layer, pick best validation AUROC. For 7–8B models, layer 21 (of 32) consistently wins.
+5. **Save probe:** `W` (d_model × 1) + `b` (scalar) + `best_layer` index → `sep_probe_<model>.pkl`.
 
 Re-training is only needed when the base LLM changes. The probe is not updated at inference time.
 
@@ -304,13 +304,13 @@ Re-training is only needed when the base LLM changes. The probe is not updated a
 
 ## 8. Future Work
 
-**INSIDE (Chen et al., ICLR 2024, 356 citations)** — EigenScore + feature clipping. No NLI; operates in embedding geometry. Requires forward hooks to modify activations in-flight. Full spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
+**INSIDE (Chen et al., ICLR 2024, 356 citations):** EigenScore + feature clipping. No NLI; operates in embedding geometry. Requires forward hooks to modify activations in-flight. Full spec in [src/ctgt/inside_2024/inside.py](src/ctgt/inside_2024/inside.py).
 
-**Diversity-steered sampling (Park & Cho, NeurIPS 2025)** — penalise semantically redundant outputs during generation. Same AUROC with ~4 samples instead of 10 — 60% LLM cost reduction with no architecture changes.
+**Diversity-steered sampling (Park & Cho, NeurIPS 2025):** penalise semantically redundant outputs during generation. Same AUROC with ~4 samples instead of 10; 60% LLM cost reduction with no architecture changes.
 
-**p(True) baseline (Kadavath et al., 2022)** — ask the model "is your answer correct?" as a self-evaluation signal. A third AUROC comparison point alongside SE and PE.
+**p(True) baseline (Kadavath et al., 2022):** ask the model "is your answer correct?" as a self-evaluation signal. A third AUROC comparison point alongside SE and PE.
 
-**Larger models** — Mistral-7B hits 61% accuracy. Llama-3.1-8B or Qwen2.5-7B would push accuracy higher and close the gap to Kuhn et al.'s results.
+**Larger models:** Mistral-7B hits 61% accuracy. Llama-3.1-8B or Qwen2.5-7B would push accuracy higher and close the gap to Kuhn et al.'s results.
 
 ---
 
