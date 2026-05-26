@@ -32,35 +32,11 @@ SE = -∑_c  p(c|x) · log p(c|x),   p(c|x) = ∑_{s ∈ c} p(s|x)
 
 High SE means the model's answers genuinely disagree on *meaning* — a strong hallucination signal.
 
-**Step 1 — Sample**
-
-Draw M=10 completions at temperature 0.5. Record each completion's length-normalised log-probability:
-
-```
-log_prob = (1/n) · ∑_i log p(token_i | context, tokens_{<i})
-```
-
-Length normalisation makes short and long answers comparable.
-
-**Step 2 — Cluster by meaning**
-
-Use **DeBERTa-large** (400M parameters, fine-tuned on Multi-NLI) to check semantic equivalence. Both directions must hold:
-
-```
-A entails B  AND  B entails A  →  same cluster
-```
-
-A one-way implication is not enough: "Paris is in France" entails "Paris exists" but they are not equivalent. Greedy transitivity keeps comparisons at O(M·C) rather than O(M²).
-
-**Step 3 — Entropy over clusters**
-
-Sum probabilities within each cluster, then compute entropy:
-
-```
-SE = -∑_c  p(c) · log p(c)
-```
-
-SE = 0: all samples share one meaning (certain). SE ≈ log(10) = 2.3: every sample has a distinct meaning (maximally uncertain).
+1. **Sample** — draw M=10 completions at temperature 0.5; record length-normalised log-prob for each: `log_prob = (1/n) · ∑ log p(token_i)`
+2. **Cluster** — run DeBERTa NLI bidirectionally against each cluster's representative; assign on mutual entailment, else open a new cluster. O(M·C) not O(M²).
+3. **Aggregate** — sum sequence probabilities within each cluster: `p(c) = ∑_{s∈c} exp(log_prob_s)`
+4. **Entropy** — `SE = -∑_c p(c) · log p(c)`. SE=0: one shared meaning. SE≈log(10)=2.3: every sample differs.
+5. **Evaluate** — SE is the hallucination score. Label = RougeL(best answer, gold) > 0.3. Sweep threshold → AUROC.
 
 ---
 
