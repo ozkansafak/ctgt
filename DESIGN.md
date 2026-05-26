@@ -197,57 +197,39 @@ Example item:
 
 ## 4. Results
 
-All benchmarks: 50 questions, M=10 samples, TriviaQA `rc.nocontext` validation set, Modal T4 GPU.
+All benchmarks: 50 questions, M=10 samples, temperature=0.5, TriviaQA `rc.nocontext` validation set, Modal T4 GPU.
 
-### 4.1 Qwen2.5-1.5B-Instruct
+### 4.1 Summary table
 
-| Method | AUROC |
-|---|---|
-| **Semantic Entropy (ours)** | **0.771** |
-| Predictive Entropy (baseline) | 0.604 |
-| Random | 0.500 |
+| Model | Type | Accuracy | SE AUROC | PE AUROC | SE gain | LLM time/q | NLI time/q | Wall time |
+|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-1.5B | Instruction-tuned | 6% | **0.723** | 0.660 | +0.064 | 10.7s | 2.5s | 103s |
+| OPT-2.7B | Base model | 4% | 0.688 | 0.562 | +0.125 | 17.4s | 2.7s | — |
+| Kuhn et al. OPT-30B | Base model | ~50% | ~0.830 | — | — | — | — | — |
 
-SE gain: **+0.167**. Accuracy: 4%. Avg latency: 10.5s LLM + 2.3s NLI = **12.8s/question**.
+SE consistently outranks PE as an uncertainty signal across both models. OPT-2.7B is larger but scores lower AUROC than Qwen-1.5B — OPT is a base model with no instruction tuning, so its Q&A completions are noisier and SE has less signal to work with.
 
-![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q50_s10_t0.5_20260525_214200_plots.png)
-
-| | Correct answers | Wrong answers |
-|---|---|---|
-| Avg SE | 1.365 | 1.718 |
-| Avg # clusters | 5.50 | 7.06 |
+Kuhn et al. use a 30B OPT model and report SE AUROC ~0.83 at ~50% accuracy. The low accuracy here (4–6%) is expected for a 1.5B model on closed-book trivia — the key result is that SE separates uncertain from confident answers better than PE does, regardless of model size.
 
 ---
 
-### 4.2 OPT-2.7B (base model)
+### 4.2 Qwen2.5-1.5B-Instruct
 
-| Method | AUROC |
-|---|---|
-| **Semantic Entropy (ours)** | **0.688** |
-| Predictive Entropy (baseline) | 0.562 |
-| Random | 0.500 |
+![Qwen2.5-1.5B results](outputs/qwen2.5-1.5b-instruct_q50_s10_t0.5_20260525_231929_plots.png)
 
-SE gain: **+0.125**. Accuracy: 4%. Avg latency: 17.4s LLM + 2.7s NLI = **20.1s/question**.
+| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
+|---|---|---|---|---|---|---|
+| Qwen2.5-1.5B | 0.723 | 0.660 | 1.236 | 1.733 | 5.00 | 7.23 |
+
+---
+
+### 4.3 OPT-2.7B (base model)
 
 ![OPT-2.7B results](outputs/opt-2.7b_q50_s10_t0.5_20260525_223843_plots.png)
 
-| | Correct answers | Wrong answers |
-|---|---|---|
-| Avg SE | 1.243 | 1.565 |
-| Avg # clusters | 5.00 | 6.67 |
-
-OPT-2.7B scores lower AUROC than Qwen-1.5B despite being larger. OPT is a base model (no instruction tuning) — its Q&A completions are noisier, which reduces the SE signal. SE still beats PE on both models.
-
----
-
-### 4.3 Model comparison
-
-| Model | Type | Accuracy | SE AUROC | PE AUROC | SE gain | LLM time/q |
+| | SE AUROC | PE AUROC | Avg SE correct | Avg SE wrong | Avg clusters correct | Avg clusters wrong |
 |---|---|---|---|---|---|---|
-| Qwen2.5-1.5B | Instruction-tuned | 4% | **0.771** | 0.604 | +0.167 | 10.5s |
-| OPT-2.7B | Base model | 4% | 0.688 | 0.562 | +0.125 | 17.4s |
-| Kuhn et al. OPT-30B | Base model | ~50% | ~0.830 | — | — | — |
-
-Kuhn et al. use a 30B OPT model and report SE AUROC ~0.83. The low accuracy here (4%) is expected — the key result is that SE consistently outranks PE as an uncertainty signal regardless of model size.
+| OPT-2.7B | 0.688 | 0.562 | 1.243 | 1.565 | 5.00 | 6.67 |
 
 ---
 
