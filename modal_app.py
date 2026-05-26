@@ -197,7 +197,9 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
     questions = [item["question"] for item in items]
     aliases_list = [item["answer"]["normalized_aliases"] for item in items]
 
+    import time as _time
     print(f"Dispatching {len(questions)} questions to Modal (n_samples={n_samples}, temperature={temperature}) …")
+    _t_start = _time.perf_counter()
     raw = list(
         score_question.map(
             questions,
@@ -205,6 +207,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
             order_outputs=True,
         )
     )
+    wall_time_s = _time.perf_counter() - _t_start
 
     # Score correctness locally (cheap, no GPU needed)
     scorer = rs.RougeScorer(["rougeL"], use_stemmer=False)
@@ -232,6 +235,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
     print(f"   Avg LLM sampling time    : {avg_llm:.1f}s  (M={n_samples} samples)")
     print(f"   Avg NLI clustering time  : {avg_nli:.1f}s")
     print(f"   Avg total per question   : {avg_llm + avg_nli:.1f}s")
+    print(f"   Total wall time          : {wall_time_s:.0f}s ({wall_time_s/60:.1f} min)")
     print(f"{'='*56}")
 
     from datetime import datetime
@@ -253,6 +257,7 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
             "pe_auroc": pe_auroc,
             "avg_llm_s": avg_llm,
             "avg_nli_s": avg_nli,
+            "wall_time_s": wall_time_s,
             "rows": rows,
         },
         indent=2,
