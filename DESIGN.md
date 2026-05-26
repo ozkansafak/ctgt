@@ -174,11 +174,11 @@ SEP probes recover 91–96% of SE's AUROC using a single forward pass — no sam
 
 **Full details**
 
-| Model | Params | PE AUROC | Kuhn wall time | SEP best layer |
-|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 21 |
-| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 21 |
-| Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 17 |
+| Model | Params | PE AUROC | Kuhn wall time | Kossen wall time | SEP best layer |
+|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 7B | 0.330 | 75s | 75s | 21 |
+| Meta-Llama-3.1-8B-Instruct | 8B | 0.310 | 108s | 139s | 21 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 0.293 | 90s | 51s | 17 |
 
 PE AUROC < 0.5 across all instruction-tuned models: the concise system prompt makes them lexically rigid, so all M=10 samples return identical wrong tokens (PE≈0 on errors) while correct answers show slight lexical variation. SE is unaffected because it clusters by meaning, not token sequence.
 
