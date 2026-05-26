@@ -4,4 +4,7 @@ __pycache__/
 *.egg-info/
 .venv/
 .env
+.DS_Store
 benchmark_results.json
+# SEP training data: large (200+ MB) — contains full hidden state vectors
+outputs/sep_data_*.json

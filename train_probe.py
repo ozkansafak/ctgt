@@ -15,8 +15,9 @@ import json
 from pathlib import Path
 
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 
 from ctgt.kossen_2024.probe import SEProbe
 
@@ -83,30 +84,61 @@ def main() -> None:
         bar = "█" * bar_len + "░" * (30 - bar_len)
         print(f"  Layer {layer_idx:3d}: {bar} {train_aurocs[layer_idx]:.3f}{marker}")
 
-    # Evaluate on test set
-    print("\n── Test set evaluation ─────────────────────────────────────────")
-    X_test = np.array(test_hs[probe.best_layer], dtype=np.float32)
-    se_test = np.array(test_se, dtype=np.float32)
-    labels_test = (se_test > probe.threshold).astype(int)
+    # ── 5-fold cross-validation on all 200 questions ─────────────────
+    # Uses all data to estimate AUROC, avoiding the variance of a single split.
+    # Two metrics reported:
+    #   (A) Hallucination detection: probe vs is_correct ground truth
+    #   (B) SE approximation: probe vs SE-binarised labels (Kossen 2024 metric)
+    print("\n── 5-fold cross-validation (all 200 questions) ─────────────────")
 
-    if len(np.unique(labels_test)) < 2:
-        print("  Warning: test set is single-class — AUROC undefined. Run with more data.")
-        sep_test_auroc = float("nan")
-        se_test_auroc  = float("nan")
-    else:
-        probe_proba   = probe.clf.predict_proba(X_test)[:, 1]
-        sep_test_auroc = roc_auc_score(labels_test, probe_proba)
-        # Oracle: SE score itself predicting high-SE label
-        se_test_auroc  = roc_auc_score(labels_test, se_test)
+    all_se    = np.array(se_scores, dtype=np.float32)
+    # Binarise SE with the threshold already fitted on the train split
+    se_labels_all   = (all_se > probe.threshold).astype(int)
+    hall_labels_all = [1 - int(r["is_correct"]) for r in rows]
+
+    X_all = np.array(
+        [rows[i]["hidden_states"][str(probe.best_layer)] for i in range(len(rows))],
+        dtype=np.float32,
+    )
+
+    def safe_auroc(labels, scores):
+        labels = np.array(labels)
+        if len(np.unique(labels)) < 2:
+            return float("nan")
+        return float(roc_auc_score(labels, scores))
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    sep_hall_fold, se_hall_fold, sep_se_fold = [], [], []
+
+    for fold_train, fold_test in skf.split(X_all, hall_labels_all):
+        clf = LogisticRegression(C=1.0, max_iter=1000, solver="lbfgs")
+        clf.fit(X_all[fold_train], se_labels_all[fold_train])
+        proba = clf.predict_proba(X_all[fold_test])[:, 1]
+
+        sep_hall_fold.append(safe_auroc([hall_labels_all[i] for i in fold_test], proba))
+        se_hall_fold.append( safe_auroc([hall_labels_all[i] for i in fold_test], all_se[fold_test]))
+        sep_se_fold.append(  safe_auroc(se_labels_all[fold_test], proba))
+
+    def mean_nan(vals): return float(np.nanmean(vals))
+
+    sep_hall_cv = mean_nan(sep_hall_fold)
+    se_hall_cv  = mean_nan(se_hall_fold)
+    sep_se_cv   = mean_nan(sep_se_fold)
 
     print(f"  SE threshold (γ*)  : {probe.threshold:.3f}")
     print(f"  Best layer         : {probe.best_layer}  (train AUROC={train_aurocs[probe.best_layer]:.3f})")
-    print(f"  SEP test AUROC     : {sep_test_auroc:.3f}")
-    print(f"  SE  test AUROC     : {se_test_auroc:.3f}  ← oracle (10× slower at inference)")
-    if not (np.isnan(sep_test_auroc) or np.isnan(se_test_auroc)):
-        print(f"  Gap vs oracle      : {sep_test_auroc - se_test_auroc:+.3f}")
-    print(f"\n  Inference speedup  : ~{10:.0f}× fewer LLM forward passes")
-    print(f"  Compute class      : O(d) = O({hidden_dim}) matrix multiply vs O(M·d) clustering")
+    print()
+    print(f"  (A) Hallucination detection  [label = is_correct from dataset]")
+    print(f"      SE  AUROC (oracle, 5-fold): {se_hall_cv:.3f}  ← 10× slower, needs M samples + NLI")
+    print(f"      SEP AUROC (probe, 5-fold) : {sep_hall_cv:.3f}  ← single forward pass")
+    if not (np.isnan(sep_hall_cv) or np.isnan(se_hall_cv)):
+        print(f"      Gap                       : {sep_hall_cv - se_hall_cv:+.3f}")
+    print()
+    print(f"  (B) SE approximation  [label = SE > γ* = {probe.threshold:.3f}]")
+    print(f"      SEP AUROC (5-fold)         : {sep_se_cv:.3f}  (Kossen 2024 metric)")
+    print()
+    print(f"  Inference speedup  : ~10× fewer LLM forward passes")
+    print(f"  Compute class      : O(d) = O({hidden_dim}) vs O(M · NLI calls)")
 
     out = Path(args.output)
     out.parent.mkdir(exist_ok=True)

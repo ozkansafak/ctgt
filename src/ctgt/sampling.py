@@ -42,7 +42,16 @@ class LLMSampler:
 
     def _build_prompt(self, question: str) -> str:
         if self.tokenizer.chat_template is not None:
-            messages = [{"role": "user", "content": question}]
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "Answer the question with a short, direct answer. "
+                        "Give only the answer itself — no explanation, no full sentences."
+                    ),
+                },
+                {"role": "user", "content": question},
+            ]
             return self.tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )

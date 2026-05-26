@@ -193,21 +193,32 @@ Example item:
 
 ## 4. Results
 
-All benchmarks: 50 questions, M=10 samples, temperature=0.5, TriviaQA `rc.nocontext` validation set, Modal T4 GPU.
+TriviaQA `rc.nocontext` validation set, M=10 samples, temperature=0.5, Modal GPU.
 
 ### 4.1 Summary table
 
-| Model | Instruction-tuned | Params | Accuracy | SE AUROC | PE AUROC | SE gain | LLM time/q | NLI time/q | Wall time |
+#### Kuhn / Farquhar baseline — Semantic Entropy (SE)
+
+| Model | IT? | Params | N | GPU | Accuracy | SE AUROC | PE AUROC | SE gain | Wall time |
 |---|---|---|---|---|---|---|---|---|---|
-| Qwen2.5-1.5B-Instruct | ✅ Yes | 1.5B | 6% | **0.723** | 0.660 | +0.064 | 10.7s | 2.5s | 103s |
-| OPT-2.7B | ❌ No | 2.7B | 4% | 0.688 | 0.562 | +0.125 | 17.4s | 2.7s | — |
-| Kuhn et al. OPT-30B | ❌ No | 30B | ~50% | ~0.830 | — | — | — | — | — |
+| Mistral-7B-Instruct-v0.3 | ✅ | 7B | 200 | A10G | **56%** | **0.750** | 0.293 | +0.457 | 60s |
+| Qwen2.5-1.5B-Instruct | ✅ | 1.5B | 50 | T4 | 6% | 0.723 | 0.660 | +0.064 | 103s |
+| OPT-2.7B | ❌ | 2.7B | 50 | T4 | 4% | 0.688 | 0.562 | +0.125 | — |
+| Kuhn et al. OPT-30B | ❌ | 30B | — | — | ~50% | ~0.830 | — | — | — |
 
-SE consistently outranks PE as an uncertainty signal on both models.
+#### Kossen 2024 — Semantic Entropy Probes (SEP)
 
-**Why OPT-2.7B scores lower than Qwen-1.5B despite being larger:** OPT is a base model — it was only trained on raw text (books, web pages) and never fine-tuned to follow instructions. It produces answers via autocomplete from a `Q: ... A:` prompt, which makes its completions noisier and less structured. Some of that noise comes from *how to format the answer* rather than *which fact to state*, which dilutes the SE signal. This is **not a fair size comparison** — a proper apples-to-apples comparison would use an instruction-tuned model at both sizes, e.g. Qwen2.5-7B-Instruct or Llama-3.1-8B-Instruct.
+| Model | N | Layer | SE AUROC (oracle) | SEP AUROC (probe) | Gap | Speedup |
+|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 200 (5-fold CV) | 21 | 0.746 | **0.689** | −0.057 | ~10× |
 
-Kuhn et al. use OPT-30B (also a base model) and report SE AUROC ~0.83 at ~50% accuracy — the high accuracy reflects model scale, not instruction tuning. The low accuracy here (4–6%) is expected for small models on closed-book trivia.
+The SEP probe achieves **92% of SE's AUROC** using a single forward pass and a matrix multiply — no NLI clustering, no multiple samples.
+
+**Key finding on PE:** Mistral-7B-Instruct with a concise system prompt produces AUROC = 0.293 for PE — *below random*. The model is overconfident: it often generates the same wrong answer across all M=10 samples (PE → 0), making PE anticorrelated with error. SE is robust to this because it measures semantic diversity, not lexical diversity. This is the canonical failure mode of PE that motivated the SE paper.
+
+**Why OPT-2.7B scores lower than Qwen-1.5B despite being larger:** OPT is a base model (pretrain only, no instruction tuning). Its completions are noisier and some noise reflects *how to format the answer* rather than *which fact to state*, diluting the SE signal. This is not a fair size comparison — a proper comparison requires instruction-tuned models at both sizes.
+
+Kuhn et al. use OPT-30B (also base) and report SE AUROC ~0.83 at ~50% accuracy — model scale, not instruction tuning, drives the accuracy.
 
 ---
 
