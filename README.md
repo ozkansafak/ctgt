@@ -1,8 +1,9 @@
 # Hallucination Detection via Semantic Entropy
 
-Implements and benchmarks three papers on LLM hallucination detection at increasing depths of model access: Kuhn/Farquhar (logprobs), Kossen (hidden states read), Chen INSIDE (hidden states read+write).
+Full technical report: [DESIGN.md](DESIGN.md)
 
-Full technical writeup: [DESIGN.md](DESIGN.md)
+Implements and benchmarks two papers on LLM hallucination detection: Kuhn/Farquhar Semantic Entropy (logprobs) and Kossen Semantic Entropy Probes (hidden states). A third method, Chen INSIDE (hidden states read+write), is documented but not yet implemented.
+
 
 ---
 
@@ -12,11 +13,11 @@ Full technical writeup: [DESIGN.md](DESIGN.md)
 |---|---|
 | SE | Semantic Entropy: entropy over meaning clusters, not token sequences |
 | PE | Predictive Entropy: entropy over raw token sequences (baseline) |
-| SEP | Semantic Entropy Probe: logistic regression on frozen hidden states |
+| SEP | Semantic Entropy Probe: logistic regression on last token embeddings |
 | NLI | Natural Language Inference: entailment / neutral / contradiction |
 | DeBERTa | NLI model used for clustering (`cross-encoder/nli-deberta-v3-large`) |
 | AUROC | Separation quality: 0.5 = random, 1.0 = perfect |
-| RougeL | String overlap metric; used to judge answer correctness (threshold 0.3) |
+| RougeL | String overlap metric, used to judge answer correctness (threshold 0.3) |
 | TriviaQA | Evaluation dataset, closed-book (model answers from memory) |
 
 ---
@@ -31,7 +32,7 @@ TriviaQA `rc.nocontext`, N=10,000, M=10 samples, temp=0.5, Modal A10G. Train and
 | Meta-Llama-3.1-8B-Instruct | 75% | 0.790 | 0.746 | 108s / 70s |
 | Qwen2.5-1.5B-Instruct | 41% | 0.728 | 0.705 | 90s / 31s |
 
-SEP probes recover 94-97% of SE AUROC using a single forward pass. PE AUROC < 0.5 on all models (instruction tuning artifact; see DESIGN.md).
+SEP probes recover 94-97% of SE AUROC using a single forward pass. For explanation of PE AUROC < 0.5, see DESIGN.md.
 
 ---
 
