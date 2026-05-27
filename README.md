@@ -2,6 +2,8 @@
 
 Implements and benchmarks three papers on LLM hallucination detection at increasing depths of model access: Kuhn/Farquhar (logprobs), Kossen (hidden states read), Chen INSIDE (hidden states read+write).
 
+Full technical writeup: [DESIGN.md](DESIGN.md)
+
 ---
 
 ## Glossary

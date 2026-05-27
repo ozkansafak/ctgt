@@ -3,7 +3,7 @@ INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection
 Chen et al., ICLR 2024  —  https://arxiv.org/abs/2402.03744
 
 NOT YET IMPLEMENTED — documented here as a reference for future work.
-See DESIGN.md § Future Work for context.
+See DESIGN.md "Future Work" for context.
 
 ---
 

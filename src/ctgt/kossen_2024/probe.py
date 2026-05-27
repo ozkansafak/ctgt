@@ -26,7 +26,7 @@ from sklearn.metrics import roc_auc_score
 
 
 def _otsu_threshold(scores: np.ndarray) -> float:
-    """Pick the threshold that minimises total within-class variance (Otsu 1979)."""
+    """Pick the threshold that minimizes total within-class variance (Otsu 1979)."""
     best_t, best_var = float(scores.mean()), float("inf")
     for t in np.linspace(scores.min(), scores.max(), 200):
         lo = scores[scores <= t]
