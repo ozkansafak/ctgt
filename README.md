@@ -24,15 +24,25 @@ Implements and benchmarks two papers on LLM hallucination detection: Kuhn/Farquh
 
 ## Results
 
-TriviaQA `rc.nocontext`, N=10,000, M=10 samples, temp=0.5, Modal A10G. Train and eval sets are disjoint.
+### AUROC
 
-| Model | Acc | Kuhn SE | Kossen SEP | Wall time (Kuhn / SEP) |
-|---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 70% | 0.772 | 0.742 | 75s / 50s |
-| Meta-Llama-3.1-8B-Instruct | 75% | 0.790 | 0.746 | 108s / 70s |
-| Qwen2.5-1.5B-Instruct | 41% | 0.728 | 0.705 | 90s / 31s |
+| Model | Acc | SE AUROC | PE AUROC | SEP AUROC | SEP gap | SEP best layer |
+|---|---|---|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 70% | 0.772 | 0.273 | 0.742 | −0.030 | 31 |
+| Meta-Llama-3.1-8B-Instruct | 75% | 0.790 | 0.258 | 0.746 | −0.044 | 31 |
+| Qwen2.5-1.5B-Instruct | 41% | 0.728 | 0.303 | 0.705 | −0.024 | 26 |
 
-SEP probes recover 94-97% of SE AUROC using a single forward pass. For explanation of PE AUROC < 0.5, see DESIGN.md.
+SE and PE scored directly on N=10,000 questions. SEP via 5-fold CV on the same split. PE AUROC < 0.5 on all models (instruction tuning artifact; see DESIGN.md).
+
+### Wall time (N=300, A10G)
+
+| Model | Kuhn | SEP inference | Speedup |
+|---|---|---|---|
+| Mistral-7B-Instruct-v0.3 | 75s | 50s | 1.5× |
+| Meta-Llama-3.1-8B-Instruct | 108s | 70s | 1.5× |
+| Qwen2.5-1.5B-Instruct | 90s | 31s | 2.9× |
+
+SEP probes recover 94–97% of SE AUROC using a single forward pass.
 
 ---
 
