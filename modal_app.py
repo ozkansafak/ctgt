@@ -277,7 +277,7 @@ def analyze(question: str = "What is the capital of France?", n_samples: int = 1
 
 
 @app.local_entrypoint()
-def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 0.5, llm_model: str = LLM_MODEL):
+def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 0.5, llm_model: str = LLM_MODEL, offset: int = 0, seed: int = 42):
     """
     Evaluate SE vs PE on TriviaQA (closed-book).
 
@@ -285,22 +285,27 @@ def benchmark(n_questions: int = 200, n_samples: int = 10, temperature: float = 
     and keeps containers warm, so model-load cost is amortised across questions.
     AUROC is computed locally once all results arrive.
 
+    The full validation set is shuffled with `seed` before slicing, so offset
+    and n_questions select a reproducible, non-overlapping slice.
+
     Example:
-        modal run modal_app.py::app.benchmark --n-questions 300
+        modal run modal_app.py::app.benchmark --n-questions 300 --offset 0 --seed 42
         modal run modal_app.py::app.benchmark --n-questions 300 --llm-model NousResearch/Meta-Llama-3.1-8B-Instruct
     """
     import json
+    import random
     from pathlib import Path
 
     from datasets import load_dataset
     from rouge_score import rouge_scorer as rs
     from sklearn.metrics import roc_auc_score
 
-    print(f"Loading TriviaQA validation[:{n_questions}] …")
-    dataset = load_dataset(
-        "mandarjoshi/trivia_qa", "rc.nocontext", split=f"validation[:{n_questions}]"
-    )
+    print(f"Loading TriviaQA validation (full), shuffling with seed={seed}, slice [{offset}:{offset+n_questions}] ...")
+    dataset = load_dataset("mandarjoshi/trivia_qa", "rc.nocontext", split="validation")
     items = list(dataset)
+    random.seed(seed)
+    random.shuffle(items)
+    items = items[offset: offset + n_questions]
     questions = [item["question"] for item in items]
     aliases_list = [item["answer"]["normalized_aliases"] for item in items]
 
@@ -388,17 +393,23 @@ def collect_sep_training_data(
     n_samples: int = 10,
     temperature: float = 0.5,
     llm_model: str = LLM_MODEL,
+    offset: int = 300,
+    seed: int = 42,
 ):
     """Collect SE scores + LLM hidden states for SEP probe training.
 
     Runs the full SE pipeline on TriviaQA and saves hidden states alongside
     entropy scores.  Feed the output JSON to train_probe.py to fit the probe.
 
+    Uses the same shuffle seed as `benchmark` so slices are guaranteed disjoint.
+    Default offset=300 assumes benchmark uses offset=0, n_questions=300 (Set A).
+
     Example:
-        modal run modal_app.py::app.collect_sep_training_data --n-questions 300
-        modal run modal_app.py::app.collect_sep_training_data --n-questions 300 --llm-model Qwen/Qwen2.5-1.5B-Instruct
+        modal run modal_app.py::app.collect_sep_training_data --n-questions 10000 --offset 300 --seed 42
+        modal run modal_app.py::app.collect_sep_training_data --n-questions 10000 --llm-model Qwen/Qwen2.5-1.5B-Instruct
     """
     import json
+    import random
     import time as _time
     from datetime import datetime
     from pathlib import Path
@@ -407,11 +418,12 @@ def collect_sep_training_data(
     from rouge_score import rouge_scorer as rs
     from sklearn.metrics import roc_auc_score
 
-    print(f"Loading TriviaQA validation[:{n_questions}] …")
-    dataset = load_dataset(
-        "mandarjoshi/trivia_qa", "rc.nocontext", split=f"validation[:{n_questions}]"
-    )
+    print(f"Loading TriviaQA validation (full), shuffling with seed={seed}, slice [{offset}:{offset+n_questions}] ...")
+    dataset = load_dataset("mandarjoshi/trivia_qa", "rc.nocontext", split="validation")
     items = list(dataset)
+    random.seed(seed)
+    random.shuffle(items)
+    items = items[offset: offset + n_questions]
     questions = [item["question"] for item in items]
     aliases_list = [item["answer"]["normalized_aliases"] for item in items]
 
@@ -452,32 +464,50 @@ def collect_sep_training_data(
     pe_auroc = roc_auc_score(*zip(*valid_pe)) if valid_pe else float("nan")
     accuracy = 1 - sum(labels_wrong) / len(labels_wrong)
 
+    import numpy as np
+
     model_slug = llm_model.split("/")[-1].lower()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    fname = f"sep_data_{model_slug}_q{n_questions}_s{n_samples}_t{temperature}_{timestamp}.json"
+    stem = f"sep_data_{model_slug}_q{len(rows)}_s{n_samples}_t{temperature}_{timestamp}"
     Path("outputs").mkdir(exist_ok=True)
-    out = Path("outputs") / fname
 
-    payload = json.dumps(
+    # Extract hidden states into (N, n_layers, d) float16 array, save as .npz
+    sample_hs = rows[0]["hidden_states"]
+    layer_keys = sorted(sample_hs.keys(), key=int)
+    hs_array = np.array(
+        [[r["hidden_states"][k] for k in layer_keys] for r in rows],
+        dtype=np.float16,
+    )
+    npz_path = Path("outputs") / f"{stem}.npz"
+    np.savez_compressed(npz_path, hidden_states=hs_array, layer_keys=np.array([int(k) for k in layer_keys]))
+    print(f"Hidden states ({hs_array.shape}, float16) → {npz_path}  [{npz_path.stat().st_size/1e9:.2f} GB]")
+
+    # Save metadata as small JSON (no hidden states)
+    rows_meta = [{k: v for k, v in r.items() if k != "hidden_states"} for r in rows]
+    json_path = Path("outputs") / f"{stem}.json"
+    json_path.write_text(json.dumps(
         {
             "llm_model": llm_model,
             "nli_model": NLI_MODEL,
             "n_questions": len(rows),
             "n_samples": n_samples,
             "temperature": temperature,
+            "offset": offset,
+            "seed": seed,
             "accuracy": accuracy,
             "se_auroc": se_auroc,
             "pe_auroc": pe_auroc,
             "wall_time_s": wall_time_s,
-            "rows": rows,
+            "rows": rows_meta,
         },
         indent=2,
-    )
-    out.write_text(payload)
+    ))
+
     print(f"\nSE AUROC: {se_auroc:.3f} | PE AUROC: {pe_auroc:.3f} | Accuracy: {accuracy:.1%}")
     print(f"Wall time: {wall_time_s:.0f}s ({wall_time_s / 60:.1f} min)")
-    print(f"SEP training data → {out}")
-    print("Next: python train_probe.py --input", out)
+    print(f"SEP metadata  → {json_path}")
+    print(f"SEP training data → {npz_path}")
+    print("Next: python train_probe.py --input", json_path)
 
 
 @app.local_entrypoint()

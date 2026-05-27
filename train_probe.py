@@ -130,34 +130,29 @@ def main() -> None:
 
     se_scores = [r["semantic_entropy"] for r in rows]
 
-    # JSON serialises int keys as strings; normalise to int before handing to probe
-    sample_hs = rows[0]["hidden_states"]
-    layer_keys_str = sorted(sample_hs.keys(), key=int)
-    layer_keys_int = [int(k) for k in layer_keys_str]
-    hidden_dim = len(sample_hs[layer_keys_str[0]])
-    print(f"  {len(layer_keys_int)} layers extracted | hidden_dim={hidden_dim}")
+    # Load hidden states from .npz companion if present, else fall back to JSON rows
+    npz_path = path.with_suffix(".npz")
+    if npz_path.exists():
+        print(f"  Loading hidden states from {npz_path}")
+        npz = np.load(npz_path)
+        hs_array = npz["hidden_states"].astype(np.float32)  # (N, n_layers, d)
+        layer_keys_int = list(npz["layer_keys"])
+        hidden_dim = hs_array.shape[2]
+        print(f"  {len(layer_keys_int)} layers | hidden_dim={hidden_dim} | shape={hs_array.shape}")
+        train_hs = {layer_keys_int[li]: hs_array[:, li, :] for li in range(len(layer_keys_int))}
+        test_hs = train_hs  # CV handles splitting; no separate test split needed
+    else:
+        sample_hs = rows[0]["hidden_states"]
+        layer_keys_str = sorted(sample_hs.keys(), key=int)
+        layer_keys_int = [int(k) for k in layer_keys_str]
+        hidden_dim = len(sample_hs[layer_keys_str[0]])
+        print(f"  {len(layer_keys_int)} layers extracted | hidden_dim={hidden_dim}")
+        train_hs = {int(k): [rows[i]["hidden_states"][k] for i in range(len(rows))] for k in layer_keys_str}
+        test_hs = train_hs
 
-    # Train / test split on question indices
-    indices = list(range(len(rows)))
-    train_idx, test_idx = train_test_split(indices, test_size=args.test_size, random_state=42)
-    print(f"  Train: {len(train_idx)} | Test: {len(test_idx)}")
-
-    train_se = [se_scores[i] for i in train_idx]
-    test_se  = [se_scores[i] for i in test_idx]
-
-    # Build per-layer hidden state matrices (int keys for probe.fit)
-    train_hs = {
-        int(k): [rows[i]["hidden_states"][k] for i in train_idx]
-        for k in layer_keys_str
-    }
-    test_hs = {
-        int(k): [rows[i]["hidden_states"][k] for i in test_idx]
-        for k in layer_keys_str
-    }
-
-    # Fit probe — grid search over layers on training data
+    # Fit probe — grid search over layers
     probe = SEProbe()
-    train_aurocs = probe.fit(train_hs, train_se)
+    train_aurocs = probe.fit(train_hs, se_scores)
 
     # Print layer grid search results
     print("\n── Layer grid search (train AUROC) ─────────────────────────────")
@@ -167,22 +162,21 @@ def main() -> None:
         bar = "█" * bar_len + "░" * (30 - bar_len)
         print(f"  Layer {layer_idx:3d}: {bar} {train_aurocs[layer_idx]:.3f}{marker}")
 
-    # ── 5-fold cross-validation on all 200 questions ─────────────────
-    # Uses all data to estimate AUROC, avoiding the variance of a single split.
-    # Two metrics reported:
-    #   (A) Hallucination detection: probe vs is_correct ground truth
-    #   (B) SE approximation: probe vs SE-binarised labels (Kossen 2024 metric)
-    print("\n── 5-fold cross-validation (all 200 questions) ─────────────────")
+    print(f"\n── 5-fold cross-validation ({len(rows)} questions) ─────────────────")
 
     all_se    = np.array(se_scores, dtype=np.float32)
     # Binarise SE with the threshold already fitted on the train split
     se_labels_all   = (all_se > probe.threshold).astype(int)
     hall_labels_all = [1 - int(r["is_correct"]) for r in rows]
 
-    X_all = np.array(
-        [rows[i]["hidden_states"][str(probe.best_layer)] for i in range(len(rows))],
-        dtype=np.float32,
-    )
+    best_layer_idx = layer_keys_int.index(probe.best_layer)
+    if npz_path.exists():
+        X_all = hs_array[:, best_layer_idx, :]
+    else:
+        X_all = np.array(
+            [rows[i]["hidden_states"][str(probe.best_layer)] for i in range(len(rows))],
+            dtype=np.float32,
+        )
 
     def safe_auroc(labels, scores):
         labels = np.array(labels)
