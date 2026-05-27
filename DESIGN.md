@@ -32,7 +32,7 @@ SE = -∑_c  p(c|x) · log p(c|x),   p(c|x) = ∑_{s ∈ c} p(s|x)
 
 High SE means the model's answers genuinely disagree on meaning, and this is treated to be a strong hallucination signal.
 
-> **Key insight:** These SE based algorithms don't judge whether a specific completion is a hallucination. Instead, they aim to detect whether the LLM is in a hallucination-prone state. A high SE score means the model lacks a stable answer to draw from —-i.e. the prompt has put the model in a high-entropy region of its knowledge base. The known blind spot follows directly: if the model is consistently wrong in the same way across all M samples, SE = 0 and the hallucination tendency doesnt get flagged leading to a False Negative.
+> **Key insight:** The SE based algorithms don't make an prediction on whether a specific completion is a hallucination. Instead, they aim to detect whether the LLM is in a hallucination-prone state. A high SE score means the model lacks a stable answer to draw from —-i.e. the prompt has put the model in a high-entropy region of its knowledge base. The known blind spot is that if the model is consistently wrong in the same way across all M samples, SE = 0 and the hallucination tendency doesnt get flagged, this leads to a False Negative contributing to a significant drop in AUCROC.
 
 Step by Step algorithm:
 1. **Sample:** draw M=10 completions at temperature 0.5. Record length-normalized log-probs for each: `log_prob = (1/n) · ∑ log p(token_i)`
@@ -106,8 +106,8 @@ We check the model's primary answer against every gold alias, a match on any ali
 
 **Train / eval split.** TriviaQA is not randomly ordered — questions are grouped by source document — so we shuffle the full validation set with a fixed seed before slicing. This gives two disjoint sets that share no questions:
 
-- **Set A (eval, N=10,000, offset=0):** held out for evaluating Kuhn SE and Kossen SEP. Neither algorithm sees these questions during training.
-- **Set B (train, N=10,000, offset=10,000):** used to train the Kossen linear probe. The full Kuhn pipeline (M=10 samples + NLI) is run on Set B to generate SE labels; a logistic regression is then fit to the hidden states extracted from these same questions. Set B is never used for evaluation.
+- **Set A (eval, N=300, offset=0):** questions 0–299 of the shuffled validation set. Held out for evaluating Kuhn SE. Neither algorithm sees these during probe training.
+- **Set B (train, N=10,000, offset=300):** questions 300–10,299. Used to train the Kossen linear probe. The full Kuhn pipeline (M=10 samples + NLI) runs on Set B to generate SE labels; a logistic regression is then fit to the hidden states from the same questions. Probe performance is estimated via 5-fold CV within Set B. Set B is never used as a held-out eval set.
 
 The reason Set B needs N=10,000 is that the logistic regression operates in d=4096 dimensional space. At N=300 the problem is underdetermined (more features than samples) and the probe underfits.
 
@@ -148,7 +148,7 @@ SE = -(0.95·log 0.95 + 0.05·log 0.05) = 0.20  ->  low uncertainty
 
 ## 5. Results
 
-TriviaQA `rc.nocontext`, M=10 samples, temp=0.5, Modal A10G GPU. Kuhn SE and Kossen SEP are evaluated on disjoint question sets (Set A / Set B, N=10,000 each, same shuffle seed, no overlap).
+TriviaQA `rc.nocontext`, M=10 samples, temp=0.5, Modal A10G GPU. Set A (N=300, eval) and Set B (N=10,000, probe training) are disjoint slices of the shuffled validation set, same seed, no overlap.
 
 ### 5.1 Summary
 
