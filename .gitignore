@@ -6,5 +6,7 @@ __pycache__/
 .env
 .DS_Store
 benchmark_results.json
-# SEP training data: large (200+ MB) — contains full hidden state vectors
+# Benchmark outputs: large data files and timestamped results
 outputs/sep_data_*.json
+outputs/sep_data_*.npz
+outputs/*_q*_s*_t*.json

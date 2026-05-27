@@ -1,12 +1,30 @@
 # Appendix
 
-## A1. Per-model plots
+## A1. SE worked example
+
+*"Who invented the light bulb?"*
+
+```
+s1:  "Thomas Edison"              log_prob = -0.12 ┐
+s2:  "Edison invented it in 1879" log_prob = -0.15 ├─ Cluster 1  p = 0.95
+s3:  "The light bulb is Edison's" log_prob = -0.18 ┘
+s10: "Nikola Tesla"               log_prob = -2.10  ── Cluster 2  p = 0.05
+
+SE = -(0.95·log 0.95 + 0.05·log 0.05) = 0.20  ->  low uncertainty
+```
+
+Cluster 1 has high aggregate probability (three paraphrases of the same correct answer). Cluster 2 has low probability (one wrong answer). SE is low because the model is nearly certain about one meaning. If the model were split evenly across two meanings, SE would approach log(2) ≈ 0.69.
+
+---
+
+## A2. Per-model plots
+
 
 Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and **Kossen SEP** (ROC curve + probe score distribution). All runs: TriviaQA `rc.nocontext`, N=10,000, M=10 samples, temp=0.5, Modal A10G.
 
 ---
 
-### A1.1 Mistral-7B-Instruct-v0.3
+### A2.1 Mistral-7B-Instruct-v0.3
 
 <p align="center"><img src="outputs/sep_data_mistral-7b-instruct-v0.3_q10000_s10_t0.5_20260526_204939_plots.png" width="75%"></p>
 
@@ -18,7 +36,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 ---
 
-### A1.2 Meta-Llama-3.1-8B-Instruct
+### A2.2 Meta-Llama-3.1-8B-Instruct
 
 <p align="center"><img src="outputs/sep_data_meta-llama-3.1-8b-instruct_q10000_s10_t0.5_20260526_211214_plots.png" width="75%"></p>
 
@@ -30,7 +48,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 ---
 
-### A1.3 Qwen2.5-1.5B-Instruct
+### A2.3 Qwen2.5-1.5B-Instruct
 
 <p align="center"><img src="outputs/sep_data_qwen2.5-1.5b-instruct_q10000_s10_t0.5_20260526_213050_plots.png" width="75%"></p>
 
@@ -42,7 +60,7 @@ Each model shows two figure pairs: **Kuhn SE** (ROC curve + SE distribution) and
 
 ---
 
-## A2. Experimental split
+## A3. Experimental split
 
 TriviaQA `rc.nocontext` (17,944 validation questions), shuffled with seed 42, M=10 samples per question, temp=0.5, Modal A10G GPU.
 
@@ -57,7 +75,7 @@ The first 300 questions are disjoint from the benchmark split (same shuffle seed
 
 ---
 
-## A3. Production Design
+## A4. Production Design
 
 In production, SE is too expensive because it requires M generations plus NLI clustering. SEP is cheap: one prefill pass, one hidden-state slice, one matrix multiply. The probe can be served alongside the LLM and adds negligible compute relative to decoding.
 
@@ -95,24 +113,12 @@ In production, SE is too expensive because it requires M generations plus NLI cl
 
 The probe runs at the **last input token position** — the model has attended to the full question but has not yet emitted a single output token. Slicing `hidden_states[best_layer][-1]` and running `sigmoid(W · h + b)` adds < 1 ms on top of the prefill. Token generation then proceeds from the same KV cache.
 
-### Latency budget (Mistral-7B, A10G)
-
-| Step | Latency |
-|---|---|
-| Tokenize | < 1 ms |
-| Prefill (question, ~20 tokens) | ~10 ms |
-| Probe score | < 1 ms |
-| Decode (answer, ~30 tokens) | ~200 ms |
-| **Total** | **~210 ms** |
-
-The probe adds < 0.5% overhead to total request latency.
-
 ### Offline training (one-time)
 
-1. **Collect training data:** run the full Kuhn pipeline on N ≥ 500 questions → SE score per question. Takes ~75s per 300 questions on A10G.
-2. **Binarize:** Otsu threshold γ* on SE scores → 0/1 uncertain labels.
+1. **Collect training data:** run the full Kuhn pipeline on N ≥ 500 questions -> SE score per question. Takes ~75s per 300 questions on A10G.
+2. **Binarize:** Otsu threshold γ* on SE scores -> 0/1 uncertain labels.
 3. **Extract hidden states:** one forward pass per question, slice `hidden_states[layer][-1]` at every layer.
 4. **Grid-search layers:** fit logistic regression per layer, pick best AUROC. For 7–8B models, layer 31 (of 32) wins; for Qwen-1.5B (28 layers), layer 26.
-5. **Save probe:** `W` (d_model × 1) + `b` (scalar) + `best_layer` → `sep_probe_<model>.pkl`.
+5. **Save probe:** `W` (d_model × 1) + `b` (scalar) + `best_layer` -> `sep_probe_<model>.pkl`.
 
 Re-training is only needed when the base LLM changes.

@@ -2,8 +2,7 @@
 
 Full technical report: [DESIGN.md](DESIGN.md)
 
-Implements and benchmarks two papers on LLM hallucination detection: Kuhn/Farquhar Semantic Entropy (logprobs) and Kossen Semantic Entropy Probes (hidden states). A third method, Chen INSIDE (hidden states read+write), is documented but not yet implemented.
-
+Implements and benchmarks two hallucination detectors: Semantic Entropy (SE) as a sampling-based baseline, and Semantic Entropy Probes (SEP)  as a single-forward-pass approximation suitable for deployment.
 
 ---
 
@@ -17,6 +16,7 @@ Implements and benchmarks two papers on LLM hallucination detection: Kuhn/Farquh
 | NLI | Natural Language Inference: entailment / neutral / contradiction |
 | DeBERTa | NLI model used for clustering (`cross-encoder/nli-deberta-v3-large`) |
 | AUROC | Separation quality: 0.5 = random, 1.0 = perfect |
+| Acc | Accuracy: fraction of questions where the model's answer passes the RougeL threshold |
 | RougeL | String overlap metric, used to judge answer correctness (threshold 0.3) |
 | TriviaQA | Evaluation dataset, closed-book (model answers from memory) |
 
@@ -66,7 +66,7 @@ src/ctgt/
 ## Setup
 
 ```bash
-git clone <repo> && cd ctgt
+git clone https://github.com/ozkansafak/hallucination.git && cd hallucination
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 modal setup
@@ -95,7 +95,7 @@ python results.py outputs/<run>.json
 
 ## References
 
-- Farquhar, Kossen, Kuhn, Gal (2024). *Detecting Hallucinations in LLMs Using Semantic Entropy.* Nature. [arXiv:2303.08896](https://arxiv.org/abs/2303.08896)
+- Farquhar, Kossen, Kuhn, Gal (2024). *Detecting Hallucinations in LLMs Using Semantic Entropy.* Nature. [Nature](https://www.nature.com/articles/s41586-024-07421-0)
 - Kossen, Han, Razzak, Schut, Malik, Gal (2024). *Semantic Entropy Probes.* [arXiv:2406.15927](https://arxiv.org/abs/2406.15927)
 - Chen et al. (2024). *INSIDE: LLMs Internal States Retain the Power of Hallucination Detection.* ICLR 2024. [arXiv:2402.03744](https://arxiv.org/abs/2402.03744)
-- Park, Cho (2025). *Efficient Semantic Uncertainty Quantification via Diversity-Steered Sampling.* NeurIPS 2025.
+- Park, Cho (2025). *Efficient Semantic Uncertainty Quantification via Diversity-Steered Sampling.* NeurIPS 2025. [Poster](https://neurips.cc/virtual/2025/loc/san-diego/poster/118777)
