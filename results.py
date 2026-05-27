@@ -69,7 +69,7 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         pe_scores    = [r["predictive_entropy"]   for r in rows]
 
         model_short = data["llm_model"].split("/")[-1]
-        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "")
+        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "").replace("Meta-Llama", "Llama")
         n_q   = data["n_questions"]
         n_s   = data["n_samples"]
         temp  = data["temperature"]
@@ -86,10 +86,11 @@ def plot_auroc(data: dict, path: Path = Path("benchmark_results.json")) -> None:
         # ROC curves
         ax = axes[0]
         for scores, label, color in [
-            (se_scores, f"Semantic Entropy (AUROC={data['se_auroc']:.3f})", "#2196F3"),
-            (pe_scores, f"Predictive Entropy (AUROC={data['pe_auroc']:.3f})", "#FF5722"),
+            (se_scores, f"SE AUROC={data['se_auroc']:.3f}", "#2196F3"),
+            (pe_scores, f"PE AUROC={data['pe_auroc']:.3f}", "#F44336"),
         ]:
-            fpr, tpr, _ = roc_curve(labels_wrong, scores)
+            mask = [i for i, s in enumerate(scores) if s == s]  # drop NaN
+            fpr, tpr, _ = roc_curve([labels_wrong[i] for i in mask], [scores[i] for i in mask])
             ax.plot(fpr, tpr, color=color, lw=2, label=label)
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")

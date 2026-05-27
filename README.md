@@ -23,15 +23,15 @@ Full technical writeup: [DESIGN.md](DESIGN.md)
 
 ## Results
 
-TriviaQA `rc.nocontext`, N=300, M=10 samples, temp=0.5, Modal A10G.
+TriviaQA `rc.nocontext`, N=10,000, M=10 samples, temp=0.5, Modal A10G. Train and eval sets are disjoint.
 
 | Model | Acc | Kuhn SE | Kossen SEP | Wall time (Kuhn / SEP) |
 |---|---|---|---|---|
-| Mistral-7B-Instruct-v0.3 | 61% | 0.720 | 0.662 | 75s / 50s |
-| Meta-Llama-3.1-8B-Instruct | 73% | 0.728 | 0.687 | 108s / 70s |
-| Qwen2.5-1.5B-Instruct | 39% | 0.755 | 0.692 | 90s / 31s |
+| Mistral-7B-Instruct-v0.3 | 70% | 0.772 | 0.742 | 75s / 50s |
+| Meta-Llama-3.1-8B-Instruct | 75% | 0.790 | 0.746 | 108s / 70s |
+| Qwen2.5-1.5B-Instruct | 41% | 0.728 | 0.705 | 90s / 31s |
 
-SEP probes recover 91-96% of SE AUROC using a single forward pass. PE AUROC < 0.5 on all models (instruction tuning artifact; see DESIGN.md).
+SEP probes recover 94-97% of SE AUROC using a single forward pass. PE AUROC < 0.5 on all models (instruction tuning artifact; see DESIGN.md).
 
 ---
 

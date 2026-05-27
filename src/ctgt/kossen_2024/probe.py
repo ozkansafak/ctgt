@@ -23,6 +23,7 @@ from pathlib import Path
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import StandardScaler
 
 
 def _otsu_threshold(scores: np.ndarray) -> float:
@@ -92,15 +93,17 @@ class SEProbe:
         self.layer_aurocs = {}
         for layer_idx, X_list in hidden_states.items():
             X = np.array(X_list, dtype=np.float32)
-            clf = LogisticRegression(C=1.0, max_iter=1000, solver="lbfgs")
+            X = StandardScaler().fit_transform(X)
+            clf = LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs")
             clf.fit(X, labels)
             proba = clf.predict_proba(X)[:, 1]
             self.layer_aurocs[layer_idx] = float(roc_auc_score(labels, proba))
 
         self.best_layer = max(self.layer_aurocs, key=self.layer_aurocs.get)
         X_best = np.array(hidden_states[self.best_layer], dtype=np.float32)
-        self.clf = LogisticRegression(C=1.0, max_iter=1000, solver="lbfgs")
-        self.clf.fit(X_best, labels)
+        self.scaler = StandardScaler().fit(X_best)
+        self.clf = LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs")
+        self.clf.fit(self.scaler.transform(X_best), labels)
 
         return self.layer_aurocs
 
@@ -119,7 +122,8 @@ class SEProbe:
         """
         if self.clf is None:
             raise RuntimeError("Probe not fitted. Call fit() first.")
-        return float(self.clf.predict_proba(hidden_state.reshape(1, -1))[0, 1])
+        h = self.scaler.transform(hidden_state.reshape(1, -1))
+        return float(self.clf.predict_proba(h)[0, 1])
 
     def is_uncertain(self, hidden_state: np.ndarray, cutoff: float = 0.5) -> bool:
         return self.predict_proba(hidden_state) > cutoff

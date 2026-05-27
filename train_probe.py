@@ -43,7 +43,7 @@ def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_ha
         labels_wrong = [1 - int(r["is_correct"]) for r in rows]
 
         model_short = data["llm_model"].split("/")[-1]
-        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "")
+        model_short = model_short.replace("-Instruct-v0.3", "").replace("-Instruct", "").replace("Meta-Llama", "Llama")
         n_q = data["n_questions"]
 
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -54,12 +54,13 @@ def _plot_sep(data: dict, probe, rows: list, sep_scores_cv: "np.ndarray", sep_ha
 
         ax = axes[0]
         for scores, label, color in [
-            (se_scores,      f"SE oracle (AUROC={data['se_auroc']:.3f})",  "#2196F3"),
-            (sep_scores_cv,  f"SEP probe (AUROC={sep_hall_cv:.3f})",       "#4CAF50"),
-            (pe_scores,      f"PE       (AUROC={data['pe_auroc']:.3f})",   "#FF5722"),
+            (se_scores,      f"SE  AUROC={data['se_auroc']:.3f}",  "#2196F3"),
+            (sep_scores_cv,  f"SEP AUROC={sep_hall_cv:.3f}",       "#4CAF50"),
+            (pe_scores,      f"PE  AUROC={data['pe_auroc']:.3f}",  "#F44336"),
         ]:
-            fpr, tpr, _ = roc_curve(labels_wrong, scores)
-            ax.plot(fpr, tpr, lw=2, label=label)
+            mask = [i for i, s in enumerate(scores) if s == s]
+            fpr, tpr, _ = roc_curve([labels_wrong[i] for i in mask], [scores[i] for i in mask])
+            ax.plot(fpr, tpr, lw=2, label=label, color=color)
         ax.plot([0, 1], [0, 1], "k--", lw=1)
         ax.set_xlabel("False Positive Rate")
         ax.set_ylabel("True Positive Rate")
@@ -189,7 +190,7 @@ def main() -> None:
     sep_scores_cv = np.zeros(len(rows))
 
     for fold_train, fold_test in skf.split(X_all, hall_labels_all):
-        clf = LogisticRegression(C=1.0, max_iter=1000, solver="lbfgs")
+        clf = LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs")
         clf.fit(X_all[fold_train], se_labels_all[fold_train])
         proba = clf.predict_proba(X_all[fold_test])[:, 1]
         sep_scores_cv[fold_test] = proba
@@ -232,8 +233,8 @@ def main() -> None:
         "se_auroc":      data["se_auroc"],
         "pe_auroc":      data["pe_auroc"],
         "accuracy":      data["accuracy"],
-        "best_layer":    probe.best_layer,
-        "threshold":     probe.threshold,
+        "best_layer":    int(probe.best_layer),
+        "threshold":     float(probe.threshold),
         "sep_hall_cv":   sep_hall_cv,
         "se_scores":     [r["semantic_entropy"]   for r in rows],
         "pe_scores":     [r["predictive_entropy"] for r in rows],
